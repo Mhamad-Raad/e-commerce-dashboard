@@ -1,7 +1,6 @@
 import { Route, Routes } from 'react-router-dom';
 import { Login } from './routes/Login';
 import { Overview } from './routes/Overview';
-import { ComingSoon } from './routes/ComingSoon';
 import { ProductsList } from './routes/products/ProductsList';
 import { ProductForm } from './routes/products/ProductForm';
 import { CustomersList } from './routes/customers/CustomersList';
@@ -12,6 +11,7 @@ import { CartDetail } from './routes/carts/CartDetail';
 import { OrdersList } from './routes/orders/OrdersList';
 import { NewOrder } from './routes/orders/NewOrder';
 import { OrderDetail } from './routes/orders/OrderDetail';
+import { Reports } from './routes/reports/Reports';
 import { ProtectedRoute } from './routes/ProtectedRoute';
 import { DashboardLayout } from './components/DashboardLayout';
 
@@ -39,7 +39,7 @@ export default function App() {
         <Route path="/orders" element={<OrdersList />} />
         <Route path="/orders/new" element={<NewOrder />} />
         <Route path="/orders/:id" element={<OrderDetail />} />
-        <Route path="/reports" element={<ComingSoon title="Reports" />} />
+        <Route path="/reports" element={<Reports />} />
       </Route>
     </Routes>
   );
