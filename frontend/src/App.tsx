@@ -2,6 +2,8 @@ import { Route, Routes } from 'react-router-dom';
 import { Login } from './routes/Login';
 import { Overview } from './routes/Overview';
 import { ComingSoon } from './routes/ComingSoon';
+import { ProductsList } from './routes/products/ProductsList';
+import { ProductForm } from './routes/products/ProductForm';
 import { ProtectedRoute } from './routes/ProtectedRoute';
 import { DashboardLayout } from './components/DashboardLayout';
 
@@ -17,7 +19,9 @@ export default function App() {
         }
       >
         <Route path="/" element={<Overview />} />
-        <Route path="/products" element={<ComingSoon title="Products" />} />
+        <Route path="/products" element={<ProductsList />} />
+        <Route path="/products/new" element={<ProductForm />} />
+        <Route path="/products/:id/edit" element={<ProductForm />} />
         <Route path="/customers" element={<ComingSoon title="Customers" />} />
         <Route path="/carts" element={<ComingSoon title="Carts" />} />
         <Route path="/orders" element={<ComingSoon title="Orders" />} />

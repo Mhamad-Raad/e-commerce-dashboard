@@ -30,12 +30,19 @@ password: Admin123!
 
 ### Endpoints
 
-| Method | Path                | Auth                | Purpose                     |
-|--------|---------------------|---------------------|-----------------------------|
-| POST   | `/api/auth/login`   | public              | Returns `accessToken` + sets `refresh_token` cookie |
-| POST   | `/api/auth/refresh` | refresh cookie      | Rotates tokens              |
-| POST   | `/api/auth/logout`  | access token        | Clears server refresh hash + cookie |
-| GET    | `/api/auth/me`      | access token        | Current user                |
+| Method | Path                       | Auth           | Purpose                     |
+|--------|----------------------------|----------------|-----------------------------|
+| POST   | `/api/auth/login`          | public         | Returns `accessToken` + sets `refresh_token` cookie |
+| POST   | `/api/auth/refresh`        | refresh cookie | Rotates tokens              |
+| POST   | `/api/auth/logout`         | access token   | Clears server refresh hash + cookie |
+| GET    | `/api/auth/me`             | access token   | Current user                |
+| GET    | `/api/products`            | access token   | List (search, category, isActive, page, pageSize) |
+| GET    | `/api/products/:id`        | access token   | Single product              |
+| POST   | `/api/products`            | access token   | Create                      |
+| PATCH  | `/api/products/:id`        | access token   | Update                      |
+| DELETE | `/api/products/:id`        | access token   | Delete                      |
+
+> Prices are stored as integer minor units (`priceCents`). The frontend form converts decimal input ↔ cents. This avoids floating-point math on money.
 
 ## Frontend setup
 
@@ -73,12 +80,10 @@ ecommerce-dashboard/
 
 ## Next phase
 
-CRUD modules to add on the backend (each = Prisma model + service + controller + DTOs):
+CRUD modules to add (each = Prisma model + service + controller + DTOs on the backend, list/form pages on the frontend):
 
-- Products
+- ✅ Products
 - Customers
 - Carts
 - Orders
 - Reports (read-only aggregations)
-
-Matching frontend pages with a table + form pattern.
