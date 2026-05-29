@@ -1,46 +1,84 @@
+import { lazy, Suspense } from 'react';
 import { Route, Routes } from 'react-router-dom';
-import { Login } from './routes/Login';
-import { Overview } from './routes/Overview';
-import { ProductsList } from './routes/products/ProductsList';
-import { ProductForm } from './routes/products/ProductForm';
-import { CustomersList } from './routes/customers/CustomersList';
-import { CustomerForm } from './routes/customers/CustomerForm';
-import { CartsList } from './routes/carts/CartsList';
-import { NewCart } from './routes/carts/NewCart';
-import { CartDetail } from './routes/carts/CartDetail';
-import { OrdersList } from './routes/orders/OrdersList';
-import { NewOrder } from './routes/orders/NewOrder';
-import { OrderDetail } from './routes/orders/OrderDetail';
-import { Reports } from './routes/reports/Reports';
 import { ProtectedRoute } from './routes/ProtectedRoute';
 import { DashboardLayout } from './components/DashboardLayout';
 
+const Login = lazy(() =>
+  import('./routes/Login').then((m) => ({ default: m.Login })),
+);
+const Overview = lazy(() =>
+  import('./routes/Overview').then((m) => ({ default: m.Overview })),
+);
+const ProductsList = lazy(() =>
+  import('./routes/products/ProductsList').then((m) => ({ default: m.ProductsList })),
+);
+const ProductForm = lazy(() =>
+  import('./routes/products/ProductForm').then((m) => ({ default: m.ProductForm })),
+);
+const CustomersList = lazy(() =>
+  import('./routes/customers/CustomersList').then((m) => ({ default: m.CustomersList })),
+);
+const CustomerForm = lazy(() =>
+  import('./routes/customers/CustomerForm').then((m) => ({ default: m.CustomerForm })),
+);
+const CartsList = lazy(() =>
+  import('./routes/carts/CartsList').then((m) => ({ default: m.CartsList })),
+);
+const NewCart = lazy(() =>
+  import('./routes/carts/NewCart').then((m) => ({ default: m.NewCart })),
+);
+const CartDetail = lazy(() =>
+  import('./routes/carts/CartDetail').then((m) => ({ default: m.CartDetail })),
+);
+const OrdersList = lazy(() =>
+  import('./routes/orders/OrdersList').then((m) => ({ default: m.OrdersList })),
+);
+const NewOrder = lazy(() =>
+  import('./routes/orders/NewOrder').then((m) => ({ default: m.NewOrder })),
+);
+const OrderDetail = lazy(() =>
+  import('./routes/orders/OrderDetail').then((m) => ({ default: m.OrderDetail })),
+);
+const Reports = lazy(() =>
+  import('./routes/reports/Reports').then((m) => ({ default: m.Reports })),
+);
+
+function PageLoader() {
+  return (
+    <div className="flex h-full items-center justify-center py-12 text-sm text-slate-500">
+      Loading…
+    </div>
+  );
+}
+
 export default function App() {
   return (
-    <Routes>
-      <Route path="/login" element={<Login />} />
-      <Route
-        element={
-          <ProtectedRoute>
-            <DashboardLayout />
-          </ProtectedRoute>
-        }
-      >
-        <Route path="/" element={<Overview />} />
-        <Route path="/products" element={<ProductsList />} />
-        <Route path="/products/new" element={<ProductForm />} />
-        <Route path="/products/:id/edit" element={<ProductForm />} />
-        <Route path="/customers" element={<CustomersList />} />
-        <Route path="/customers/new" element={<CustomerForm />} />
-        <Route path="/customers/:id/edit" element={<CustomerForm />} />
-        <Route path="/carts" element={<CartsList />} />
-        <Route path="/carts/new" element={<NewCart />} />
-        <Route path="/carts/:id" element={<CartDetail />} />
-        <Route path="/orders" element={<OrdersList />} />
-        <Route path="/orders/new" element={<NewOrder />} />
-        <Route path="/orders/:id" element={<OrderDetail />} />
-        <Route path="/reports" element={<Reports />} />
-      </Route>
-    </Routes>
+    <Suspense fallback={<PageLoader />}>
+      <Routes>
+        <Route path="/login" element={<Login />} />
+        <Route
+          element={
+            <ProtectedRoute>
+              <DashboardLayout />
+            </ProtectedRoute>
+          }
+        >
+          <Route path="/" element={<Overview />} />
+          <Route path="/products" element={<ProductsList />} />
+          <Route path="/products/new" element={<ProductForm />} />
+          <Route path="/products/:id/edit" element={<ProductForm />} />
+          <Route path="/customers" element={<CustomersList />} />
+          <Route path="/customers/new" element={<CustomerForm />} />
+          <Route path="/customers/:id/edit" element={<CustomerForm />} />
+          <Route path="/carts" element={<CartsList />} />
+          <Route path="/carts/new" element={<NewCart />} />
+          <Route path="/carts/:id" element={<CartDetail />} />
+          <Route path="/orders" element={<OrdersList />} />
+          <Route path="/orders/new" element={<NewOrder />} />
+          <Route path="/orders/:id" element={<OrderDetail />} />
+          <Route path="/reports" element={<Reports />} />
+        </Route>
+      </Routes>
+    </Suspense>
   );
 }
