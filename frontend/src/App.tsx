@@ -1,20 +1,28 @@
 import { Route, Routes } from 'react-router-dom';
 import { Login } from './routes/Login';
-import { Dashboard } from './routes/Dashboard';
+import { Overview } from './routes/Overview';
+import { ComingSoon } from './routes/ComingSoon';
 import { ProtectedRoute } from './routes/ProtectedRoute';
+import { DashboardLayout } from './components/DashboardLayout';
 
 export default function App() {
   return (
     <Routes>
       <Route path="/login" element={<Login />} />
       <Route
-        path="/"
         element={
           <ProtectedRoute>
-            <Dashboard />
+            <DashboardLayout />
           </ProtectedRoute>
         }
-      />
+      >
+        <Route path="/" element={<Overview />} />
+        <Route path="/products" element={<ComingSoon title="Products" />} />
+        <Route path="/customers" element={<ComingSoon title="Customers" />} />
+        <Route path="/carts" element={<ComingSoon title="Carts" />} />
+        <Route path="/orders" element={<ComingSoon title="Orders" />} />
+        <Route path="/reports" element={<ComingSoon title="Reports" />} />
+      </Route>
     </Routes>
   );
 }
