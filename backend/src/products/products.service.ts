@@ -4,6 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
+import { buildPaginated, paginate } from '../common/pagination';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { ListProductsQueryDto } from './dto/list-products.query.dto';
@@ -31,13 +32,12 @@ export class ProductsService {
       this.prisma.product.findMany({
         where,
         orderBy: { createdAt: 'desc' },
-        skip: (page - 1) * pageSize,
-        take: pageSize,
+        ...paginate(page, pageSize),
       }),
       this.prisma.product.count({ where }),
     ]);
 
-    return { items, total, page, pageSize };
+    return buildPaginated(items, total, page, pageSize);
   }
 
   async findById(id: string) {

@@ -1,11 +1,7 @@
-import { Type } from 'class-transformer';
-import { IsBooleanString, IsInt, IsOptional, IsString, Max, Min } from 'class-validator';
+import { IsBooleanString, IsOptional, IsString } from 'class-validator';
+import { PaginationQueryDto } from '../../common/dto/pagination-query.dto';
 
-export class ListProductsQueryDto {
-  @IsOptional()
-  @IsString()
-  search?: string;
-
+export class ListProductsQueryDto extends PaginationQueryDto {
   @IsOptional()
   @IsString()
   category?: string;
@@ -13,17 +9,4 @@ export class ListProductsQueryDto {
   @IsOptional()
   @IsBooleanString()
   isActive?: string;
-
-  @IsOptional()
-  @Type(() => Number)
-  @IsInt()
-  @Min(1)
-  page?: number = 1;
-
-  @IsOptional()
-  @Type(() => Number)
-  @IsInt()
-  @Min(1)
-  @Max(100)
-  pageSize?: number = 20;
 }
