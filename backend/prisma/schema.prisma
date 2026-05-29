@@ -12,6 +12,12 @@ enum Role {
   STAFF
 }
 
+enum CartStatus {
+  OPEN
+  CHECKED_OUT
+  ABANDONED
+}
+
 model User {
   id           String   @id @default(cuid())
   email        String   @unique
@@ -37,6 +43,8 @@ model Product {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
+  cartItems CartItem[]
+
   @@index([category])
   @@index([isActive])
   @@index([createdAt])
@@ -54,6 +62,36 @@ model Customer {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  carts Cart[]
+
   @@index([isActive])
   @@index([createdAt])
+}
+
+model Cart {
+  id         String     @id @default(cuid())
+  customerId String
+  customer   Customer   @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  status     CartStatus @default(OPEN)
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+
+  items CartItem[]
+
+  @@index([customerId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+model CartItem {
+  id         String  @id @default(cuid())
+  cartId     String
+  cart       Cart    @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  productId  String
+  product    Product @relation(fields: [productId], references: [id])
+  quantity   Int
+  priceCents Int
+
+  @@unique([cartId, productId])
+  @@index([productId])
 }
