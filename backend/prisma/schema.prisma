@@ -18,6 +18,15 @@ enum CartStatus {
   ABANDONED
 }
 
+enum OrderStatus {
+  PENDING
+  PAID
+  SHIPPED
+  DELIVERED
+  CANCELLED
+  REFUNDED
+}
+
 model User {
   id           String   @id @default(cuid())
   email        String   @unique
@@ -43,7 +52,8 @@ model Product {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  cartItems CartItem[]
+  cartItems  CartItem[]
+  orderItems OrderItem[]
 
   @@index([category])
   @@index([isActive])
@@ -62,7 +72,8 @@ model Customer {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  carts Cart[]
+  carts  Cart[]
+  orders Order[]
 
   @@index([isActive])
   @@index([createdAt])
@@ -93,5 +104,41 @@ model CartItem {
   priceCents Int
 
   @@unique([cartId, productId])
+  @@index([productId])
+}
+
+model Order {
+  id            String      @id @default(cuid())
+  number        String      @unique
+  customerId    String
+  customer      Customer    @relation(fields: [customerId], references: [id])
+  subtotalCents Int
+  taxCents      Int         @default(0)
+  shippingCents Int         @default(0)
+  totalCents    Int
+  currency      String      @default("USD")
+  status        OrderStatus @default(PENDING)
+  placedAt      DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  items OrderItem[]
+
+  @@index([customerId])
+  @@index([status])
+  @@index([placedAt])
+}
+
+model OrderItem {
+  id         String  @id @default(cuid())
+  orderId    String
+  order      Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId  String
+  product    Product @relation(fields: [productId], references: [id])
+  name       String
+  sku        String
+  quantity   Int
+  priceCents Int
+
+  @@index([orderId])
   @@index([productId])
 }

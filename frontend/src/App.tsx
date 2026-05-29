@@ -9,6 +9,9 @@ import { CustomerForm } from './routes/customers/CustomerForm';
 import { CartsList } from './routes/carts/CartsList';
 import { NewCart } from './routes/carts/NewCart';
 import { CartDetail } from './routes/carts/CartDetail';
+import { OrdersList } from './routes/orders/OrdersList';
+import { NewOrder } from './routes/orders/NewOrder';
+import { OrderDetail } from './routes/orders/OrderDetail';
 import { ProtectedRoute } from './routes/ProtectedRoute';
 import { DashboardLayout } from './components/DashboardLayout';
 
@@ -33,7 +36,9 @@ export default function App() {
         <Route path="/carts" element={<CartsList />} />
         <Route path="/carts/new" element={<NewCart />} />
         <Route path="/carts/:id" element={<CartDetail />} />
-        <Route path="/orders" element={<ComingSoon title="Orders" />} />
+        <Route path="/orders" element={<OrdersList />} />
+        <Route path="/orders/new" element={<NewOrder />} />
+        <Route path="/orders/:id" element={<OrderDetail />} />
         <Route path="/reports" element={<ComingSoon title="Reports" />} />
       </Route>
     </Routes>
