@@ -4,7 +4,6 @@ import { Store } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { navGroups, type NavItem } from '@/components/nav-items';
 import { NavUser } from '@/components/NavUser';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface SidebarProps {
   collapsed?: boolean;
@@ -43,11 +42,11 @@ export function Sidebar({ collapsed = false, onNavigate }: SidebarProps) {
       </div>
 
       {/* Grouped navigation */}
-      <nav className="flex-1 space-y-1 overflow-y-auto p-2">
+      <nav className="flex-1 space-y-1 overflow-y-auto overflow-x-hidden p-2">
         {navGroups.map((group, i) => (
           <div key={group.labelKey}>
             {collapsed ? (
-              i > 0 && <div className="mx-2 my-2 h-px bg-border" />
+              i > 0 ? <div className="mx-2 my-2 h-px bg-border" /> : null
             ) : (
               <div className="px-3 pb-1 pt-3 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/70">
                 {t(group.labelKey)}
@@ -81,12 +80,14 @@ function NavRow({
 }) {
   const { t } = useTranslation();
   const Icon = item.icon;
+  const label = t(item.labelKey);
 
-  const link = (
+  return (
     <NavLink
       to={item.to}
       end={item.end}
       onClick={onNavigate}
+      title={collapsed ? label : undefined}
       className={({ isActive }) =>
         cn(
           'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200',
@@ -98,17 +99,7 @@ function NavRow({
       }
     >
       <Icon className="h-5 w-5 shrink-0" />
-      {!collapsed && <span className="truncate">{t(item.labelKey)}</span>}
+      {!collapsed && <span className="truncate">{label}</span>}
     </NavLink>
   );
-
-  if (collapsed) {
-    return (
-      <Tooltip delayDuration={0}>
-        <TooltipTrigger asChild>{link}</TooltipTrigger>
-        <TooltipContent side="right">{t(item.labelKey)}</TooltipContent>
-      </Tooltip>
-    );
-  }
-  return link;
 }
