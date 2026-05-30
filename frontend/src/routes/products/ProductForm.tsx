@@ -1,31 +1,33 @@
-import { useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useEffect } from 'react';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
+import { ArrowLeft, Package } from 'lucide-react';
+import { toast } from 'sonner';
 import { z } from 'zod';
-import { productsApi } from '../../features/products/api';
-import type { ProductWritePayload } from '../../features/products/types';
-import { extractErrorMessage } from '../../lib/format';
+import { productsApi } from '@/features/products/api';
+import type { ProductWritePayload } from '@/features/products/types';
+import { PageHeader } from '@/components/PageHeader';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Card, CardContent } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
+import { cn } from '@/lib/utils';
+import { extractErrorMessage } from '@/lib/format';
 
 const schema = z.object({
-  name: z.string().min(1, 'Required').max(200),
-  sku: z
-    .string()
-    .min(2, 'At least 2 characters')
-    .max(40)
-    .regex(/^[A-Z0-9_-]+$/i, 'Letters, digits, _ and - only'),
-  price: z
-    .string()
-    .min(1, 'Required')
-    .refine((v) => !Number.isNaN(Number(v)) && Number(v) >= 0, 'Must be a non-negative number'),
-  currency: z.string().length(3, 'Use a 3-letter code like USD'),
-  stock: z
-    .string()
-    .min(1, 'Required')
-    .refine((v) => Number.isInteger(Number(v)) && Number(v) >= 0, 'Must be a whole number ≥ 0'),
+  name: z.string().min(1).max(200),
+  sku: z.string().min(2).max(40).regex(/^[A-Z0-9_-]+$/i),
+  price: z.string().min(1).refine((v) => !Number.isNaN(Number(v)) && Number(v) >= 0),
+  currency: z.string().length(3),
+  stock: z.string().min(1).refine((v) => Number.isInteger(Number(v)) && Number(v) >= 0),
   category: z.string().max(60).optional().or(z.literal('')),
-  imageUrl: z.string().url('Must be a URL').optional().or(z.literal('')),
+  imageUrl: z.string().url().optional().or(z.literal('')),
   description: z.string().max(5000).optional().or(z.literal('')),
   isActive: z.boolean(),
 });
@@ -47,9 +49,9 @@ const defaultValues: FormValues = {
 export function ProductForm() {
   const { id } = useParams<{ id: string }>();
   const isEdit = !!id;
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const [serverError, setServerError] = useState<string | null>(null);
 
   const productQuery = useQuery({
     queryKey: ['product', id],
@@ -61,11 +63,10 @@ export function ProductForm() {
     register,
     handleSubmit,
     reset,
+    setValue,
+    watch,
     formState: { errors, isSubmitting },
-  } = useForm<FormValues>({
-    resolver: zodResolver(schema),
-    defaultValues,
-  });
+  } = useForm<FormValues>({ resolver: zodResolver(schema), defaultValues });
 
   useEffect(() => {
     if (productQuery.data) {
@@ -102,114 +103,88 @@ export function ProductForm() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['products'] });
       if (isEdit) queryClient.invalidateQueries({ queryKey: ['product', id] });
+      toast.success(t('products.saved_toast'));
       navigate('/products');
     },
-    onError: (err) => setServerError(extractErrorMessage(err)),
+    onError: (err) => toast.error(extractErrorMessage(err)),
   });
 
-  const onSubmit = (values: FormValues) => {
-    setServerError(null);
-    saveMutation.mutate(values);
-  };
-
   if (isEdit && productQuery.isLoading) {
-    return <div className="text-sm text-slate-500">Loading…</div>;
+    return <Skeleton className="h-96 w-full rounded-xl" />;
   }
   if (isEdit && productQuery.isError) {
-    return (
-      <div className="text-sm text-red-600">{extractErrorMessage(productQuery.error)}</div>
-    );
+    return <p className="text-destructive">{extractErrorMessage(productQuery.error)}</p>;
   }
 
+  const isActive = watch('isActive');
+
   return (
-    <div className="space-y-5">
-      <div>
-        <h1 className="text-2xl font-semibold text-slate-900">
-          {isEdit ? 'Edit product' : 'New product'}
-        </h1>
-        <p className="mt-1 text-sm text-slate-500">
-          {isEdit ? 'Update product details.' : 'Add a product to the catalog.'}
-        </p>
-      </div>
+    <div className="mx-auto max-w-3xl space-y-5">
+      <Button asChild variant="ghost" size="sm" className="-ms-2">
+        <Link to="/products">
+          <ArrowLeft className="h-4 w-4" />
+          {t('common.back')}
+        </Link>
+      </Button>
 
-      <form
-        onSubmit={handleSubmit(onSubmit)}
-        className="space-y-5 rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200"
-        noValidate
-      >
-        <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-          <Field label="Name" error={errors.name?.message}>
-            <input
-              className={inputClass}
-              autoComplete="off"
-              {...register('name')}
-            />
-          </Field>
-          <Field label="SKU" error={errors.sku?.message}>
-            <input className={`${inputClass} font-mono`} autoComplete="off" {...register('sku')} />
-          </Field>
-          <Field label="Price" error={errors.price?.message}>
-            <input className={inputClass} inputMode="decimal" {...register('price')} />
-          </Field>
-          <Field label="Currency" error={errors.currency?.message}>
-            <input
-              className={`${inputClass} uppercase`}
-              maxLength={3}
-              {...register('currency')}
-            />
-          </Field>
-          <Field label="Stock" error={errors.stock?.message}>
-            <input className={inputClass} inputMode="numeric" {...register('stock')} />
-          </Field>
-          <Field label="Category" error={errors.category?.message}>
-            <input className={inputClass} autoComplete="off" {...register('category')} />
-          </Field>
-          <div className="md:col-span-2">
-            <Field label="Image URL" error={errors.imageUrl?.message}>
-              <input className={inputClass} {...register('imageUrl')} />
-            </Field>
-          </div>
-          <div className="md:col-span-2">
-            <Field label="Description" error={errors.description?.message}>
-              <textarea rows={4} className={inputClass} {...register('description')} />
-            </Field>
-          </div>
-        </div>
+      <PageHeader icon={Package} title={isEdit ? t('common.edit') : t('products.new')} />
 
-        <label className="flex items-center gap-2 text-sm text-slate-700">
-          <input type="checkbox" {...register('isActive')} className="rounded border-slate-300" />
-          Active (visible to customers)
-        </label>
+      <Card>
+        <CardContent className="pt-6">
+          <form onSubmit={handleSubmit((v) => saveMutation.mutate(v))} className="space-y-5" noValidate>
+            <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+              <Field label={t('products.name')} error={errors.name?.message}>
+                <Input autoComplete="off" {...register('name')} />
+              </Field>
+              <Field label={t('products.sku')} error={errors.sku?.message}>
+                <Input className="font-mono" autoComplete="off" {...register('sku')} />
+              </Field>
+              <Field label={t('products.price')} error={errors.price?.message}>
+                <Input inputMode="decimal" {...register('price')} />
+              </Field>
+              <Field label={t('common.currency')} error={errors.currency?.message}>
+                <Input className="uppercase" maxLength={3} {...register('currency')} />
+              </Field>
+              <Field label={t('products.stock')} error={errors.stock?.message}>
+                <Input inputMode="numeric" {...register('stock')} />
+              </Field>
+              <Field label={t('products.category')} error={errors.category?.message}>
+                <Input autoComplete="off" {...register('category')} />
+              </Field>
+              <div className="md:col-span-2">
+                <Field label={t('products.image')} error={errors.imageUrl?.message}>
+                  <Input {...register('imageUrl')} placeholder="https://…" />
+                </Field>
+              </div>
+              <div className="md:col-span-2">
+                <Field label={t('products.description')} error={errors.description?.message}>
+                  <Textarea rows={4} {...register('description')} />
+                </Field>
+              </div>
+            </div>
 
-        {serverError && (
-          <div className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">
-            {serverError}
-          </div>
-        )}
+            <label className="flex items-center gap-2 text-sm">
+              <Checkbox
+                checked={isActive}
+                onCheckedChange={(c) => setValue('isActive', c === true)}
+              />
+              {t('common.active')}
+            </label>
 
-        <div className="flex justify-end gap-2">
-          <button
-            type="button"
-            onClick={() => navigate('/products')}
-            className="rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-700 hover:bg-slate-100"
-          >
-            Cancel
-          </button>
-          <button
-            type="submit"
-            disabled={isSubmitting || saveMutation.isPending}
-            className="rounded-lg bg-slate-900 px-3 py-2 text-sm font-medium text-white hover:bg-slate-800 disabled:opacity-60"
-          >
-            {saveMutation.isPending ? 'Saving…' : isEdit ? 'Save changes' : 'Create product'}
-          </button>
-        </div>
-      </form>
+            <div className="flex justify-end gap-2">
+              <Button type="button" variant="outline" onClick={() => navigate('/products')}>
+                {t('common.cancel')}
+              </Button>
+              <Button type="submit" disabled={isSubmitting || saveMutation.isPending}>
+                {saveMutation.isPending ? t('common.saving') : t('common.save')}
+              </Button>
+            </div>
+          </form>
+        </CardContent>
+      </Card>
     </div>
   );
 }
-
-const inputClass =
-  'block w-full rounded-lg border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-900';
 
 function Field({
   label,
@@ -221,10 +196,10 @@ function Field({
   children: React.ReactNode;
 }) {
   return (
-    <div>
-      <label className="block text-sm font-medium text-slate-700">{label}</label>
-      <div className="mt-1">{children}</div>
-      {error && <p className="mt-1 text-xs text-red-600">{error}</p>}
+    <div className="space-y-1.5">
+      <Label className={cn(error && 'text-destructive')}>{label}</Label>
+      {children}
+      {error && <p className="text-xs text-destructive">{error}</p>}
     </div>
   );
 }

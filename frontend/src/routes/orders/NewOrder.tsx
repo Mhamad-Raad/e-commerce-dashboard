@@ -1,10 +1,33 @@
 import { useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { customersApi } from '../../features/customers/api';
-import { productsApi } from '../../features/products/api';
-import { ordersApi } from '../../features/orders/api';
-import { formatMoney, extractErrorMessage } from '../../lib/format';
+import { useTranslation } from 'react-i18next';
+import { ArrowLeft, ClipboardList, Plus, Trash2 } from 'lucide-react';
+import { toast } from 'sonner';
+import { customersApi } from '@/features/customers/api';
+import { productsApi } from '@/features/products/api';
+import { ordersApi } from '@/features/orders/api';
+import { PageHeader } from '@/components/PageHeader';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Card, CardContent } from '@/components/ui/card';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { formatMoney, extractErrorMessage } from '@/lib/format';
 
 interface DraftItem {
   productId: string;
@@ -12,6 +35,7 @@ interface DraftItem {
 }
 
 export function NewOrder() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [customerId, setCustomerId] = useState('');
   const [items, setItems] = useState<DraftItem[]>([]);
@@ -19,7 +43,6 @@ export function NewOrder() {
   const [quantityPick, setQuantityPick] = useState(1);
   const [taxDollars, setTaxDollars] = useState('0');
   const [shippingDollars, setShippingDollars] = useState('0');
-  const [error, setError] = useState<string | null>(null);
 
   const customersQuery = useQuery({
     queryKey: ['customers', 'picker'],
@@ -78,180 +101,164 @@ export function NewOrder() {
         shippingCents: shippingCents || undefined,
       }),
     onSuccess: (order) => navigate(`/orders/${order.id}`),
-    onError: (err) => setError(extractErrorMessage(err)),
+    onError: (err) => toast.error(extractErrorMessage(err)),
   });
 
   const canSubmit = customerId && items.length > 0 && !createOrder.isPending;
 
   return (
-    <div className="space-y-5">
-      <div>
-        <h1 className="text-2xl font-semibold text-slate-900">New order</h1>
-        <p className="mt-1 text-sm text-slate-500">Create an order with line items.</p>
-      </div>
+    <div className="mx-auto max-w-3xl space-y-5">
+      <Button asChild variant="ghost" size="sm" className="-ms-2">
+        <Link to="/orders">
+          <ArrowLeft className="h-4 w-4" />
+          {t('common.back')}
+        </Link>
+      </Button>
 
-      <div className="space-y-5 rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
-        <div>
-          <label className="block text-sm font-medium text-slate-700">Customer</label>
-          <select
-            value={customerId}
-            onChange={(e) => setCustomerId(e.target.value)}
-            disabled={customersQuery.isLoading}
-            className="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-900"
-          >
-            <option value="">Select a customer…</option>
-            {customersQuery.data?.items.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.name} ({c.email})
-              </option>
-            ))}
-          </select>
-        </div>
+      <PageHeader icon={ClipboardList} title={t('orders.new')} />
 
-        <div>
-          <div className="mb-2 text-sm font-medium text-slate-700">Items</div>
-          {items.length === 0 ? (
-            <div className="rounded-lg border border-dashed border-slate-300 px-3 py-6 text-center text-sm text-slate-500">
-              No items yet.
-            </div>
-          ) : (
-            <table className="min-w-full divide-y divide-slate-200 text-sm">
-              <thead>
-                <tr className="text-left text-xs uppercase tracking-wide text-slate-500">
-                  <th className="py-2">Product</th>
-                  <th className="py-2">Qty</th>
-                  <th className="py-2">Price</th>
-                  <th className="py-2">Line total</th>
-                  <th></th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
-                {items.map((i) => {
-                  const p = productsById.get(i.productId);
-                  if (!p) return null;
-                  return (
-                    <tr key={i.productId}>
-                      <td className="py-2">{p.name}</td>
-                      <td className="py-2">{i.quantity}</td>
-                      <td className="py-2">{formatMoney(p.priceCents, p.currency)}</td>
-                      <td className="py-2">{formatMoney(p.priceCents * i.quantity, p.currency)}</td>
-                      <td className="py-2 text-right">
-                        <button
-                          onClick={() => removeItem(i.productId)}
-                          className="text-red-600 hover:underline"
-                        >
-                          Remove
-                        </button>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          )}
-
-          <div className="mt-3 flex flex-wrap items-end gap-3">
-            <div className="min-w-64 flex-1">
-              <label className="block text-xs text-slate-600">Add product</label>
-              <select
-                value={productPick}
-                onChange={(e) => setProductPick(e.target.value)}
-                className="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
-              >
-                <option value="">Select a product…</option>
-                {productsQuery.data?.items.map((p) => (
-                  <option key={p.id} value={p.id}>
-                    {p.name} ({formatMoney(p.priceCents, p.currency)})
-                  </option>
+      <Card>
+        <CardContent className="space-y-5 pt-6">
+          <div className="space-y-1.5">
+            <Label>{t('orders.customer')}</Label>
+            <Select value={customerId || undefined} onValueChange={setCustomerId}>
+              <SelectTrigger>
+                <SelectValue placeholder={`${t('orders.customer')}…`} />
+              </SelectTrigger>
+              <SelectContent>
+                {customersQuery.data?.items.map((c) => (
+                  <SelectItem key={c.id} value={c.id}>
+                    {c.name} ({c.email})
+                  </SelectItem>
                 ))}
-              </select>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label>{t('orders.items')}</Label>
+            {items.length === 0 ? (
+              <div className="rounded-lg border border-dashed px-3 py-6 text-center text-sm text-muted-foreground">
+                {t('carts.empty_cart')}
+              </div>
+            ) : (
+              <div className="rounded-lg border">
+                <Table>
+                  <TableHeader>
+                    <TableRow className="hover:bg-transparent">
+                      <TableHead>{t('carts.product')}</TableHead>
+                      <TableHead>{t('carts.quantity')}</TableHead>
+                      <TableHead>{t('products.price')}</TableHead>
+                      <TableHead>{t('orders.total')}</TableHead>
+                      <TableHead className="text-end">{t('common.actions')}</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {items.map((i) => {
+                      const p = productsById.get(i.productId);
+                      if (!p) return null;
+                      return (
+                        <TableRow key={i.productId} className="hover:bg-transparent">
+                          <TableCell className="font-medium">{p.name}</TableCell>
+                          <TableCell>{i.quantity}</TableCell>
+                          <TableCell>{formatMoney(p.priceCents, p.currency)}</TableCell>
+                          <TableCell>{formatMoney(p.priceCents * i.quantity, p.currency)}</TableCell>
+                          <TableCell className="text-end">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8 text-destructive hover:bg-destructive/10 hover:text-destructive"
+                              onClick={() => removeItem(i.productId)}
+                              aria-label={t('common.delete')}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
+                  </TableBody>
+                </Table>
+              </div>
+            )}
+
+            <div className="flex flex-wrap items-end gap-3 pt-1">
+              <div className="min-w-64 flex-1 space-y-1">
+                <Label className="text-xs text-muted-foreground">{t('carts.product')}</Label>
+                <Select value={productPick || undefined} onValueChange={setProductPick}>
+                  <SelectTrigger>
+                    <SelectValue placeholder={`${t('carts.product')}…`} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {productsQuery.data?.items.map((p) => (
+                      <SelectItem key={p.id} value={p.id}>
+                        {p.name} ({formatMoney(p.priceCents, p.currency)})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-1">
+                <Label className="text-xs text-muted-foreground">{t('carts.quantity')}</Label>
+                <Input
+                  type="number"
+                  min={1}
+                  value={quantityPick}
+                  onChange={(e) => setQuantityPick(Math.max(1, Number(e.target.value)))}
+                  className="w-24"
+                />
+              </div>
+              <Button type="button" variant="outline" onClick={addItem} disabled={!productPick}>
+                <Plus className="h-4 w-4" />
+                {t('carts.add_item')}
+              </Button>
             </div>
-            <div>
-              <label className="block text-xs text-slate-600">Quantity</label>
-              <input
-                type="number"
-                min={1}
-                value={quantityPick}
-                onChange={(e) => setQuantityPick(Math.max(1, Number(e.target.value)))}
-                className="mt-1 w-24 rounded-lg border border-slate-300 px-3 py-2 text-sm"
+          </div>
+
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <div className="space-y-1">
+              <Label className="text-xs text-muted-foreground">{t('orders.tax')}</Label>
+              <Input inputMode="decimal" value={taxDollars} onChange={(e) => setTaxDollars(e.target.value)} />
+            </div>
+            <div className="space-y-1">
+              <Label className="text-xs text-muted-foreground">{t('orders.shipping')}</Label>
+              <Input
+                inputMode="decimal"
+                value={shippingDollars}
+                onChange={(e) => setShippingDollars(e.target.value)}
               />
             </div>
-            <button
-              type="button"
-              onClick={addItem}
-              disabled={!productPick}
-              className="rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-700 hover:bg-slate-100 disabled:opacity-50"
-            >
-              Add item
-            </button>
           </div>
-        </div>
 
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-          <div>
-            <label className="block text-xs text-slate-600">Tax</label>
-            <input
-              inputMode="decimal"
-              value={taxDollars}
-              onChange={(e) => setTaxDollars(e.target.value)}
-              className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
-            />
+          <div className="space-y-1.5 border-t pt-4 text-sm">
+            <div className="flex justify-between text-muted-foreground">
+              <span>{t('orders.subtotal')}</span>
+              <span>{formatMoney(subtotalCents)}</span>
+            </div>
+            <div className="flex justify-between text-muted-foreground">
+              <span>{t('orders.tax')}</span>
+              <span>{formatMoney(taxCents)}</span>
+            </div>
+            <div className="flex justify-between text-muted-foreground">
+              <span>{t('orders.shipping')}</span>
+              <span>{formatMoney(shippingCents)}</span>
+            </div>
+            <div className="mt-2 flex justify-between text-base font-semibold">
+              <span>{t('orders.total')}</span>
+              <span>{formatMoney(totalCents)}</span>
+            </div>
           </div>
-          <div>
-            <label className="block text-xs text-slate-600">Shipping</label>
-            <input
-              inputMode="decimal"
-              value={shippingDollars}
-              onChange={(e) => setShippingDollars(e.target.value)}
-              className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
-            />
-          </div>
-        </div>
 
-        <div className="border-t border-slate-200 pt-4 text-sm">
-          <div className="flex justify-between text-slate-600">
-            <span>Subtotal</span>
-            <span>{formatMoney(subtotalCents)}</span>
+          <div className="flex justify-end gap-2">
+            <Button type="button" variant="outline" onClick={() => navigate('/orders')}>
+              {t('common.cancel')}
+            </Button>
+            <Button type="button" onClick={() => createOrder.mutate()} disabled={!canSubmit}>
+              {createOrder.isPending ? t('common.working') : t('common.create')}
+            </Button>
           </div>
-          <div className="flex justify-between text-slate-600">
-            <span>Tax</span>
-            <span>{formatMoney(taxCents)}</span>
-          </div>
-          <div className="flex justify-between text-slate-600">
-            <span>Shipping</span>
-            <span>{formatMoney(shippingCents)}</span>
-          </div>
-          <div className="mt-2 flex justify-between text-base font-semibold text-slate-900">
-            <span>Total</span>
-            <span>{formatMoney(totalCents)}</span>
-          </div>
-        </div>
-
-        {error && (
-          <div className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">{error}</div>
-        )}
-
-        <div className="flex justify-end gap-2">
-          <button
-            type="button"
-            onClick={() => navigate('/orders')}
-            className="rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-700 hover:bg-slate-100"
-          >
-            Cancel
-          </button>
-          <button
-            type="button"
-            onClick={() => {
-              setError(null);
-              createOrder.mutate();
-            }}
-            disabled={!canSubmit}
-            className="rounded-lg bg-slate-900 px-3 py-2 text-sm font-medium text-white hover:bg-slate-800 disabled:opacity-60"
-          >
-            {createOrder.isPending ? 'Creating…' : 'Create order'}
-          </button>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

@@ -24,13 +24,13 @@ export class ErrorBoundary extends Component<Props, State> {
   render() {
     if (this.state.error) {
       return (
-        <div className="flex h-screen items-center justify-center bg-slate-50 px-4">
-          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
-            <h1 className="text-lg font-semibold text-slate-900">Something went wrong</h1>
-            <p className="mt-2 text-sm text-slate-600">{this.state.error.message}</p>
+        <div className="flex h-screen items-center justify-center bg-background px-4">
+          <div className="w-full max-w-md rounded-xl border bg-card p-6 text-card-foreground shadow-sm">
+            <h1 className="text-lg font-semibold">Something went wrong</h1>
+            <p className="mt-2 text-sm text-muted-foreground">{this.state.error.message}</p>
             <button
               onClick={this.reset}
-              className="mt-4 rounded-lg bg-slate-900 px-3 py-2 text-sm font-medium text-white hover:bg-slate-800"
+              className="mt-4 rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
             >
               Try again
             </button>

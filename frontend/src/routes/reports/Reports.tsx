@@ -1,162 +1,177 @@
 import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { reportsApi } from '../../features/reports/api';
-import { orderStatusTone } from '../../features/orders/api';
-import { StatusBadge } from '../../components/StatusBadge';
-import { formatDate, formatMoney, extractErrorMessage } from '../../lib/format';
+import { useTranslation } from 'react-i18next';
+import { BarChart3 } from 'lucide-react';
+import { reportsApi } from '@/features/reports/api';
+import { orderStatusTone } from '@/features/orders/api';
+import type { OrderStatus } from '@/features/orders/types';
+import { PageHeader } from '@/components/PageHeader';
+import { StatusBadge } from '@/components/StatusBadge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import { formatDate, formatMoney } from '@/lib/format';
 
 export function Reports() {
+  const { t } = useTranslation();
   const summary = useQuery({ queryKey: ['reports', 'summary'], queryFn: reportsApi.summary });
   const top = useQuery({ queryKey: ['reports', 'top-products'], queryFn: () => reportsApi.topProducts(10) });
   const recent = useQuery({ queryKey: ['reports', 'recent-orders'], queryFn: () => reportsApi.recentOrders(10) });
 
+  const statusLabel = (s: OrderStatus) => t(`orders.status.${s.toLowerCase()}`);
+
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold text-slate-900">Reports</h1>
-        <p className="mt-1 text-sm text-slate-500">Sales overview, orders, and top products.</p>
+      <PageHeader icon={BarChart3} title={t('reports.title')} description={t('reports.subtitle')} />
+
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <StatCard
+          label={t('reports.revenue')}
+          value={summary.data ? formatMoney(summary.data.revenueCents) : '—'}
+          loading={summary.isLoading}
+        />
+        <StatCard
+          label={t('reports.orders')}
+          value={summary.data ? String(summary.data.orderCount) : '—'}
+          loading={summary.isLoading}
+        />
+        <StatCard
+          label={t('reports.aov')}
+          value={summary.data ? formatMoney(summary.data.aovCents) : '—'}
+          loading={summary.isLoading}
+        />
+        <StatCard
+          label={t('reports.active_customers')}
+          value={summary.data ? String(summary.data.customerCount) : '—'}
+          loading={summary.isLoading}
+        />
       </div>
 
-      <section>
-        {summary.isError && (
-          <div className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">
-            {extractErrorMessage(summary.error)}
-          </div>
-        )}
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <StatCard
-            label="Revenue"
-            value={summary.data ? formatMoney(summary.data.revenueCents) : '—'}
-            loading={summary.isLoading}
-          />
-          <StatCard
-            label="Orders"
-            value={summary.data ? String(summary.data.orderCount) : '—'}
-            loading={summary.isLoading}
-          />
-          <StatCard
-            label="Avg. order value"
-            value={summary.data ? formatMoney(summary.data.aovCents) : '—'}
-            loading={summary.isLoading}
-          />
-          <StatCard
-            label="Active customers"
-            value={summary.data ? String(summary.data.customerCount) : '—'}
-            loading={summary.isLoading}
-          />
-        </div>
-      </section>
-
-      <section className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <Panel title="Orders by status">
-          {summary.isLoading ? (
-            <div className="text-sm text-slate-500">Loading…</div>
-          ) : summary.data && summary.data.ordersByStatus.length > 0 ? (
-            <ul className="space-y-2">
-              {summary.data.ordersByStatus.map(({ status, count }) => (
-                <li key={status} className="flex items-center justify-between text-sm">
-                  <StatusBadge label={status.toLowerCase()} tone={orderStatusTone(status)} />
-                  <span className="font-medium text-slate-900">{count}</span>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <div className="text-sm text-slate-500">No orders yet.</div>
-          )}
-        </Panel>
-
-        <Panel title="Top products">
-          {top.isLoading ? (
-            <div className="text-sm text-slate-500">Loading…</div>
-          ) : top.data && top.data.length > 0 ? (
-            <table className="min-w-full divide-y divide-slate-200 text-sm">
-              <thead>
-                <tr className="text-left text-xs uppercase tracking-wide text-slate-500">
-                  <th className="py-2">Product</th>
-                  <th className="py-2 text-right">Units</th>
-                  <th className="py-2 text-right">Revenue</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
-                {top.data.map((p) => (
-                  <tr key={p.productId}>
-                    <td className="py-2">
-                      <div className="font-medium text-slate-900">{p.name}</div>
-                      <div className="font-mono text-xs text-slate-500">{p.sku}</div>
-                    </td>
-                    <td className="py-2 text-right text-slate-700">{p.units}</td>
-                    <td className="py-2 text-right text-slate-900">
-                      {formatMoney(p.revenueCents, p.currency)}
-                    </td>
-                  </tr>
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-sm">{t('reports.orders_by_status')}</CardTitle>
+          </CardHeader>
+          <CardContent className="pt-0">
+            {summary.isLoading ? (
+              <Skeleton className="h-24 w-full" />
+            ) : summary.data && summary.data.ordersByStatus.length > 0 ? (
+              <ul className="space-y-2">
+                {summary.data.ordersByStatus.map(({ status, count }) => (
+                  <li key={status} className="flex items-center justify-between text-sm">
+                    <StatusBadge label={statusLabel(status)} tone={orderStatusTone(status)} />
+                    <span className="font-medium">{count}</span>
+                  </li>
                 ))}
-              </tbody>
-            </table>
-          ) : (
-            <div className="text-sm text-slate-500">No sales yet.</div>
-          )}
-        </Panel>
-      </section>
+              </ul>
+            ) : (
+              <p className="text-sm text-muted-foreground">{t('reports.no_orders')}</p>
+            )}
+          </CardContent>
+        </Card>
 
-      <section>
-        <Panel title="Recent orders">
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-sm">{t('reports.top_products')}</CardTitle>
+          </CardHeader>
+          <CardContent className="pt-0">
+            {top.isLoading ? (
+              <Skeleton className="h-24 w-full" />
+            ) : top.data && top.data.length > 0 ? (
+              <Table>
+                <TableHeader>
+                  <TableRow className="hover:bg-transparent">
+                    <TableHead>{t('carts.product')}</TableHead>
+                    <TableHead className="text-end">{t('reports.recent_orders')}</TableHead>
+                    <TableHead className="text-end">{t('reports.revenue')}</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {top.data.map((p) => (
+                    <TableRow key={p.productId} className="hover:bg-transparent">
+                      <TableCell>
+                        <div className="font-medium">{p.name}</div>
+                        <div className="font-mono text-xs text-muted-foreground">{p.sku}</div>
+                      </TableCell>
+                      <TableCell className="text-end">{p.units}</TableCell>
+                      <TableCell className="text-end font-medium">
+                        {formatMoney(p.revenueCents, p.currency)}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            ) : (
+              <p className="text-sm text-muted-foreground">{t('reports.no_sales')}</p>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-sm">{t('reports.recent_orders')}</CardTitle>
+        </CardHeader>
+        <CardContent className="pt-0">
           {recent.isLoading ? (
-            <div className="text-sm text-slate-500">Loading…</div>
+            <Skeleton className="h-32 w-full" />
           ) : recent.data && recent.data.length > 0 ? (
-            <table className="min-w-full divide-y divide-slate-200 text-sm">
-              <thead>
-                <tr className="text-left text-xs uppercase tracking-wide text-slate-500">
-                  <th className="py-2">Order #</th>
-                  <th className="py-2">Customer</th>
-                  <th className="py-2">Total</th>
-                  <th className="py-2">Status</th>
-                  <th className="py-2">Placed</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
+            <Table>
+              <TableHeader>
+                <TableRow className="hover:bg-transparent">
+                  <TableHead>{t('orders.number')}</TableHead>
+                  <TableHead>{t('orders.customer')}</TableHead>
+                  <TableHead>{t('orders.total')}</TableHead>
+                  <TableHead>{t('common.status')}</TableHead>
+                  <TableHead>{t('orders.placed')}</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
                 {recent.data.map((o) => (
-                  <tr key={o.id}>
-                    <td className="py-2 font-mono text-xs text-slate-700">
+                  <TableRow key={o.id} className="hover:bg-transparent">
+                    <TableCell className="font-mono text-xs">
                       <Link to={`/orders/${o.id}`} className="hover:underline">
                         {o.number}
                       </Link>
-                    </td>
-                    <td className="py-2">
-                      <div className="font-medium text-slate-900">{o.customer.name}</div>
-                      <div className="text-xs text-slate-500">{o.customer.email}</div>
-                    </td>
-                    <td className="py-2 text-slate-900">{formatMoney(o.totalCents, o.currency)}</td>
-                    <td className="py-2">
-                      <StatusBadge label={o.status.toLowerCase()} tone={orderStatusTone(o.status)} />
-                    </td>
-                    <td className="py-2 text-slate-500">{formatDate(o.placedAt)}</td>
-                  </tr>
+                    </TableCell>
+                    <TableCell>
+                      <div className="font-medium">{o.customer.name}</div>
+                      <div className="text-xs text-muted-foreground">{o.customer.email}</div>
+                    </TableCell>
+                    <TableCell className="font-medium">{formatMoney(o.totalCents, o.currency)}</TableCell>
+                    <TableCell>
+                      <StatusBadge label={statusLabel(o.status)} tone={orderStatusTone(o.status)} />
+                    </TableCell>
+                    <TableCell className="text-muted-foreground">{formatDate(o.placedAt)}</TableCell>
+                  </TableRow>
                 ))}
-              </tbody>
-            </table>
+              </TableBody>
+            </Table>
           ) : (
-            <div className="text-sm text-slate-500">No orders yet.</div>
+            <p className="text-sm text-muted-foreground">{t('reports.no_orders')}</p>
           )}
-        </Panel>
-      </section>
+        </CardContent>
+      </Card>
     </div>
   );
 }
 
 function StatCard({ label, value, loading }: { label: string; value: string; loading?: boolean }) {
   return (
-    <div className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
-      <div className="text-xs uppercase tracking-wide text-slate-500">{label}</div>
-      <div className="mt-2 text-2xl font-semibold text-slate-900">{loading ? '…' : value}</div>
-    </div>
-  );
-}
-
-function Panel({ title, children }: { title: string; children: React.ReactNode }) {
-  return (
-    <div className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
-      <h2 className="text-sm font-semibold text-slate-900">{title}</h2>
-      <div className="mt-3">{children}</div>
-    </div>
+    <Card>
+      <CardContent className="p-5">
+        <div className="text-xs uppercase tracking-wide text-muted-foreground">{label}</div>
+        <div className="mt-2 text-2xl font-semibold">
+          {loading ? <Skeleton className="h-7 w-20" /> : value}
+        </div>
+      </CardContent>
+    </Card>
   );
 }
