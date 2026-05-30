@@ -1,27 +1,42 @@
 import { useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { ordersApi, orderStatusTone } from '../../features/orders/api';
-import type { OrderStatus } from '../../features/orders/types';
-import { ConfirmDialog } from '../../components/ConfirmDialog';
-import { StatusBadge } from '../../components/StatusBadge';
-import { formatDate, formatMoney, extractErrorMessage } from '../../lib/format';
+import { useTranslation } from 'react-i18next';
+import { ArrowLeft, ClipboardList, Trash2 } from 'lucide-react';
+import { toast } from 'sonner';
+import { ordersApi, orderStatusTone } from '@/features/orders/api';
+import type { OrderStatus } from '@/features/orders/types';
+import { ConfirmDialog } from '@/components/ConfirmDialog';
+import { PageHeader } from '@/components/PageHeader';
+import { StatusBadge } from '@/components/StatusBadge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { formatDate, formatMoney, extractErrorMessage } from '@/lib/format';
 
-const statuses: OrderStatus[] = [
-  'PENDING',
-  'PAID',
-  'SHIPPED',
-  'DELIVERED',
-  'CANCELLED',
-  'REFUNDED',
-];
+const STATUSES: OrderStatus[] = ['PENDING', 'PAID', 'SHIPPED', 'DELIVERED', 'CANCELLED', 'REFUNDED'];
 
 export function OrderDetail() {
   const { id } = useParams<{ id: string }>();
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [confirmDelete, setConfirmDelete] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   const orderQuery = useQuery({
     queryKey: ['order', id],
@@ -34,116 +49,143 @@ export function OrderDetail() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['order', id] });
       queryClient.invalidateQueries({ queryKey: ['orders'] });
+      toast.success(t('orders.status_updated_toast'));
     },
-    onError: (err) => setError(extractErrorMessage(err)),
+    onError: (err) => toast.error(extractErrorMessage(err)),
   });
 
   const removeOrder = useMutation({
     mutationFn: () => ordersApi.remove(id!),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['orders'] });
+      toast.success(t('orders.deleted_toast'));
       navigate('/orders');
     },
-    onError: (err) => setError(extractErrorMessage(err)),
+    onError: (err) => toast.error(extractErrorMessage(err)),
   });
 
-  if (orderQuery.isLoading) return <div className="text-sm text-slate-500">Loading…</div>;
-  if (orderQuery.isError)
-    return <div className="text-sm text-red-600">{extractErrorMessage(orderQuery.error)}</div>;
-  if (!orderQuery.data) return null;
+  const statusLabel = (s: OrderStatus) => t(`orders.status.${s.toLowerCase()}`);
+
+  if (orderQuery.isLoading) {
+    return (
+      <div className="space-y-5">
+        <Skeleton className="h-9 w-56" />
+        <Skeleton className="h-64 w-full rounded-xl" />
+      </div>
+    );
+  }
+  if (orderQuery.isError || !orderQuery.data) {
+    return (
+      <div className="space-y-4">
+        <Button asChild variant="ghost" size="sm">
+          <Link to="/orders">
+            <ArrowLeft className="h-4 w-4" />
+            {t('common.back')}
+          </Link>
+        </Button>
+        <p className="text-destructive">{extractErrorMessage(orderQuery.error)}</p>
+      </div>
+    );
+  }
 
   const order = orderQuery.data;
 
   return (
     <div className="space-y-5">
-      <div className="flex items-start justify-between">
-        <div>
-          <div className="font-mono text-xs text-slate-500">{order.number}</div>
-          <h1 className="text-2xl font-semibold text-slate-900">{order.customer.name}</h1>
-          <p className="mt-1 text-sm text-slate-500">
-            {order.customer.email} · placed {formatDate(order.placedAt)}
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
-          <StatusBadge label={order.status.toLowerCase()} tone={orderStatusTone(order.status)} />
-          <select
-            value={order.status}
-            onChange={(e) => updateStatus.mutate(e.target.value as OrderStatus)}
-            disabled={updateStatus.isPending}
-            className="rounded-lg border border-slate-300 px-2 py-1 text-sm"
-          >
-            {statuses.map((s) => (
-              <option key={s} value={s}>
-                {s.charAt(0) + s.slice(1).toLowerCase()}
-              </option>
-            ))}
-          </select>
-          <button
-            onClick={() => setConfirmDelete(true)}
-            className="rounded-lg border border-red-300 px-3 py-1.5 text-sm text-red-600 hover:bg-red-50"
-          >
-            Delete
-          </button>
-        </div>
-      </div>
+      <Button asChild variant="ghost" size="sm" className="-ms-2">
+        <Link to="/orders">
+          <ArrowLeft className="h-4 w-4" />
+          {t('common.back')}
+        </Link>
+      </Button>
 
-      {error && (
-        <div className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">{error}</div>
-      )}
+      <PageHeader
+        icon={ClipboardList}
+        title={order.customer.name}
+        description={
+          <span>
+            <span className="font-mono text-xs">{order.number}</span> · {order.customer.email} ·{' '}
+            {formatDate(order.placedAt)}
+          </span>
+        }
+        action={
+          <div className="flex flex-wrap items-center gap-2">
+            <StatusBadge label={statusLabel(order.status)} tone={orderStatusTone(order.status)} />
+            <Select
+              value={order.status}
+              onValueChange={(v) => updateStatus.mutate(v as OrderStatus)}
+            >
+              <SelectTrigger className="w-40">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {STATUSES.map((s) => (
+                  <SelectItem key={s} value={s}>
+                    {statusLabel(s)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Button variant="destructive" onClick={() => setConfirmDelete(true)}>
+              <Trash2 className="h-4 w-4" />
+              {t('common.delete')}
+            </Button>
+          </div>
+        }
+      />
 
-      <div className="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-slate-200">
-        <table className="min-w-full divide-y divide-slate-200 text-sm">
-          <thead className="bg-slate-50">
-            <tr className="text-left text-xs font-medium uppercase tracking-wide text-slate-500">
-              <th className="px-4 py-3">Product</th>
-              <th className="px-4 py-3">SKU</th>
-              <th className="px-4 py-3">Price</th>
-              <th className="px-4 py-3">Qty</th>
-              <th className="px-4 py-3">Line total</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-slate-100">
+      <Card>
+        <Table>
+          <TableHeader>
+            <TableRow className="hover:bg-transparent">
+              <TableHead>{t('carts.product')}</TableHead>
+              <TableHead>{t('products.sku')}</TableHead>
+              <TableHead>{t('products.price')}</TableHead>
+              <TableHead>{t('carts.quantity')}</TableHead>
+              <TableHead className="text-end">{t('orders.total')}</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
             {order.items.map((item) => (
-              <tr key={item.id}>
-                <td className="px-4 py-3 font-medium text-slate-900">{item.name}</td>
-                <td className="px-4 py-3 font-mono text-xs text-slate-600">{item.sku}</td>
-                <td className="px-4 py-3 text-slate-700">
-                  {formatMoney(item.priceCents, order.currency)}
-                </td>
-                <td className="px-4 py-3 text-slate-700">{item.quantity}</td>
-                <td className="px-4 py-3 text-slate-900">
+              <TableRow key={item.id} className="hover:bg-transparent">
+                <TableCell className="font-medium">{item.name}</TableCell>
+                <TableCell className="font-mono text-xs text-muted-foreground">{item.sku}</TableCell>
+                <TableCell>{formatMoney(item.priceCents, order.currency)}</TableCell>
+                <TableCell>{item.quantity}</TableCell>
+                <TableCell className="text-end font-medium">
                   {formatMoney(item.priceCents * item.quantity, order.currency)}
-                </td>
-              </tr>
+                </TableCell>
+              </TableRow>
             ))}
-          </tbody>
-        </table>
-      </div>
+          </TableBody>
+        </Table>
+      </Card>
 
-      <div className="ml-auto max-w-sm rounded-2xl bg-white p-5 text-sm shadow-sm ring-1 ring-slate-200">
-        <div className="flex justify-between text-slate-600">
-          <span>Subtotal</span>
-          <span>{formatMoney(order.subtotalCents, order.currency)}</span>
-        </div>
-        <div className="flex justify-between text-slate-600">
-          <span>Tax</span>
-          <span>{formatMoney(order.taxCents, order.currency)}</span>
-        </div>
-        <div className="flex justify-between text-slate-600">
-          <span>Shipping</span>
-          <span>{formatMoney(order.shippingCents, order.currency)}</span>
-        </div>
-        <div className="mt-2 flex justify-between border-t border-slate-200 pt-2 text-base font-semibold text-slate-900">
-          <span>Total</span>
-          <span>{formatMoney(order.totalCents, order.currency)}</span>
-        </div>
-      </div>
+      <Card className="ms-auto max-w-sm">
+        <CardContent className="space-y-1.5 p-5 text-sm">
+          <div className="flex justify-between text-muted-foreground">
+            <span>{t('orders.subtotal')}</span>
+            <span>{formatMoney(order.subtotalCents, order.currency)}</span>
+          </div>
+          <div className="flex justify-between text-muted-foreground">
+            <span>{t('orders.tax')}</span>
+            <span>{formatMoney(order.taxCents, order.currency)}</span>
+          </div>
+          <div className="flex justify-between text-muted-foreground">
+            <span>{t('orders.shipping')}</span>
+            <span>{formatMoney(order.shippingCents, order.currency)}</span>
+          </div>
+          <div className="mt-2 flex justify-between border-t pt-2 text-base font-semibold">
+            <span>{t('orders.total')}</span>
+            <span>{formatMoney(order.totalCents, order.currency)}</span>
+          </div>
+        </CardContent>
+      </Card>
 
       <ConfirmDialog
         open={confirmDelete}
-        title="Delete order"
-        message="Delete this order and all its items? This can't be undone."
-        confirmLabel="Delete"
+        title={t('orders.delete_title')}
+        message={t('orders.delete_message', { number: order.number })}
         busy={removeOrder.isPending}
         onCancel={() => setConfirmDelete(false)}
         onConfirm={() => removeOrder.mutate()}
