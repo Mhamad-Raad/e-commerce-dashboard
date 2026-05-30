@@ -28,7 +28,7 @@ export function DashboardLayout() {
   return (
     <TooltipProvider delayDuration={200}>
       <div className="flex h-full">
-        <aside className="hidden md:block">
+        <aside className="hidden shrink-0 md:block">
           <Sidebar collapsed={collapsed} />
         </aside>
 
