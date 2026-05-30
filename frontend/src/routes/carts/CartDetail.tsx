@@ -1,13 +1,39 @@
 import { useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { cartsApi } from '../../features/carts/api';
-import { productsApi } from '../../features/products/api';
-import { cartTotalCents, type CartStatus } from '../../features/carts/types';
-import { ConfirmDialog } from '../../components/ConfirmDialog';
-import { StatusBadge } from '../../components/StatusBadge';
-import { formatDate, formatMoney, extractErrorMessage } from '../../lib/format';
+import { useTranslation } from 'react-i18next';
+import { ArrowLeft, Plus, ShoppingCart, Trash2 } from 'lucide-react';
+import { toast } from 'sonner';
+import { cartsApi } from '@/features/carts/api';
+import { productsApi } from '@/features/products/api';
+import { cartTotalCents, type CartStatus } from '@/features/carts/types';
+import { ConfirmDialog } from '@/components/ConfirmDialog';
+import { PageHeader } from '@/components/PageHeader';
+import { EmptyState } from '@/components/EmptyState';
+import { StatusBadge } from '@/components/StatusBadge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Skeleton } from '@/components/ui/skeleton';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { formatDate, formatMoney, extractErrorMessage } from '@/lib/format';
 
+const STATUSES: CartStatus[] = ['OPEN', 'CHECKED_OUT', 'ABANDONED'];
 const statusTone: Record<CartStatus, 'green' | 'amber' | 'slate'> = {
   OPEN: 'green',
   CHECKED_OUT: 'slate',
@@ -16,12 +42,12 @@ const statusTone: Record<CartStatus, 'green' | 'amber' | 'slate'> = {
 
 export function CartDetail() {
   const { id } = useParams<{ id: string }>();
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [productId, setProductId] = useState('');
   const [quantity, setQuantity] = useState(1);
   const [confirmDelete, setConfirmDelete] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   const cartQuery = useQuery({
     queryKey: ['cart', id],
@@ -38,6 +64,7 @@ export function CartDetail() {
     queryClient.invalidateQueries({ queryKey: ['cart', id] });
     queryClient.invalidateQueries({ queryKey: ['carts'] });
   };
+  const onError = (err: unknown) => toast.error(extractErrorMessage(err));
 
   const addItem = useMutation({
     mutationFn: () => cartsApi.addItem(id!, productId, quantity),
@@ -45,189 +72,211 @@ export function CartDetail() {
       setProductId('');
       setQuantity(1);
       onCartChanged();
+      toast.success(t('carts.item_added_toast'));
     },
-    onError: (err) => setError(extractErrorMessage(err)),
+    onError,
   });
 
   const updateItem = useMutation({
     mutationFn: ({ itemId, qty }: { itemId: string; qty: number }) =>
       cartsApi.updateItem(id!, itemId, qty),
     onSuccess: onCartChanged,
-    onError: (err) => setError(extractErrorMessage(err)),
+    onError,
   });
 
   const removeItem = useMutation({
     mutationFn: (itemId: string) => cartsApi.removeItem(id!, itemId),
-    onSuccess: onCartChanged,
-    onError: (err) => setError(extractErrorMessage(err)),
+    onSuccess: () => {
+      onCartChanged();
+      toast.success(t('carts.item_removed_toast'));
+    },
+    onError,
   });
 
   const updateStatus = useMutation({
     mutationFn: (status: CartStatus) => cartsApi.updateStatus(id!, status),
     onSuccess: onCartChanged,
-    onError: (err) => setError(extractErrorMessage(err)),
+    onError,
   });
 
   const removeCart = useMutation({
     mutationFn: () => cartsApi.remove(id!),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['carts'] });
+      toast.success(t('carts.deleted_toast'));
       navigate('/carts');
     },
-    onError: (err) => setError(extractErrorMessage(err)),
+    onError,
   });
 
-  if (cartQuery.isLoading) return <div className="text-sm text-slate-500">Loading…</div>;
-  if (cartQuery.isError)
-    return <div className="text-sm text-red-600">{extractErrorMessage(cartQuery.error)}</div>;
-  if (!cartQuery.data) return null;
+  const statusLabel = (s: CartStatus) => t(`carts.status.${s.toLowerCase()}`);
+
+  if (cartQuery.isLoading) {
+    return (
+      <div className="space-y-5">
+        <Skeleton className="h-9 w-56" />
+        <Skeleton className="h-64 w-full rounded-xl" />
+      </div>
+    );
+  }
+  if (cartQuery.isError || !cartQuery.data) {
+    return (
+      <div className="space-y-4">
+        <Button asChild variant="ghost" size="sm">
+          <Link to="/carts">
+            <ArrowLeft className="h-4 w-4" />
+            {t('common.back')}
+          </Link>
+        </Button>
+        <p className="text-destructive">{extractErrorMessage(cartQuery.error)}</p>
+      </div>
+    );
+  }
 
   const cart = cartQuery.data;
   const total = cartTotalCents(cart);
 
   return (
     <div className="space-y-5">
-      <div className="flex items-start justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold text-slate-900">Cart for {cart.customer.name}</h1>
-          <p className="mt-1 text-sm text-slate-500">
-            {cart.customer.email} · created {formatDate(cart.createdAt)}
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
-          <StatusBadge label={cart.status.replace('_', ' ').toLowerCase()} tone={statusTone[cart.status]} />
-          <select
-            value={cart.status}
-            onChange={(e) => updateStatus.mutate(e.target.value as CartStatus)}
-            disabled={updateStatus.isPending}
-            className="rounded-lg border border-slate-300 px-2 py-1 text-sm"
-          >
-            <option value="OPEN">Open</option>
-            <option value="CHECKED_OUT">Checked out</option>
-            <option value="ABANDONED">Abandoned</option>
-          </select>
-          <button
-            onClick={() => setConfirmDelete(true)}
-            className="rounded-lg border border-red-300 px-3 py-1.5 text-sm text-red-600 hover:bg-red-50"
-          >
-            Delete
-          </button>
-        </div>
-      </div>
+      <Button asChild variant="ghost" size="sm" className="-ms-2">
+        <Link to="/carts">
+          <ArrowLeft className="h-4 w-4" />
+          {t('common.back')}
+        </Link>
+      </Button>
 
-      {error && (
-        <div className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">{error}</div>
-      )}
-
-      <div className="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-slate-200">
-        <table className="min-w-full divide-y divide-slate-200 text-sm">
-          <thead className="bg-slate-50">
-            <tr className="text-left text-xs font-medium uppercase tracking-wide text-slate-500">
-              <th className="px-4 py-3">Product</th>
-              <th className="px-4 py-3">SKU</th>
-              <th className="px-4 py-3">Price</th>
-              <th className="px-4 py-3">Qty</th>
-              <th className="px-4 py-3">Line total</th>
-              <th className="px-4 py-3 text-right"></th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-slate-100">
-            {cart.items.length === 0 && (
-              <tr>
-                <td colSpan={6} className="px-4 py-8 text-center text-slate-500">
-                  Cart is empty.
-                </td>
-              </tr>
-            )}
-            {cart.items.map((item) => (
-              <tr key={item.id} className="hover:bg-slate-50">
-                <td className="px-4 py-3 font-medium text-slate-900">{item.product.name}</td>
-                <td className="px-4 py-3 font-mono text-xs text-slate-600">{item.product.sku}</td>
-                <td className="px-4 py-3 text-slate-700">{formatMoney(item.priceCents)}</td>
-                <td className="px-4 py-3">
-                  <input
-                    type="number"
-                    min={1}
-                    value={item.quantity}
-                    onChange={(e) => {
-                      const qty = Number(e.target.value);
-                      if (qty > 0) updateItem.mutate({ itemId: item.id, qty });
-                    }}
-                    className="w-20 rounded border border-slate-300 px-2 py-1 text-sm"
-                  />
-                </td>
-                <td className="px-4 py-3 text-slate-900">
-                  {formatMoney(item.priceCents * item.quantity)}
-                </td>
-                <td className="px-4 py-3 text-right">
-                  <button
-                    onClick={() => removeItem.mutate(item.id)}
-                    className="text-red-600 hover:underline"
-                  >
-                    Remove
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-          <tfoot className="bg-slate-50">
-            <tr>
-              <td colSpan={4} className="px-4 py-3 text-right text-sm font-medium text-slate-700">
-                Cart total
-              </td>
-              <td className="px-4 py-3 text-sm font-semibold text-slate-900">{formatMoney(total)}</td>
-              <td></td>
-            </tr>
-          </tfoot>
-        </table>
-      </div>
-
-      <div className="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200">
-        <h2 className="text-sm font-semibold text-slate-900">Add item</h2>
-        <div className="mt-3 flex flex-wrap items-end gap-3">
-          <div className="min-w-64 flex-1">
-            <label className="block text-xs text-slate-600">Product</label>
-            <select
-              value={productId}
-              onChange={(e) => setProductId(e.target.value)}
-              className="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
-            >
-              <option value="">Select a product…</option>
-              {productsQuery.data?.items.map((p) => (
-                <option key={p.id} value={p.id}>
-                  {p.name} ({formatMoney(p.priceCents, p.currency)})
-                </option>
-              ))}
-            </select>
+      <PageHeader
+        icon={ShoppingCart}
+        title={cart.customer.name}
+        description={`${cart.customer.email} · ${formatDate(cart.createdAt)}`}
+        action={
+          <div className="flex flex-wrap items-center gap-2">
+            <StatusBadge label={statusLabel(cart.status)} tone={statusTone[cart.status]} />
+            <Select value={cart.status} onValueChange={(v) => updateStatus.mutate(v as CartStatus)}>
+              <SelectTrigger className="w-40">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {STATUSES.map((s) => (
+                  <SelectItem key={s} value={s}>
+                    {statusLabel(s)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Button variant="destructive" onClick={() => setConfirmDelete(true)}>
+              <Trash2 className="h-4 w-4" />
+              {t('common.delete')}
+            </Button>
           </div>
-          <div>
-            <label className="block text-xs text-slate-600">Quantity</label>
-            <input
+        }
+      />
+
+      <Card>
+        {cart.items.length === 0 ? (
+          <EmptyState icon={ShoppingCart} title={t('carts.empty_cart')} />
+        ) : (
+          <Table>
+            <TableHeader>
+              <TableRow className="hover:bg-transparent">
+                <TableHead>{t('carts.product')}</TableHead>
+                <TableHead>{t('products.sku')}</TableHead>
+                <TableHead>{t('products.price')}</TableHead>
+                <TableHead>{t('carts.quantity')}</TableHead>
+                <TableHead>{t('carts.total')}</TableHead>
+                <TableHead className="text-end">{t('common.actions')}</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {cart.items.map((item) => (
+                <TableRow key={item.id} className="hover:bg-transparent">
+                  <TableCell className="font-medium">{item.product.name}</TableCell>
+                  <TableCell className="font-mono text-xs text-muted-foreground">
+                    {item.product.sku}
+                  </TableCell>
+                  <TableCell>{formatMoney(item.priceCents)}</TableCell>
+                  <TableCell>
+                    <Input
+                      type="number"
+                      min={1}
+                      value={item.quantity}
+                      onChange={(e) => {
+                        const qty = Number(e.target.value);
+                        if (qty > 0) updateItem.mutate({ itemId: item.id, qty });
+                      }}
+                      className="w-20"
+                    />
+                  </TableCell>
+                  <TableCell className="font-medium">
+                    {formatMoney(item.priceCents * item.quantity)}
+                  </TableCell>
+                  <TableCell className="text-end">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 text-destructive hover:bg-destructive/10 hover:text-destructive"
+                      onClick={() => removeItem.mutate(item.id)}
+                      aria-label={t('carts.remove')}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+              <TableRow className="hover:bg-transparent">
+                <TableCell colSpan={4} className="text-end font-medium text-muted-foreground">
+                  {t('carts.total')}
+                </TableCell>
+                <TableCell colSpan={2} className="font-semibold">
+                  {formatMoney(total)}
+                </TableCell>
+              </TableRow>
+            </TableBody>
+          </Table>
+        )}
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-sm">{t('carts.add_item')}</CardTitle>
+        </CardHeader>
+        <CardContent className="flex flex-wrap items-end gap-3 pt-0">
+          <div className="min-w-64 flex-1 space-y-1">
+            <Label>{t('carts.product')}</Label>
+            <Select value={productId || undefined} onValueChange={setProductId}>
+              <SelectTrigger>
+                <SelectValue placeholder={`${t('carts.product')}…`} />
+              </SelectTrigger>
+              <SelectContent>
+                {productsQuery.data?.items.map((p) => (
+                  <SelectItem key={p.id} value={p.id}>
+                    {p.name} ({formatMoney(p.priceCents, p.currency)})
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-1">
+            <Label>{t('carts.quantity')}</Label>
+            <Input
               type="number"
               min={1}
               value={quantity}
               onChange={(e) => setQuantity(Math.max(1, Number(e.target.value)))}
-              className="mt-1 w-24 rounded-lg border border-slate-300 px-3 py-2 text-sm"
+              className="w-24"
             />
           </div>
-          <button
-            onClick={() => {
-              setError(null);
-              if (productId) addItem.mutate();
-            }}
-            disabled={!productId || addItem.isPending}
-            className="rounded-lg bg-slate-900 px-3 py-2 text-sm font-medium text-white hover:bg-slate-800 disabled:opacity-60"
-          >
-            {addItem.isPending ? 'Adding…' : 'Add to cart'}
-          </button>
-        </div>
-      </div>
+          <Button onClick={() => productId && addItem.mutate()} disabled={!productId || addItem.isPending}>
+            <Plus className="h-4 w-4" />
+            {addItem.isPending ? t('common.working') : t('carts.add_to_cart')}
+          </Button>
+        </CardContent>
+      </Card>
 
       <ConfirmDialog
         open={confirmDelete}
-        title="Delete cart"
-        message="Delete this cart and all its items? This can't be undone."
-        confirmLabel="Delete"
+        title={t('carts.delete_title')}
+        message={t('carts.delete_message')}
         busy={removeCart.isPending}
         onCancel={() => setConfirmDelete(false)}
         onConfirm={() => removeCart.mutate()}
