@@ -139,7 +139,7 @@ export function NewOrder() {
             <Label>{t('orders.items')}</Label>
             {items.length === 0 ? (
               <div className="rounded-lg border border-dashed px-3 py-6 text-center text-sm text-muted-foreground">
-                {t('carts.empty_cart')}
+                {t('orders.no_items')}
               </div>
             ) : (
               <div className="rounded-lg border">

@@ -112,6 +112,7 @@
     "change_status": "Change status",
     "empty_title": "No orders yet",
     "empty_desc": "Orders will appear here once placed.",
+    "no_items": "No items added yet.",
     "delete_title": "Delete order",
     "delete_message": "Delete order \"{{number}}\"? This can't be undone.",
     "deleted_toast": "Order deleted",
@@ -165,6 +166,7 @@
     "orders_by_status": "Orders by status",
     "top_products": "Top products",
     "recent_orders": "Recent orders",
+    "units_sold": "Units sold",
     "units": "{{count}} units",
     "no_sales": "No sales data yet.",
     "no_orders": "No orders yet."
@@ -180,7 +182,9 @@
     "password": "Password",
     "sign_in": "Sign in",
     "signing_in": "Signing in…",
-    "failed": "Login failed. Check your credentials."
+    "failed": "Login failed. Check your credentials.",
+    "email_invalid": "Enter a valid email address.",
+    "password_min": "Password must be at least 6 characters."
   },
   "toast": {
     "error": "Something went wrong"

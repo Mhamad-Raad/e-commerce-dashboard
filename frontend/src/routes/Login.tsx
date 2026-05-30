@@ -65,7 +65,7 @@ export function Login() {
             <div className="space-y-1.5">
               <Label htmlFor="email">{t('login.email')}</Label>
               <Input id="email" type="email" autoComplete="email" {...register('email')} />
-              {errors.email && <p className="text-xs text-destructive">{t('login.email')}</p>}
+              {errors.email && <p className="text-xs text-destructive">{t('login.email_invalid')}</p>}
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="password">{t('login.password')}</Label>
@@ -76,7 +76,7 @@ export function Login() {
                 {...register('password')}
               />
               {errors.password && (
-                <p className="text-xs text-destructive">{t('login.password')}</p>
+                <p className="text-xs text-destructive">{t('login.password_min')}</p>
               )}
             </div>
             <Button type="submit" className="w-full" disabled={isSubmitting}>

@@ -89,7 +89,7 @@ export function Reports() {
                 <TableHeader>
                   <TableRow className="hover:bg-transparent">
                     <TableHead>{t('carts.product')}</TableHead>
-                    <TableHead className="text-end">{t('reports.recent_orders')}</TableHead>
+                    <TableHead className="text-end">{t('reports.units_sold')}</TableHead>
                     <TableHead className="text-end">{t('reports.revenue')}</TableHead>
                   </TableRow>
                 </TableHeader>
