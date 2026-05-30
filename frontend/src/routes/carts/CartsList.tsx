@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useQuery, keepPreviousData } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { Plus, ShoppingCart } from 'lucide-react';
-import { cartsApi } from '@/features/carts/api';
+import { cartsApi, cartStatusTone } from '@/features/carts/api';
 import { cartTotalCents, type Cart, type CartStatus } from '@/features/carts/types';
 import { PageHeader } from '@/components/PageHeader';
 import { SearchInput } from '@/components/SearchInput';
@@ -24,12 +24,6 @@ import { formatDate, formatMoney } from '@/lib/format';
 const PAGE_SIZE = 20;
 const STATUSES: CartStatus[] = ['OPEN', 'CHECKED_OUT', 'ABANDONED'];
 const ALL = '__all__';
-
-const statusTone: Record<CartStatus, 'green' | 'amber' | 'slate'> = {
-  OPEN: 'green',
-  CHECKED_OUT: 'slate',
-  ABANDONED: 'amber',
-};
 
 export function CartsList() {
   const { t } = useTranslation();
@@ -73,7 +67,7 @@ export function CartsList() {
     {
       key: 'status',
       header: t('common.status'),
-      cell: (c) => <StatusBadge label={statusLabel(c.status)} tone={statusTone[c.status]} />,
+      cell: (c) => <StatusBadge label={statusLabel(c.status)} tone={cartStatusTone(c.status)} />,
     },
     {
       key: 'updated',

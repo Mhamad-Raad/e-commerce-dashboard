@@ -42,3 +42,14 @@ export const cartsApi = {
     return res.data;
   },
 };
+
+export const cartStatusTone = (status: CartStatus): 'green' | 'amber' | 'slate' => {
+  switch (status) {
+    case 'OPEN':
+      return 'green';
+    case 'CHECKED_OUT':
+      return 'slate';
+    case 'ABANDONED':
+      return 'amber';
+  }
+};

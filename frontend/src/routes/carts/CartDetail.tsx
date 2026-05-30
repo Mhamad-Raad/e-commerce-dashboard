@@ -4,7 +4,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { ArrowLeft, Plus, ShoppingCart, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
-import { cartsApi } from '@/features/carts/api';
+import { cartsApi, cartStatusTone } from '@/features/carts/api';
 import { productsApi } from '@/features/products/api';
 import { cartTotalCents, type CartStatus } from '@/features/carts/types';
 import { ConfirmDialog } from '@/components/ConfirmDialog';
@@ -34,11 +34,6 @@ import {
 import { formatDate, formatMoney, extractErrorMessage } from '@/lib/format';
 
 const STATUSES: CartStatus[] = ['OPEN', 'CHECKED_OUT', 'ABANDONED'];
-const statusTone: Record<CartStatus, 'green' | 'amber' | 'slate'> = {
-  OPEN: 'green',
-  CHECKED_OUT: 'slate',
-  ABANDONED: 'amber',
-};
 
 export function CartDetail() {
   const { id } = useParams<{ id: string }>();
@@ -151,7 +146,7 @@ export function CartDetail() {
         description={`${cart.customer.email} · ${formatDate(cart.createdAt)}`}
         action={
           <div className="flex flex-wrap items-center gap-2">
-            <StatusBadge label={statusLabel(cart.status)} tone={statusTone[cart.status]} />
+            <StatusBadge label={statusLabel(cart.status)} tone={cartStatusTone(cart.status)} />
             <Select value={cart.status} onValueChange={(v) => updateStatus.mutate(v as CartStatus)}>
               <SelectTrigger className="w-40">
                 <SelectValue />

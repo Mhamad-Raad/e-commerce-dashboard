@@ -10,14 +10,13 @@ import { z } from 'zod';
 import { productsApi } from '@/features/products/api';
 import type { ProductWritePayload } from '@/features/products/types';
 import { PageHeader } from '@/components/PageHeader';
+import { FormField } from '@/components/FormField';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { cn } from '@/lib/utils';
 import { extractErrorMessage } from '@/lib/format';
 
 const schema = z.object({
@@ -133,33 +132,33 @@ export function ProductForm() {
         <CardContent className="pt-6">
           <form onSubmit={handleSubmit((v) => saveMutation.mutate(v))} className="space-y-5" noValidate>
             <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-              <Field label={t('products.name')} error={errors.name?.message}>
+              <FormField label={t('products.name')} error={errors.name?.message}>
                 <Input autoComplete="off" {...register('name')} />
-              </Field>
-              <Field label={t('products.sku')} error={errors.sku?.message}>
+              </FormField>
+              <FormField label={t('products.sku')} error={errors.sku?.message}>
                 <Input className="font-mono" autoComplete="off" {...register('sku')} />
-              </Field>
-              <Field label={t('products.price')} error={errors.price?.message}>
+              </FormField>
+              <FormField label={t('products.price')} error={errors.price?.message}>
                 <Input inputMode="decimal" {...register('price')} />
-              </Field>
-              <Field label={t('common.currency')} error={errors.currency?.message}>
+              </FormField>
+              <FormField label={t('common.currency')} error={errors.currency?.message}>
                 <Input className="uppercase" maxLength={3} {...register('currency')} />
-              </Field>
-              <Field label={t('products.stock')} error={errors.stock?.message}>
+              </FormField>
+              <FormField label={t('products.stock')} error={errors.stock?.message}>
                 <Input inputMode="numeric" {...register('stock')} />
-              </Field>
-              <Field label={t('products.category')} error={errors.category?.message}>
+              </FormField>
+              <FormField label={t('products.category')} error={errors.category?.message}>
                 <Input autoComplete="off" {...register('category')} />
-              </Field>
+              </FormField>
               <div className="md:col-span-2">
-                <Field label={t('products.image')} error={errors.imageUrl?.message}>
+                <FormField label={t('products.image')} error={errors.imageUrl?.message}>
                   <Input {...register('imageUrl')} placeholder="https://…" />
-                </Field>
+                </FormField>
               </div>
               <div className="md:col-span-2">
-                <Field label={t('products.description')} error={errors.description?.message}>
+                <FormField label={t('products.description')} error={errors.description?.message}>
                   <Textarea rows={4} {...register('description')} />
-                </Field>
+                </FormField>
               </div>
             </div>
 
@@ -182,24 +181,6 @@ export function ProductForm() {
           </form>
         </CardContent>
       </Card>
-    </div>
-  );
-}
-
-function Field({
-  label,
-  error,
-  children,
-}: {
-  label: string;
-  error?: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <div className="space-y-1.5">
-      <Label className={cn(error && 'text-destructive')}>{label}</Label>
-      {children}
-      {error && <p className="text-xs text-destructive">{error}</p>}
     </div>
   );
 }

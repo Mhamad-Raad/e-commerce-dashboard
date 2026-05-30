@@ -8,20 +8,12 @@ import { productsApi } from '@/features/products/api';
 import { ProductImage } from '@/features/products/ProductImage';
 import { PageHeader } from '@/components/PageHeader';
 import { ConfirmDialog } from '@/components/ConfirmDialog';
+import { DetailRow } from '@/components/DetailRow';
 import { StatusBadge } from '@/components/StatusBadge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { formatDate, formatMoney, extractErrorMessage } from '@/lib/format';
-
-function DetailRow({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <div className="flex justify-between gap-4 py-2.5 text-sm">
-      <span className="text-muted-foreground">{label}</span>
-      <span className="text-end font-medium">{children}</span>
-    </div>
-  );
-}
 
 export function ProductDetail() {
   const { id } = useParams<{ id: string }>();
