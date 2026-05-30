@@ -1,60 +1,57 @@
-import { NavLink, Outlet } from 'react-router-dom';
-import { useAuth } from '../lib/auth';
+import { useEffect, useState } from 'react';
+import { Outlet, useLocation } from 'react-router-dom';
+import { Sidebar } from '@/components/Sidebar';
+import { Navbar } from '@/components/Navbar';
+import { Sheet, SheetContent, SheetTitle } from '@/components/ui/sheet';
+import { TooltipProvider } from '@/components/ui/tooltip';
+import { useDirection } from '@/i18n/useDirection';
 
-const navItems = [
-  { to: '/', label: 'Overview', end: true },
-  { to: '/products', label: 'Products' },
-  { to: '/customers', label: 'Customers' },
-  { to: '/carts', label: 'Carts' },
-  { to: '/orders', label: 'Orders' },
-  { to: '/reports', label: 'Reports' },
-];
+const COLLAPSE_KEY = 'sidebar:collapsed';
 
 export function DashboardLayout() {
-  const { user, logout } = useAuth();
+  const [collapsed, setCollapsed] = useState(
+    () => localStorage.getItem(COLLAPSE_KEY) === '1',
+  );
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const { isRtl } = useDirection();
+  const location = useLocation();
+
+  useEffect(() => {
+    localStorage.setItem(COLLAPSE_KEY, collapsed ? '1' : '0');
+  }, [collapsed]);
+
+  // Close the mobile drawer on navigation.
+  useEffect(() => {
+    setMobileOpen(false);
+  }, [location.pathname]);
 
   return (
-    <div className="flex min-h-full bg-slate-50">
-      <aside className="flex w-60 flex-col border-r border-slate-200 bg-white">
-        <div className="px-6 py-5">
-          <div className="text-base font-semibold text-slate-900">Dashboard</div>
-          <div className="text-xs text-slate-500">Admin console</div>
-        </div>
-        <nav className="flex-1 space-y-0.5 px-3">
-          {navItems.map((item) => (
-            <NavLink
-              key={item.to}
-              to={item.to}
-              end={item.end}
-              className={({ isActive }) =>
-                `block rounded-lg px-3 py-2 text-sm ${
-                  isActive
-                    ? 'bg-slate-900 text-white'
-                    : 'text-slate-700 hover:bg-slate-100'
-                }`
-              }
-            >
-              {item.label}
-            </NavLink>
-          ))}
-        </nav>
-        <div className="border-t border-slate-200 p-4">
-          <div className="text-xs text-slate-500">Signed in as</div>
-          <div className="truncate text-sm text-slate-900">{user?.email}</div>
-          <button
-            onClick={() => logout()}
-            className="mt-3 w-full rounded-lg border border-slate-300 px-3 py-1.5 text-sm text-slate-700 hover:bg-slate-100"
-          >
-            Sign out
-          </button>
-        </div>
-      </aside>
+    <TooltipProvider delayDuration={200}>
+      <div className="flex h-full">
+        <aside className="hidden md:block">
+          <Sidebar collapsed={collapsed} />
+        </aside>
 
-      <main className="flex-1 overflow-x-hidden">
-        <div className="mx-auto max-w-6xl px-8 py-8">
-          <Outlet />
+        <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
+          <SheetContent side={isRtl ? 'right' : 'left'} className="w-60 p-0">
+            <SheetTitle className="sr-only">Menu</SheetTitle>
+            <Sidebar collapsed={false} onNavigate={() => setMobileOpen(false)} />
+          </SheetContent>
+        </Sheet>
+
+        <div className="flex min-w-0 flex-1 flex-col">
+          <Navbar
+            collapsed={collapsed}
+            onToggleCollapsed={() => setCollapsed((c) => !c)}
+            onOpenMobileMenu={() => setMobileOpen(true)}
+          />
+          <main className="flex-1 overflow-y-auto">
+            <div className="mx-auto w-full max-w-screen-2xl px-4 py-6 sm:px-6 lg:px-8">
+              <Outlet />
+            </div>
+          </main>
         </div>
-      </main>
-    </div>
+      </div>
+    </TooltipProvider>
   );
 }
