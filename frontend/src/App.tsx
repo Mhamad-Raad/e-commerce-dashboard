@@ -15,6 +15,9 @@ const ProductsList = lazy(() =>
 const ProductForm = lazy(() =>
   import('./routes/products/ProductForm').then((m) => ({ default: m.ProductForm })),
 );
+const ProductDetail = lazy(() =>
+  import('./routes/products/ProductDetail').then((m) => ({ default: m.ProductDetail })),
+);
 const CustomersList = lazy(() =>
   import('./routes/customers/CustomersList').then((m) => ({ default: m.CustomersList })),
 );
@@ -45,7 +48,7 @@ const Reports = lazy(() =>
 
 function PageLoader() {
   return (
-    <div className="flex h-full items-center justify-center py-12 text-sm text-slate-500">
+    <div className="flex h-full items-center justify-center py-12 text-sm text-muted-foreground">
       Loading…
     </div>
   );
@@ -66,6 +69,7 @@ export default function App() {
           <Route path="/" element={<Overview />} />
           <Route path="/products" element={<ProductsList />} />
           <Route path="/products/new" element={<ProductForm />} />
+          <Route path="/products/:id" element={<ProductDetail />} />
           <Route path="/products/:id/edit" element={<ProductForm />} />
           <Route path="/customers" element={<CustomersList />} />
           <Route path="/customers/new" element={<CustomerForm />} />
