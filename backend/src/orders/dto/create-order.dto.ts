@@ -1,0 +1,46 @@
+import { Type } from 'class-transformer';
+import {
+  ArrayMinSize,
+  IsArray,
+  IsInt,
+  IsOptional,
+  IsString,
+  Length,
+  Min,
+  ValidateNested,
+} from 'class-validator';
+
+export class CreateOrderItemDto {
+  @IsString()
+  productId!: string;
+
+  @IsInt()
+  @Min(1)
+  quantity!: number;
+}
+
+export class CreateOrderDto {
+  @IsString()
+  customerId!: string;
+
+  @IsArray()
+  @ArrayMinSize(1)
+  @ValidateNested({ each: true })
+  @Type(() => CreateOrderItemDto)
+  items!: CreateOrderItemDto[];
+
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  taxCents?: number;
+
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  shippingCents?: number;
+
+  @IsOptional()
+  @IsString()
+  @Length(3, 3)
+  currency?: string;
+}

@@ -2,6 +2,7 @@ import { ForbiddenException, Injectable, UnauthorizedException } from '@nestjs/c
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
+import { createHash } from 'crypto';
 import { PrismaService } from '../prisma/prisma.service';
 import { JwtPayload } from './strategies/jwt.strategy';
 
@@ -33,7 +34,7 @@ export class AuthService {
     const user = await this.prisma.user.findUnique({ where: { id: userId } });
     if (!user || !user.refreshHash) throw new ForbiddenException('Access denied');
 
-    const matches = await bcrypt.compare(presentedToken, user.refreshHash);
+    const matches = await bcrypt.compare(this.digest(presentedToken), user.refreshHash);
     if (!matches) throw new ForbiddenException('Access denied');
 
     const tokens = await this.issueTokens(user.id, user.email, user.role);
@@ -73,10 +74,18 @@ export class AuthService {
   }
 
   private async storeRefreshHash(userId: string, refreshToken: string) {
-    const refreshHash = await bcrypt.hash(refreshToken, 12);
+    const refreshHash = await bcrypt.hash(this.digest(refreshToken), 12);
     await this.prisma.user.update({
       where: { id: userId },
       data: { refreshHash },
     });
+  }
+
+  // Collapse the token to a fixed-length SHA-256 hex digest before bcrypt.
+  // bcrypt only hashes the first 72 bytes of its input, and every JWT for a
+  // given user shares an identical 72-byte prefix (header + "sub" claim), so
+  // hashing the raw token would make all of a user's refresh tokens collide.
+  private digest(token: string) {
+    return createHash('sha256').update(token).digest('hex');
   }
 }
