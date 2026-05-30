@@ -33,7 +33,7 @@ export function DashboardLayout() {
         </aside>
 
         <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
-          <SheetContent side={isRtl ? 'right' : 'left'} className="w-60 p-0">
+          <SheetContent side={isRtl ? 'right' : 'left'} className="w-64 p-0">
             <SheetTitle className="sr-only">Menu</SheetTitle>
             <Sidebar collapsed={false} onNavigate={() => setMobileOpen(false)} />
           </SheetContent>

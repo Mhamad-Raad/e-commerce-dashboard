@@ -4,6 +4,9 @@
     "subtitle": "وحدة الإدارة"
   },
   "nav": {
+    "group_main": "الرئيسية",
+    "group_management": "الإدارة",
+    "group_analytics": "التحليلات",
     "overview": "نظرة عامة",
     "products": "المنتجات",
     "customers": "العملاء",

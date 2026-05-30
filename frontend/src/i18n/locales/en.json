@@ -4,6 +4,9 @@
     "subtitle": "Admin console"
   },
   "nav": {
+    "group_main": "Main",
+    "group_management": "Management",
+    "group_analytics": "Analytics",
     "overview": "Overview",
     "products": "Products",
     "customers": "Customers",
