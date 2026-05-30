@@ -24,6 +24,9 @@ const CustomersList = lazy(() =>
 const CustomerForm = lazy(() =>
   import('./routes/customers/CustomerForm').then((m) => ({ default: m.CustomerForm })),
 );
+const CustomerDetail = lazy(() =>
+  import('./routes/customers/CustomerDetail').then((m) => ({ default: m.CustomerDetail })),
+);
 const CartsList = lazy(() =>
   import('./routes/carts/CartsList').then((m) => ({ default: m.CartsList })),
 );
@@ -73,6 +76,7 @@ export default function App() {
           <Route path="/products/:id/edit" element={<ProductForm />} />
           <Route path="/customers" element={<CustomersList />} />
           <Route path="/customers/new" element={<CustomerForm />} />
+          <Route path="/customers/:id" element={<CustomerDetail />} />
           <Route path="/customers/:id/edit" element={<CustomerForm />} />
           <Route path="/carts" element={<CartsList />} />
           <Route path="/carts/new" element={<NewCart />} />
