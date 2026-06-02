@@ -38,6 +38,45 @@ model User {
   updatedAt    DateTime @updatedAt
 }
 
+model Store {
+  id          String   @id @default(cuid())
+  name        String
+  slug        String   @unique
+  description String?
+  logoUrl     String?
+  bannerUrl   String?
+  email       String?
+  phone       String?
+  address     String?
+  city        String?
+  country     String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  products Product[]
+  featured FeaturedStore?
+
+  @@index([isActive])
+  @@index([createdAt])
+}
+
+model Category {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  slug        String   @unique
+  description String?
+  imageUrl    String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  products Product[]
+  featured FeaturedCategory?
+
+  @@index([isActive])
+}
+
 model Product {
   id          String   @id @default(cuid())
   name        String
@@ -47,17 +86,63 @@ model Product {
   currency    String   @default("USD")
   stock       Int      @default(0)
   imageUrl    String?
-  category    String?
+  storeId     String
+  store       Store    @relation(fields: [storeId], references: [id], onDelete: Restrict)
+  categoryId  String?
+  category    Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
   isActive    Boolean  @default(true)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
   cartItems  CartItem[]
   orderItems OrderItem[]
+  featured   FeaturedProduct?
 
-  @@index([category])
+  @@index([storeId])
+  @@index([categoryId])
   @@index([isActive])
   @@index([createdAt])
+}
+
+model HeroBanner {
+  id        String   @id @default(cuid())
+  title     String
+  subtitle  String?
+  imageUrl  String
+  linkUrl   String?
+  sortOrder Int      @default(0)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([sortOrder])
+}
+
+model FeaturedProduct {
+  id        String  @id @default(cuid())
+  productId String  @unique
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  sortOrder Int     @default(0)
+
+  @@index([sortOrder])
+}
+
+model FeaturedCategory {
+  id         String   @id @default(cuid())
+  categoryId String   @unique
+  category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  sortOrder  Int      @default(0)
+
+  @@index([sortOrder])
+}
+
+model FeaturedStore {
+  id        String @id @default(cuid())
+  storeId   String @unique
+  store     Store  @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  sortOrder Int    @default(0)
+
+  @@index([sortOrder])
 }
 
 model Customer {
