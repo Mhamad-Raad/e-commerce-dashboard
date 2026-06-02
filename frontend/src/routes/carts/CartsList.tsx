@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useQuery, keepPreviousData } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
@@ -6,9 +5,9 @@ import { Plus, ShoppingCart } from 'lucide-react';
 import { cartsApi, cartStatusTone } from '@/features/carts/api';
 import { cartTotalCents, type Cart, type CartStatus } from '@/features/carts/types';
 import { PageHeader } from '@/components/PageHeader';
-import { SearchInput } from '@/components/SearchInput';
+import { UrlSearchInput } from '@/components/UrlSearchInput';
 import { EmptyState } from '@/components/EmptyState';
-import { Pagination } from '@/components/Pagination';
+import { TablePagination } from '@/components/TablePagination';
 import { DataTable, type Column } from '@/components/DataTable';
 import { StatusBadge } from '@/components/StatusBadge';
 import { Button } from '@/components/ui/button';
@@ -19,32 +18,32 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { useListParams } from '@/hooks/useListParams';
 import { formatDate, formatMoney } from '@/lib/format';
 
-const PAGE_SIZE = 20;
 const STATUSES: CartStatus[] = ['OPEN', 'CHECKED_OUT', 'ABANDONED'];
 const ALL = '__all__';
 
 export function CartsList() {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const [search, setSearch] = useState('');
-  const [status, setStatus] = useState<CartStatus | ''>('');
-  const [page, setPage] = useState(1);
+  const { page, limit, search, getFilter, setPage, setLimit, setSearch, setFilter } = useListParams({
+    key: 'carts',
+  });
+  const status = getFilter('status') as CartStatus | '';
 
   const { data, isLoading, isError, error } = useQuery({
-    queryKey: ['carts', { search, status, page }],
+    queryKey: ['carts', { search, status, page, limit }],
     queryFn: () =>
       cartsApi.list({
         search: search || undefined,
         status: status || undefined,
         page,
-        pageSize: PAGE_SIZE,
+        pageSize: limit,
       }),
     placeholderData: keepPreviousData,
   });
 
-  const totalPages = data ? Math.max(1, Math.ceil(data.total / data.pageSize)) : 1;
   const statusLabel = (s: CartStatus) => t(`carts.status.${s.toLowerCase()}`);
 
   const columns: Column<Cart>[] = [
@@ -93,20 +92,14 @@ export function CartsList() {
       />
 
       <div className="flex flex-wrap items-center gap-3">
-        <SearchInput
+        <UrlSearchInput
           value={search}
-          onChange={(v) => {
-            setSearch(v);
-            setPage(1);
-          }}
+          onChange={setSearch}
           placeholder={t('carts.search_placeholder')}
         />
         <Select
           value={status || ALL}
-          onValueChange={(v) => {
-            setStatus(v === ALL ? '' : (v as CartStatus));
-            setPage(1);
-          }}
+          onValueChange={(v) => setFilter('status', v === ALL ? '' : v)}
         >
           <SelectTrigger className="w-44">
             <SelectValue />
@@ -139,8 +132,14 @@ export function CartsList() {
         }
       />
 
-      {data && totalPages > 1 && (
-        <Pagination page={data.page} totalPages={totalPages} onPageChange={setPage} />
+      {data && data.total > 0 && (
+        <TablePagination
+          page={page}
+          pageSize={limit}
+          total={data.total}
+          onPageChange={setPage}
+          onPageSizeChange={setLimit}
+        />
       )}
     </div>
   );

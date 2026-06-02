@@ -8,28 +8,26 @@ import { customersApi } from '@/features/customers/api';
 import type { Customer } from '@/features/customers/types';
 import { ConfirmDialog } from '@/components/ConfirmDialog';
 import { PageHeader } from '@/components/PageHeader';
-import { SearchInput } from '@/components/SearchInput';
+import { UrlSearchInput } from '@/components/UrlSearchInput';
 import { EmptyState } from '@/components/EmptyState';
-import { Pagination } from '@/components/Pagination';
+import { TablePagination } from '@/components/TablePagination';
 import { RowActions } from '@/components/RowActions';
 import { DataTable, type Column } from '@/components/DataTable';
 import { StatusBadge } from '@/components/StatusBadge';
 import { Button } from '@/components/ui/button';
+import { useListParams } from '@/hooks/useListParams';
 import { formatDate, extractErrorMessage } from '@/lib/format';
-
-const PAGE_SIZE = 20;
 
 export function CustomersList() {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const [search, setSearch] = useState('');
-  const [page, setPage] = useState(1);
+  const { page, limit, search, setPage, setLimit, setSearch } = useListParams({ key: 'customers' });
   const [toDelete, setToDelete] = useState<Customer | null>(null);
   const queryClient = useQueryClient();
 
   const { data, isLoading, isError, error } = useQuery({
-    queryKey: ['customers', { search, page }],
-    queryFn: () => customersApi.list({ search: search || undefined, page, pageSize: PAGE_SIZE }),
+    queryKey: ['customers', { search, page, limit }],
+    queryFn: () => customersApi.list({ search: search || undefined, page, pageSize: limit }),
     placeholderData: keepPreviousData,
   });
 
@@ -42,8 +40,6 @@ export function CustomersList() {
     },
     onError: (err) => toast.error(extractErrorMessage(err)),
   });
-
-  const totalPages = data ? Math.max(1, Math.ceil(data.total / data.pageSize)) : 1;
 
   const columns: Column<Customer>[] = [
     {
@@ -101,12 +97,9 @@ export function CustomersList() {
         }
       />
 
-      <SearchInput
+      <UrlSearchInput
         value={search}
-        onChange={(v) => {
-          setSearch(v);
-          setPage(1);
-        }}
+        onChange={setSearch}
         placeholder={t('customers.search_placeholder')}
       />
 
@@ -135,8 +128,14 @@ export function CustomersList() {
         }
       />
 
-      {data && totalPages > 1 && (
-        <Pagination page={data.page} totalPages={totalPages} onPageChange={setPage} />
+      {data && data.total > 0 && (
+        <TablePagination
+          page={page}
+          pageSize={limit}
+          total={data.total}
+          onPageChange={setPage}
+          onPageSizeChange={setLimit}
+        />
       )}
 
       <ConfirmDialog

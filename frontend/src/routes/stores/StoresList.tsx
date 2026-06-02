@@ -9,28 +9,26 @@ import type { Store } from '@/features/stores/types';
 import { ProductImage } from '@/features/products/ProductImage';
 import { ConfirmDialog } from '@/components/ConfirmDialog';
 import { PageHeader } from '@/components/PageHeader';
-import { SearchInput } from '@/components/SearchInput';
+import { UrlSearchInput } from '@/components/UrlSearchInput';
 import { EmptyState } from '@/components/EmptyState';
-import { Pagination } from '@/components/Pagination';
+import { TablePagination } from '@/components/TablePagination';
 import { RowActions } from '@/components/RowActions';
 import { DataTable, type Column } from '@/components/DataTable';
 import { StatusBadge } from '@/components/StatusBadge';
 import { Button } from '@/components/ui/button';
+import { useListParams } from '@/hooks/useListParams';
 import { formatDate, extractErrorMessage } from '@/lib/format';
-
-const PAGE_SIZE = 20;
 
 export function StoresList() {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const [search, setSearch] = useState('');
-  const [page, setPage] = useState(1);
+  const { page, limit, search, setPage, setLimit, setSearch } = useListParams({ key: 'stores' });
   const [toDelete, setToDelete] = useState<Store | null>(null);
   const queryClient = useQueryClient();
 
   const { data, isLoading, isError, error } = useQuery({
-    queryKey: ['stores', { search, page }],
-    queryFn: () => storesApi.list({ search: search || undefined, page, pageSize: PAGE_SIZE }),
+    queryKey: ['stores', { search, page, limit }],
+    queryFn: () => storesApi.list({ search: search || undefined, page, pageSize: limit }),
     placeholderData: keepPreviousData,
   });
 
@@ -46,8 +44,6 @@ export function StoresList() {
       setToDelete(null);
     },
   });
-
-  const totalPages = data ? Math.max(1, Math.ceil(data.total / data.pageSize)) : 1;
 
   const columns: Column<Store>[] = [
     {
@@ -114,12 +110,9 @@ export function StoresList() {
         }
       />
 
-      <SearchInput
+      <UrlSearchInput
         value={search}
-        onChange={(v) => {
-          setSearch(v);
-          setPage(1);
-        }}
+        onChange={setSearch}
         placeholder={t('stores.search_placeholder')}
       />
 
@@ -148,8 +141,14 @@ export function StoresList() {
         }
       />
 
-      {data && totalPages > 1 && (
-        <Pagination page={data.page} totalPages={totalPages} onPageChange={setPage} />
+      {data && data.total > 0 && (
+        <TablePagination
+          page={page}
+          pageSize={limit}
+          total={data.total}
+          onPageChange={setPage}
+          onPageSizeChange={setLimit}
+        />
       )}
 
       <ConfirmDialog
