@@ -253,7 +253,23 @@
     "units_sold": "Units sold",
     "units": "{{count}} units",
     "no_sales": "No sales data yet.",
-    "no_orders": "No orders yet."
+    "no_orders": "No orders yet.",
+    "trend": "Orders & revenue per day",
+    "orders_per_day": "Orders",
+    "revenue_per_day": "Revenue",
+    "date_range": "Date range",
+    "last_n_days": "{{count}} days",
+    "from": "From",
+    "to": "To"
+  },
+  "pagination": {
+    "rows_per_page": "Rows",
+    "showing": "{{from}}–{{to}} of {{total}}"
+  },
+  "combobox": {
+    "search": "Search…",
+    "no_results": "No results",
+    "loading": "Loading…"
   },
   "overview": {
     "title": "Overview",

@@ -253,7 +253,23 @@
     "units_sold": "الوحدات المباعة",
     "units": "{{count}} وحدة",
     "no_sales": "لا توجد بيانات مبيعات بعد.",
-    "no_orders": "لا توجد طلبات بعد."
+    "no_orders": "لا توجد طلبات بعد.",
+    "trend": "الطلبات والإيرادات يومياً",
+    "orders_per_day": "الطلبات",
+    "revenue_per_day": "الإيرادات",
+    "date_range": "النطاق الزمني",
+    "last_n_days": "{{count}} يوم",
+    "from": "من",
+    "to": "إلى"
+  },
+  "pagination": {
+    "rows_per_page": "صفوف",
+    "showing": "{{from}}–{{to}} من {{total}}"
+  },
+  "combobox": {
+    "search": "بحث…",
+    "no_results": "لا توجد نتائج",
+    "loading": "جارٍ التحميل…"
   },
   "overview": {
     "title": "نظرة عامة",
