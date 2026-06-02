@@ -3,6 +3,37 @@ import * as bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
 
+const slugify = (value: string): string =>
+  value
+    .normalize('NFKD')
+    .replace(/[̀-ͯ]/g, '')
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 80) || 'item';
+
+const categorySeed = [
+  { name: 'Electronics', imageUrl: 'https://picsum.photos/seed/cat-electronics/400/300' },
+  { name: 'Apparel',     imageUrl: 'https://picsum.photos/seed/cat-apparel/400/300' },
+  { name: 'Home',        imageUrl: 'https://picsum.photos/seed/cat-home/400/300' },
+  { name: 'Beauty',      imageUrl: 'https://picsum.photos/seed/cat-beauty/400/300' },
+];
+
+// Each store specialises in one category (its products map by that category name).
+const storeSeed = [
+  { name: 'Baghdad Tech', category: 'Electronics', city: 'Baghdad', country: 'Iraq', description: 'Gadgets, accessories and everyday electronics.', logoUrl: 'https://picsum.photos/seed/store-tech/200/200',   bannerUrl: 'https://picsum.photos/seed/store-tech-b/1200/300' },
+  { name: 'Mosul Threads', category: 'Apparel',    city: 'Mosul',   country: 'Iraq', description: 'Everyday apparel and footwear.',            logoUrl: 'https://picsum.photos/seed/store-threads/200/200', bannerUrl: 'https://picsum.photos/seed/store-threads-b/1200/300' },
+  { name: 'Basra Home',    category: 'Home',        city: 'Basra',   country: 'Iraq', description: 'Homeware and cosy living essentials.',       logoUrl: 'https://picsum.photos/seed/store-home/200/200',   bannerUrl: 'https://picsum.photos/seed/store-home-b/1200/300' },
+  { name: 'Erbil Glow',    category: 'Beauty',      city: 'Erbil',   country: 'Iraq', description: 'Skincare and beauty, curated.',              logoUrl: 'https://picsum.photos/seed/store-glow/200/200',   bannerUrl: 'https://picsum.photos/seed/store-glow-b/1200/300' },
+];
+
+const bannerSeed = [
+  { title: 'New season, new tech',  subtitle: 'Up to 30% off accessories', imageUrl: 'https://picsum.photos/seed/banner-1/1200/400', linkUrl: '/category/electronics', sortOrder: 0 },
+  { title: 'Refresh your wardrobe', subtitle: 'Apparel arrivals are here',  imageUrl: 'https://picsum.photos/seed/banner-2/1200/400', linkUrl: '/category/apparel',     sortOrder: 1 },
+  { title: 'Glow up',               subtitle: 'Beauty picks of the week',   imageUrl: 'https://picsum.photos/seed/banner-3/1200/400', linkUrl: '/category/beauty',      sortOrder: 2 },
+];
+
 const productSeed = [
   { name: 'USB-C Hub 7-in-1', sku: 'HUB-7N1', category: 'Electronics', priceCents: 4999, stock: 80, imageUrl: 'https://picsum.photos/seed/hub/400/300' },
   { name: 'Wireless Mouse', sku: 'WMOUSE-01', category: 'Electronics', priceCents: 2999, stock: 150, imageUrl: 'https://picsum.photos/seed/mouse/400/300' },
@@ -79,21 +110,84 @@ async function seedAdmin() {
 }
 
 async function clearShopData() {
+  await prisma.featuredProduct.deleteMany();
+  await prisma.featuredCategory.deleteMany();
+  await prisma.featuredStore.deleteMany();
+  await prisma.heroBanner.deleteMany();
   await prisma.orderItem.deleteMany();
   await prisma.order.deleteMany();
   await prisma.cartItem.deleteMany();
   await prisma.cart.deleteMany();
   await prisma.customer.deleteMany();
   await prisma.product.deleteMany();
+  await prisma.category.deleteMany();
+  await prisma.store.deleteMany();
 }
 
-async function seedProducts() {
+async function seedCategories() {
+  for (const c of categorySeed) {
+    await prisma.category.create({ data: { ...c, slug: slugify(c.name) } });
+  }
+  const categories = await prisma.category.findMany();
+  console.log(`✓ Categories: ${categories.length}`);
+  return new Map(categories.map((c) => [c.name, c.id]));
+}
+
+async function seedStores() {
+  for (const s of storeSeed) {
+    const { category, ...data } = s;
+    void category;
+    await prisma.store.create({ data: { ...data, slug: slugify(s.name) } });
+  }
+  const stores = await prisma.store.findMany();
+  console.log(`✓ Stores: ${stores.length}`);
+  // category name -> store id (each store owns one category)
+  const byCategory = new Map<string, string>();
+  for (const s of storeSeed) {
+    const store = stores.find((st) => st.name === s.name);
+    if (store) byCategory.set(s.category, store.id);
+  }
+  return byCategory;
+}
+
+async function seedProducts(
+  categoryByName: Map<string, string>,
+  storeByCategory: Map<string, string>,
+) {
+  const fallbackStoreId = storeByCategory.values().next().value as string;
   for (const p of productSeed) {
-    await prisma.product.create({ data: p });
+    const { category, ...rest } = p;
+    await prisma.product.create({
+      data: {
+        ...rest,
+        categoryId: categoryByName.get(category) ?? null,
+        storeId: storeByCategory.get(category) ?? fallbackStoreId,
+      },
+    });
   }
   const products = await prisma.product.findMany();
   console.log(`✓ Products: ${products.length}`);
   return products;
+}
+
+async function seedHomepage(
+  products: { id: string }[],
+  categoryByName: Map<string, string>,
+  storeByCategory: Map<string, string>,
+) {
+  for (const b of bannerSeed) {
+    await prisma.heroBanner.create({ data: b });
+  }
+  await prisma.featuredProduct.createMany({
+    data: products.slice(0, 4).map((p, i) => ({ productId: p.id, sortOrder: i })),
+  });
+  await prisma.featuredCategory.createMany({
+    data: [...categoryByName.values()].slice(0, 3).map((categoryId, i) => ({ categoryId, sortOrder: i })),
+  });
+  await prisma.featuredStore.createMany({
+    data: [...storeByCategory.values()].slice(0, 3).map((storeId, i) => ({ storeId, sortOrder: i })),
+  });
+  console.log(`✓ Homepage: ${bannerSeed.length} banners + featured sets`);
 }
 
 async function seedCustomers() {
@@ -188,10 +282,13 @@ async function main() {
   console.log('Seeding…');
   await seedAdmin();
   await clearShopData();
-  const products = await seedProducts();
+  const categoryByName = await seedCategories();
+  const storeByCategory = await seedStores();
+  const products = await seedProducts(categoryByName, storeByCategory);
   const customers = await seedCustomers();
   await seedCarts(customers, products);
   await seedOrders(customers, products);
+  await seedHomepage(products, categoryByName, storeByCategory);
   console.log('Done.');
 }
 
