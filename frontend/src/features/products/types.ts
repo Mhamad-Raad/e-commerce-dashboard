@@ -1,3 +1,13 @@
+export interface ProductStoreRef {
+  id: string;
+  name: string;
+}
+
+export interface ProductCategoryRef {
+  id: string;
+  name: string;
+}
+
 export interface Product {
   id: string;
   name: string;
@@ -7,7 +17,10 @@ export interface Product {
   currency: string;
   stock: number;
   imageUrl: string | null;
-  category: string | null;
+  storeId: string;
+  store?: ProductStoreRef | null;
+  categoryId: string | null;
+  category?: ProductCategoryRef | null;
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
@@ -28,6 +41,7 @@ export interface ProductWritePayload {
   currency?: string;
   stock: number;
   imageUrl?: string;
-  category?: string;
+  storeId: string;
+  categoryId?: string;
   isActive?: boolean;
 }

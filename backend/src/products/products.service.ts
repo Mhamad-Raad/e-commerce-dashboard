@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ConflictException,
   Injectable,
   NotFoundException,
@@ -25,13 +26,15 @@ export class ProductsService {
         { sku: { contains: query.search, mode: 'insensitive' } },
       ];
     }
-    if (query.category) where.category = query.category;
+    if (query.storeId) where.storeId = query.storeId;
+    if (query.categoryId) where.categoryId = query.categoryId;
     if (query.isActive !== undefined) where.isActive = query.isActive === 'true';
 
     const [items, total] = await this.prisma.$transaction([
       this.prisma.product.findMany({
         where,
         orderBy: { createdAt: 'desc' },
+        include: { store: true, category: true },
         ...paginate(page, pageSize),
       }),
       this.prisma.product.count({ where }),
@@ -41,31 +44,35 @@ export class ProductsService {
   }
 
   async findById(id: string) {
-    const product = await this.prisma.product.findUnique({ where: { id } });
+    const product = await this.prisma.product.findUnique({
+      where: { id },
+      include: { store: true, category: true },
+    });
     if (!product) throw new NotFoundException(`Product ${id} not found`);
     return product;
   }
 
   async create(dto: CreateProductDto) {
     try {
-      return await this.prisma.product.create({ data: dto });
+      return await this.prisma.product.create({
+        data: dto,
+        include: { store: true, category: true },
+      });
     } catch (err) {
-      if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === 'P2002') {
-        throw new ConflictException(`SKU "${dto.sku}" already exists`);
-      }
-      throw err;
+      throw this.translateError(err, dto.sku);
     }
   }
 
   async update(id: string, dto: UpdateProductDto) {
     await this.findById(id);
     try {
-      return await this.prisma.product.update({ where: { id }, data: dto });
+      return await this.prisma.product.update({
+        where: { id },
+        data: dto,
+        include: { store: true, category: true },
+      });
     } catch (err) {
-      if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === 'P2002') {
-        throw new ConflictException(`SKU "${dto.sku}" already exists`);
-      }
-      throw err;
+      throw this.translateError(err, dto.sku);
     }
   }
 
@@ -74,4 +81,19 @@ export class ProductsService {
     await this.prisma.product.delete({ where: { id } });
     return { success: true };
   }
+
+  private translateError(err: unknown, sku?: string) {
+    if (err instanceof Prisma.PrismaClientKnownRequestError) {
+      if (err.code === 'P2002') {
+        return new ConflictException(`SKU "${sku}" already exists`);
+      }
+      if (err.code === 'P2003' || err.code === 'P2025') {
+        return new BadRequestException(
+          'The selected store or category does not exist',
+        );
+      }
+    }
+    return err;
+  }
 }
+

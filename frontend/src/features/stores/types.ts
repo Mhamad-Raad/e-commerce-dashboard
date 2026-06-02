@@ -1,0 +1,53 @@
+export interface Store {
+  id: string;
+  name: string;
+  slug: string;
+  description: string | null;
+  logoUrl: string | null;
+  bannerUrl: string | null;
+  email: string | null;
+  phone: string | null;
+  address: string | null;
+  city: string | null;
+  country: string | null;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+  _count?: { products: number };
+}
+
+export interface StoreProduct {
+  id: string;
+  name: string;
+  sku: string;
+  priceCents: number;
+  currency: string;
+  stock: number;
+  imageUrl: string | null;
+  isActive: boolean;
+  category?: { id: string; name: string } | null;
+}
+
+export interface StoreDetail extends Store {
+  products: StoreProduct[];
+}
+
+export interface StoreListResponse {
+  items: Store[];
+  total: number;
+  page: number;
+  pageSize: number;
+}
+
+export interface StoreWritePayload {
+  name: string;
+  description?: string;
+  logoUrl?: string;
+  bannerUrl?: string;
+  email?: string;
+  phone?: string;
+  address?: string;
+  city?: string;
+  country?: string;
+  isActive?: boolean;
+}

@@ -122,8 +122,17 @@ export function ProductDetail() {
               {formatMoney(product.priceCents, product.currency)}
             </DetailRow>
             <DetailRow label={t('products.stock')}>{product.stock}</DetailRow>
+            <DetailRow label={t('products.store')}>
+              {product.store ? (
+                <Link to={`/stores/${product.store.id}`} className="text-primary hover:underline">
+                  {product.store.name}
+                </Link>
+              ) : (
+                t('common.none')
+              )}
+            </DetailRow>
             <DetailRow label={t('products.category')}>
-              {product.category || t('common.none')}
+              {product.category?.name || t('common.none')}
             </DetailRow>
             <DetailRow label={t('common.status')}>
               <StatusBadge

@@ -1,10 +1,13 @@
 import {
   LayoutDashboard,
   Package,
+  Tags,
+  Store,
   Users,
   ShoppingCart,
   ClipboardList,
   BarChart3,
+  LayoutTemplate,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -26,9 +29,17 @@ export const navGroups: NavGroup[] = [
     items: [{ to: '/', labelKey: 'nav.overview', icon: LayoutDashboard, end: true }],
   },
   {
+    labelKey: 'nav.group_storefront',
+    items: [
+      { to: '/homepage', labelKey: 'nav.homepage', icon: LayoutTemplate },
+      { to: '/stores', labelKey: 'nav.stores', icon: Store },
+    ],
+  },
+  {
     labelKey: 'nav.group_management',
     items: [
       { to: '/products', labelKey: 'nav.products', icon: Package },
+      { to: '/categories', labelKey: 'nav.categories', icon: Tags },
       { to: '/customers', labelKey: 'nav.customers', icon: Users },
       { to: '/carts', labelKey: 'nav.carts', icon: ShoppingCart },
       { to: '/orders', labelKey: 'nav.orders', icon: ClipboardList },

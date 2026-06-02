@@ -3,7 +3,8 @@ import type { Product, ProductListResponse, ProductWritePayload } from './types'
 
 export interface ListProductsParams {
   search?: string;
-  category?: string;
+  storeId?: string;
+  categoryId?: string;
   isActive?: boolean;
   page?: number;
   pageSize?: number;

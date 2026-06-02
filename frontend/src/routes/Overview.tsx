@@ -20,7 +20,7 @@ import { formatMoney } from '@/lib/format';
 export function Overview() {
   const { user } = useAuth();
   const { t } = useTranslation();
-  const summary = useQuery({ queryKey: ['reports', 'summary'], queryFn: reportsApi.summary });
+  const summary = useQuery({ queryKey: ['reports', 'summary'], queryFn: () => reportsApi.summary() });
 
   const stats: { label: string; value: string; icon: LucideIcon }[] = [
     {

@@ -4,7 +4,11 @@ import { PaginationQueryDto } from '../../common/dto/pagination-query.dto';
 export class ListProductsQueryDto extends PaginationQueryDto {
   @IsOptional()
   @IsString()
-  category?: string;
+  storeId?: string;
+
+  @IsOptional()
+  @IsString()
+  categoryId?: string;
 
   @IsOptional()
   @IsBooleanString()
