@@ -1,4 +1,5 @@
-import { Link } from 'react-router-dom';
+import { useState } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { BarChart3 } from 'lucide-react';
@@ -7,6 +8,9 @@ import { orderStatusTone } from '@/features/orders/api';
 import type { OrderStatus } from '@/features/orders/types';
 import { PageHeader } from '@/components/PageHeader';
 import { StatusBadge } from '@/components/StatusBadge';
+import { TablePagination } from '@/components/TablePagination';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
@@ -18,18 +22,105 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { formatDate, formatMoney } from '@/lib/format';
+import { OrdersTimeseriesChart } from './OrdersTimeseriesChart';
+
+const PRESETS = [7, 30, 60, 90];
+const DAY_MS = 24 * 60 * 60 * 1000;
+const RECENT_WINDOW = 50;
+
+const todayISO = () => new Date(Date.now()).toISOString().slice(0, 10);
+const daysAgoISO = (n: number) => new Date(Date.now() - (n - 1) * DAY_MS).toISOString().slice(0, 10);
 
 export function Reports() {
   const { t } = useTranslation();
-  const summary = useQuery({ queryKey: ['reports', 'summary'], queryFn: reportsApi.summary });
-  const top = useQuery({ queryKey: ['reports', 'top-products'], queryFn: () => reportsApi.topProducts(10) });
-  const recent = useQuery({ queryKey: ['reports', 'recent-orders'], queryFn: () => reportsApi.recentOrders(10) });
+  const [params, setParams] = useSearchParams();
+  const start = params.get('start') ?? '';
+  const end = params.get('end') ?? '';
+  const range = { start: start || undefined, end: end || undefined };
+
+  const activePreset =
+    !start && !end
+      ? 60
+      : PRESETS.find((n) => start === daysAgoISO(n) && end === todayISO()) ?? null;
+
+  const setRange = (next: { start?: string; end?: string }) => {
+    const p = new URLSearchParams(params);
+    if (next.start) p.set('start', next.start);
+    else p.delete('start');
+    if (next.end) p.set('end', next.end);
+    else p.delete('end');
+    setParams(p, { replace: true });
+  };
+  const setPreset = (n: number) => setRange({ start: daysAgoISO(n), end: todayISO() });
+  const setField = (field: 'start' | 'end', value: string) =>
+    setRange({ start, end, [field]: value });
+
+  const summary = useQuery({
+    queryKey: ['reports', 'summary', range],
+    queryFn: () => reportsApi.summary(range),
+  });
+  const series = useQuery({
+    queryKey: ['reports', 'timeseries', range],
+    queryFn: () => reportsApi.timeseries(range),
+  });
+  const top = useQuery({
+    queryKey: ['reports', 'top-products', range],
+    queryFn: () => reportsApi.topProducts(10, range),
+  });
+  const recent = useQuery({
+    queryKey: ['reports', 'recent-orders'],
+    queryFn: () => reportsApi.recentOrders(RECENT_WINDOW),
+  });
 
   const statusLabel = (s: OrderStatus) => t(`orders.status.${s.toLowerCase()}`);
+
+  // Client-side pagination for the recent-orders widget.
+  const [recentPage, setRecentPage] = useState(1);
+  const [recentSize, setRecentSize] = useState(10);
+  const recentRows = recent.data ?? [];
+  const recentSlice = recentRows.slice((recentPage - 1) * recentSize, recentPage * recentSize);
 
   return (
     <div className="space-y-6">
       <PageHeader icon={BarChart3} title={t('reports.title')} description={t('reports.subtitle')} />
+
+      {/* Date range filter */}
+      <Card>
+        <CardContent className="flex flex-wrap items-center gap-3 p-4">
+          <span className="text-sm font-medium">{t('reports.date_range')}</span>
+          <div className="flex flex-wrap gap-1.5">
+            {PRESETS.map((n) => (
+              <Button
+                key={n}
+                size="sm"
+                variant={activePreset === n ? 'default' : 'outline'}
+                onClick={() => setPreset(n)}
+              >
+                {t('reports.last_n_days', { count: n })}
+              </Button>
+            ))}
+          </div>
+          <div className="ms-auto flex items-center gap-2">
+            <Input
+              type="date"
+              value={start}
+              max={end || todayISO()}
+              onChange={(e) => setField('start', e.target.value)}
+              className="h-8 w-auto"
+              aria-label={t('reports.from')}
+            />
+            <span className="text-muted-foreground">→</span>
+            <Input
+              type="date"
+              value={end}
+              max={todayISO()}
+              onChange={(e) => setField('end', e.target.value)}
+              className="h-8 w-auto"
+              aria-label={t('reports.to')}
+            />
+          </div>
+        </CardContent>
+      </Card>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard
@@ -53,6 +144,16 @@ export function Reports() {
           loading={summary.isLoading}
         />
       </div>
+
+      {/* Orders + revenue per day */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-sm">{t('reports.trend')}</CardTitle>
+        </CardHeader>
+        <CardContent className="pt-0">
+          <OrdersTimeseriesChart data={series.data ?? []} loading={series.isLoading} />
+        </CardContent>
+      </Card>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <Card>
@@ -119,41 +220,53 @@ export function Reports() {
         <CardHeader>
           <CardTitle className="text-sm">{t('reports.recent_orders')}</CardTitle>
         </CardHeader>
-        <CardContent className="pt-0">
+        <CardContent className="space-y-4 pt-0">
           {recent.isLoading ? (
             <Skeleton className="h-32 w-full" />
-          ) : recent.data && recent.data.length > 0 ? (
-            <Table>
-              <TableHeader>
-                <TableRow className="hover:bg-transparent">
-                  <TableHead>{t('orders.number')}</TableHead>
-                  <TableHead>{t('orders.customer')}</TableHead>
-                  <TableHead>{t('orders.total')}</TableHead>
-                  <TableHead>{t('common.status')}</TableHead>
-                  <TableHead>{t('orders.placed')}</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {recent.data.map((o) => (
-                  <TableRow key={o.id} className="hover:bg-transparent">
-                    <TableCell className="font-mono text-xs">
-                      <Link to={`/orders/${o.id}`} className="hover:underline">
-                        {o.number}
-                      </Link>
-                    </TableCell>
-                    <TableCell>
-                      <div className="font-medium">{o.customer.name}</div>
-                      <div className="text-xs text-muted-foreground">{o.customer.email}</div>
-                    </TableCell>
-                    <TableCell className="font-medium">{formatMoney(o.totalCents, o.currency)}</TableCell>
-                    <TableCell>
-                      <StatusBadge label={statusLabel(o.status)} tone={orderStatusTone(o.status)} />
-                    </TableCell>
-                    <TableCell className="text-muted-foreground">{formatDate(o.placedAt)}</TableCell>
+          ) : recentRows.length > 0 ? (
+            <>
+              <Table>
+                <TableHeader>
+                  <TableRow className="hover:bg-transparent">
+                    <TableHead>{t('orders.number')}</TableHead>
+                    <TableHead>{t('orders.customer')}</TableHead>
+                    <TableHead>{t('orders.total')}</TableHead>
+                    <TableHead>{t('common.status')}</TableHead>
+                    <TableHead>{t('orders.placed')}</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {recentSlice.map((o) => (
+                    <TableRow key={o.id} className="hover:bg-transparent">
+                      <TableCell className="font-mono text-xs">
+                        <Link to={`/orders/${o.id}`} className="hover:underline">
+                          {o.number}
+                        </Link>
+                      </TableCell>
+                      <TableCell>
+                        <div className="font-medium">{o.customer.name}</div>
+                        <div className="text-xs text-muted-foreground">{o.customer.email}</div>
+                      </TableCell>
+                      <TableCell className="font-medium">{formatMoney(o.totalCents, o.currency)}</TableCell>
+                      <TableCell>
+                        <StatusBadge label={statusLabel(o.status)} tone={orderStatusTone(o.status)} />
+                      </TableCell>
+                      <TableCell className="text-muted-foreground">{formatDate(o.placedAt)}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+              <TablePagination
+                page={recentPage}
+                pageSize={recentSize}
+                total={recentRows.length}
+                onPageChange={setRecentPage}
+                onPageSizeChange={(s) => {
+                  setRecentSize(s);
+                  setRecentPage(1);
+                }}
+              />
+            </>
           ) : (
             <p className="text-sm text-muted-foreground">{t('reports.no_orders')}</p>
           )}

@@ -6,7 +6,19 @@ export interface ReportsSummary {
   aovCents: number;
   customerCount: number;
   productCount: number;
+  range: { start: string; end: string };
   ordersByStatus: Array<{ status: OrderStatus; count: number }>;
+}
+
+export interface TimeseriesPoint {
+  date: string;
+  orders: number;
+  revenueCents: number;
+}
+
+export interface DateRangeParams {
+  start?: string;
+  end?: string;
 }
 
 export interface TopProduct {
