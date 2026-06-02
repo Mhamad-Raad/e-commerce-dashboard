@@ -18,6 +18,24 @@ const ProductForm = lazy(() =>
 const ProductDetail = lazy(() =>
   import('./routes/products/ProductDetail').then((m) => ({ default: m.ProductDetail })),
 );
+const CategoriesList = lazy(() =>
+  import('./routes/categories/CategoriesList').then((m) => ({ default: m.CategoriesList })),
+);
+const CategoryForm = lazy(() =>
+  import('./routes/categories/CategoryForm').then((m) => ({ default: m.CategoryForm })),
+);
+const StoresList = lazy(() =>
+  import('./routes/stores/StoresList').then((m) => ({ default: m.StoresList })),
+);
+const StoreForm = lazy(() =>
+  import('./routes/stores/StoreForm').then((m) => ({ default: m.StoreForm })),
+);
+const StoreDetail = lazy(() =>
+  import('./routes/stores/StoreDetail').then((m) => ({ default: m.StoreDetail })),
+);
+const Homepage = lazy(() =>
+  import('./routes/homepage/Homepage').then((m) => ({ default: m.Homepage })),
+);
 const CustomersList = lazy(() =>
   import('./routes/customers/CustomersList').then((m) => ({ default: m.CustomersList })),
 );
@@ -70,10 +88,18 @@ export default function App() {
           }
         >
           <Route path="/" element={<Overview />} />
+          <Route path="/homepage" element={<Homepage />} />
           <Route path="/products" element={<ProductsList />} />
           <Route path="/products/new" element={<ProductForm />} />
           <Route path="/products/:id" element={<ProductDetail />} />
           <Route path="/products/:id/edit" element={<ProductForm />} />
+          <Route path="/categories" element={<CategoriesList />} />
+          <Route path="/categories/new" element={<CategoryForm />} />
+          <Route path="/categories/:id/edit" element={<CategoryForm />} />
+          <Route path="/stores" element={<StoresList />} />
+          <Route path="/stores/new" element={<StoreForm />} />
+          <Route path="/stores/:id" element={<StoreDetail />} />
+          <Route path="/stores/:id/edit" element={<StoreForm />} />
           <Route path="/customers" element={<CustomersList />} />
           <Route path="/customers/new" element={<CustomerForm />} />
           <Route path="/customers/:id" element={<CustomerDetail />} />
