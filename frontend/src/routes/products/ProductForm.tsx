@@ -9,15 +9,26 @@ import { toast } from 'sonner';
 import { z } from 'zod';
 import { productsApi } from '@/features/products/api';
 import type { ProductWritePayload } from '@/features/products/types';
+import { storesApi } from '@/features/stores/api';
+import { categoriesApi } from '@/features/categories/api';
 import { PageHeader } from '@/components/PageHeader';
 import { FormField } from '@/components/FormField';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { extractErrorMessage } from '@/lib/format';
+
+const NO_CATEGORY = '__none__';
 
 const schema = z.object({
   name: z.string().min(1).max(200),
@@ -25,7 +36,8 @@ const schema = z.object({
   price: z.string().min(1).refine((v) => !Number.isNaN(Number(v)) && Number(v) >= 0),
   currency: z.string().length(3),
   stock: z.string().min(1).refine((v) => Number.isInteger(Number(v)) && Number(v) >= 0),
-  category: z.string().max(60).optional().or(z.literal('')),
+  storeId: z.string().min(1),
+  categoryId: z.string().optional().or(z.literal('')),
   imageUrl: z.string().url().optional().or(z.literal('')),
   description: z.string().max(5000).optional().or(z.literal('')),
   isActive: z.boolean(),
@@ -39,7 +51,8 @@ const defaultValues: FormValues = {
   price: '',
   currency: 'USD',
   stock: '0',
-  category: '',
+  storeId: '',
+  categoryId: '',
   imageUrl: '',
   description: '',
   isActive: true,
@@ -56,6 +69,15 @@ export function ProductForm() {
     queryKey: ['product', id],
     queryFn: () => productsApi.get(id!),
     enabled: isEdit,
+  });
+
+  const storesQuery = useQuery({
+    queryKey: ['stores', { page: 1, pageSize: 100 }],
+    queryFn: () => storesApi.list({ page: 1, pageSize: 100 }),
+  });
+  const categoriesQuery = useQuery({
+    queryKey: ['categories', { page: 1, pageSize: 100 }],
+    queryFn: () => categoriesApi.list({ page: 1, pageSize: 100 }),
   });
 
   const {
@@ -76,7 +98,8 @@ export function ProductForm() {
         price: (p.priceCents / 100).toString(),
         currency: p.currency,
         stock: p.stock.toString(),
-        category: p.category ?? '',
+        storeId: p.storeId,
+        categoryId: p.categoryId ?? '',
         imageUrl: p.imageUrl ?? '',
         description: p.description ?? '',
         isActive: p.isActive,
@@ -92,7 +115,8 @@ export function ProductForm() {
         priceCents: Math.round(Number(values.price) * 100),
         currency: values.currency.toUpperCase(),
         stock: Number(values.stock),
-        category: values.category?.trim() || undefined,
+        storeId: values.storeId,
+        categoryId: values.categoryId || undefined,
         imageUrl: values.imageUrl?.trim() || undefined,
         description: values.description?.trim() || undefined,
         isActive: values.isActive,
@@ -116,6 +140,8 @@ export function ProductForm() {
   }
 
   const isActive = watch('isActive');
+  const storeId = watch('storeId');
+  const categoryId = watch('categoryId');
 
   return (
     <div className="mx-auto max-w-3xl space-y-5">
@@ -147,8 +173,37 @@ export function ProductForm() {
               <FormField label={t('products.stock')} error={errors.stock?.message}>
                 <Input inputMode="numeric" {...register('stock')} />
               </FormField>
-              <FormField label={t('products.category')} error={errors.category?.message}>
-                <Input autoComplete="off" {...register('category')} />
+              <FormField label={t('products.store')} error={errors.storeId?.message}>
+                <Select value={storeId} onValueChange={(v) => setValue('storeId', v, { shouldValidate: true })}>
+                  <SelectTrigger>
+                    <SelectValue placeholder={t('products.select_store')} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {(storesQuery.data?.items ?? []).map((s) => (
+                      <SelectItem key={s.id} value={s.id}>
+                        {s.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </FormField>
+              <FormField label={t('products.category')} error={errors.categoryId?.message}>
+                <Select
+                  value={categoryId || NO_CATEGORY}
+                  onValueChange={(v) => setValue('categoryId', v === NO_CATEGORY ? '' : v)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder={t('products.select_category')} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value={NO_CATEGORY}>{t('common.none')}</SelectItem>
+                    {(categoriesQuery.data?.items ?? []).map((c) => (
+                      <SelectItem key={c.id} value={c.id}>
+                        {c.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </FormField>
               <div className="md:col-span-2">
                 <FormField label={t('products.image')} error={errors.imageUrl?.message}>

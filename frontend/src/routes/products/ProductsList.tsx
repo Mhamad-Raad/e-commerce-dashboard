@@ -65,6 +65,21 @@ export function ProductsList() {
       header: t('products.sku'),
       cell: (p) => <span className="font-mono text-xs text-muted-foreground">{p.sku}</span>,
     },
+    {
+      key: 'store',
+      header: t('products.store'),
+      cell: (p) => p.store?.name ?? t('common.none'),
+    },
+    {
+      key: 'category',
+      header: t('products.category'),
+      cell: (p) =>
+        p.category?.name ? (
+          p.category.name
+        ) : (
+          <span className="text-muted-foreground">{t('common.none')}</span>
+        ),
+    },
     { key: 'price', header: t('products.price'), cell: (p) => formatMoney(p.priceCents, p.currency) },
     { key: 'stock', header: t('products.stock'), cell: (p) => p.stock },
     {
