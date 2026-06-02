@@ -42,10 +42,14 @@ export class CreateProductDto {
   @IsUrl({ require_tld: false })
   imageUrl?: string;
 
+  @IsString()
+  @Length(1, 40)
+  storeId!: string;
+
   @IsOptional()
   @IsString()
-  @Length(1, 60)
-  category?: string;
+  @Length(1, 40)
+  categoryId?: string;
 
   @IsOptional()
   @IsBoolean()
