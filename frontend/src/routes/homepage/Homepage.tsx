@@ -19,8 +19,6 @@ import { extractErrorMessage } from '@/lib/format';
 import { BannerDialog } from './BannerDialog';
 import { FeaturedPicker } from './FeaturedPicker';
 
-const OPTIONS_PAGE_SIZE = 100;
-
 export function Homepage() {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
@@ -29,18 +27,6 @@ export function Homepage() {
   const [bannerToDelete, setBannerToDelete] = useState<HeroBanner | null>(null);
 
   const homepageQuery = useQuery({ queryKey: ['homepage'], queryFn: homepageApi.get });
-  const productsQuery = useQuery({
-    queryKey: ['products', { page: 1, pageSize: OPTIONS_PAGE_SIZE }],
-    queryFn: () => productsApi.list({ page: 1, pageSize: OPTIONS_PAGE_SIZE }),
-  });
-  const categoriesQuery = useQuery({
-    queryKey: ['categories', { page: 1, pageSize: OPTIONS_PAGE_SIZE }],
-    queryFn: () => categoriesApi.list({ page: 1, pageSize: OPTIONS_PAGE_SIZE }),
-  });
-  const storesQuery = useQuery({
-    queryKey: ['stores', { page: 1, pageSize: OPTIONS_PAGE_SIZE }],
-    queryFn: () => storesApi.list({ page: 1, pageSize: OPTIONS_PAGE_SIZE }),
-  });
 
   const invalidateHomepage = () => queryClient.invalidateQueries({ queryKey: ['homepage'] });
 
@@ -181,36 +167,54 @@ export function Homepage() {
         <FeaturedPicker
           title={t('homepage.featured_products')}
           description={t('homepage.featured_products_desc')}
-          options={(productsQuery.data?.items ?? []).map((p) => ({
+          selectedItems={(home?.featuredProducts ?? []).map((p) => ({
             id: p.id,
             label: p.name,
             imageUrl: p.imageUrl,
           }))}
-          value={(home?.featuredProducts ?? []).map((p) => p.id)}
+          queryKey={['products']}
+          fetchPage={(search, page) =>
+            productsApi.list({ search: search || undefined, page, pageSize: 20 }).then((r) => ({
+              items: r.items.map((p) => ({ id: p.id, label: p.name, imageUrl: p.imageUrl })),
+              total: r.total,
+            }))
+          }
           saving={savingKind === 'products'}
           onSave={(ids) => featuredMutation.mutate({ kind: 'products', ids })}
         />
         <FeaturedPicker
           title={t('homepage.featured_categories')}
           description={t('homepage.featured_categories_desc')}
-          options={(categoriesQuery.data?.items ?? []).map((c) => ({
+          selectedItems={(home?.featuredCategories ?? []).map((c) => ({
             id: c.id,
             label: c.name,
             imageUrl: c.imageUrl,
           }))}
-          value={(home?.featuredCategories ?? []).map((c) => c.id)}
+          queryKey={['categories']}
+          fetchPage={(search, page) =>
+            categoriesApi.list({ search: search || undefined, page, pageSize: 20 }).then((r) => ({
+              items: r.items.map((c) => ({ id: c.id, label: c.name, imageUrl: c.imageUrl })),
+              total: r.total,
+            }))
+          }
           saving={savingKind === 'categories'}
           onSave={(ids) => featuredMutation.mutate({ kind: 'categories', ids })}
         />
         <FeaturedPicker
           title={t('homepage.featured_stores')}
           description={t('homepage.featured_stores_desc')}
-          options={(storesQuery.data?.items ?? []).map((s) => ({
+          selectedItems={(home?.featuredStores ?? []).map((s) => ({
             id: s.id,
             label: s.name,
             imageUrl: s.logoUrl,
           }))}
-          value={(home?.featuredStores ?? []).map((s) => s.id)}
+          queryKey={['stores']}
+          fetchPage={(search, page) =>
+            storesApi.list({ search: search || undefined, page, pageSize: 20 }).then((r) => ({
+              items: r.items.map((s) => ({ id: s.id, label: s.name, imageUrl: s.logoUrl })),
+              total: r.total,
+            }))
+          }
           saving={savingKind === 'stores'}
           onSave={(ids) => featuredMutation.mutate({ kind: 'stores', ids })}
         />

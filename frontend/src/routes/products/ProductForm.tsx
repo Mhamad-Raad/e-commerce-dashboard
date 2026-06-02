@@ -13,22 +13,14 @@ import { storesApi } from '@/features/stores/api';
 import { categoriesApi } from '@/features/categories/api';
 import { PageHeader } from '@/components/PageHeader';
 import { FormField } from '@/components/FormField';
+import { AsyncCombobox } from '@/components/AsyncCombobox';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { extractErrorMessage } from '@/lib/format';
-
-const NO_CATEGORY = '__none__';
 
 const schema = z.object({
   name: z.string().min(1).max(200),
@@ -69,15 +61,6 @@ export function ProductForm() {
     queryKey: ['product', id],
     queryFn: () => productsApi.get(id!),
     enabled: isEdit,
-  });
-
-  const storesQuery = useQuery({
-    queryKey: ['stores', { page: 1, pageSize: 100 }],
-    queryFn: () => storesApi.list({ page: 1, pageSize: 100 }),
-  });
-  const categoriesQuery = useQuery({
-    queryKey: ['categories', { page: 1, pageSize: 100 }],
-    queryFn: () => categoriesApi.list({ page: 1, pageSize: 100 }),
   });
 
   const {
@@ -174,36 +157,37 @@ export function ProductForm() {
                 <Input inputMode="numeric" {...register('stock')} />
               </FormField>
               <FormField label={t('products.store')} error={errors.storeId?.message}>
-                <Select value={storeId} onValueChange={(v) => setValue('storeId', v, { shouldValidate: true })}>
-                  <SelectTrigger>
-                    <SelectValue placeholder={t('products.select_store')} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {(storesQuery.data?.items ?? []).map((s) => (
-                      <SelectItem key={s.id} value={s.id}>
-                        {s.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <AsyncCombobox
+                  value={storeId}
+                  onChange={(v) => setValue('storeId', v, { shouldValidate: true })}
+                  selectedLabel={productQuery.data?.store?.name}
+                  placeholder={t('products.select_store')}
+                  queryKey={['stores']}
+                  fetchPage={(search, page) =>
+                    storesApi
+                      .list({ search: search || undefined, page, pageSize: 20 })
+                      .then((r) => ({ items: r.items, total: r.total }))
+                  }
+                  getItemId={(s) => s.id}
+                  getItemLabel={(s) => s.name}
+                />
               </FormField>
               <FormField label={t('products.category')} error={errors.categoryId?.message}>
-                <Select
-                  value={categoryId || NO_CATEGORY}
-                  onValueChange={(v) => setValue('categoryId', v === NO_CATEGORY ? '' : v)}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder={t('products.select_category')} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value={NO_CATEGORY}>{t('common.none')}</SelectItem>
-                    {(categoriesQuery.data?.items ?? []).map((c) => (
-                      <SelectItem key={c.id} value={c.id}>
-                        {c.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <AsyncCombobox
+                  value={categoryId ?? ''}
+                  onChange={(v) => setValue('categoryId', v)}
+                  selectedLabel={productQuery.data?.category?.name ?? undefined}
+                  placeholder={t('products.select_category')}
+                  allowClear
+                  queryKey={['categories']}
+                  fetchPage={(search, page) =>
+                    categoriesApi
+                      .list({ search: search || undefined, page, pageSize: 20 })
+                      .then((r) => ({ items: r.items, total: r.total }))
+                  }
+                  getItemId={(c) => c.id}
+                  getItemLabel={(c) => c.name}
+                />
               </FormField>
               <div className="md:col-span-2">
                 <FormField label={t('products.image')} error={errors.imageUrl?.message}>

@@ -1,15 +1,9 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ArrowDown, ArrowUp, X } from 'lucide-react';
+import { AsyncCombobox, type AsyncPage } from '@/components/AsyncCombobox';
 import { ProductImage } from '@/features/products/ProductImage';
 import { Button } from '@/components/ui/button';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 export interface PickerOption {
@@ -21,8 +15,11 @@ export interface PickerOption {
 interface FeaturedPickerProps {
   title: string;
   description?: string;
-  options: PickerOption[];
-  value: string[];
+  /** Currently-featured items (full objects, in server order). */
+  selectedItems: PickerOption[];
+  /** Stable base key for the entity, e.g. ['products']. */
+  queryKey: unknown[];
+  fetchPage: (search: string, page: number) => Promise<AsyncPage<PickerOption>>;
   saving: boolean;
   onSave: (ids: string[]) => void;
 }
@@ -30,24 +27,34 @@ interface FeaturedPickerProps {
 const sameOrder = (a: string[], b: string[]) =>
   a.length === b.length && a.every((id, i) => id === b[i]);
 
-/** Pick, order (up/down) and remove a set of entities, then persist the order. */
+/** Pick (async search), order (up/down) and remove a set of entities, then persist. */
 export function FeaturedPicker({
   title,
   description,
-  options,
-  value,
+  selectedItems,
+  queryKey,
+  fetchPage,
   saving,
   onSave,
 }: FeaturedPickerProps) {
   const { t } = useTranslation();
-  const [ids, setIds] = useState<string[]>(value);
+  const serverIds = useMemo(() => selectedItems.map((s) => s.id), [selectedItems]);
+  const [ids, setIds] = useState<string[]>(serverIds);
+  const [itemMap, setItemMap] = useState<Map<string, PickerOption>>(
+    () => new Map(selectedItems.map((s) => [s.id, s])),
+  );
 
-  // Re-sync when the server value changes (e.g. after a successful save/refetch).
-  useEffect(() => setIds(value), [value]);
+  // Re-sync when the server set changes (after a save/refetch).
+  useEffect(() => {
+    setIds(serverIds);
+    setItemMap((prev) => {
+      const next = new Map(prev);
+      selectedItems.forEach((s) => next.set(s.id, s));
+      return next;
+    });
+  }, [serverIds, selectedItems]);
 
-  const byId = useMemo(() => new Map(options.map((o) => [o.id, o])), [options]);
-  const available = options.filter((o) => !ids.includes(o.id));
-  const dirty = !sameOrder(ids, value);
+  const dirty = !sameOrder(ids, serverIds);
 
   const move = (index: number, delta: number) => {
     const next = [...ids];
@@ -57,6 +64,12 @@ export function FeaturedPicker({
     setIds(next);
   };
 
+  const add = (item: PickerOption | null) => {
+    if (!item || ids.includes(item.id)) return;
+    setItemMap((prev) => new Map(prev).set(item.id, item));
+    setIds((prev) => [...prev, item.id]);
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -64,22 +77,16 @@ export function FeaturedPicker({
         {description && <p className="text-sm text-muted-foreground">{description}</p>}
       </CardHeader>
       <CardContent className="space-y-4">
-        <Select
+        <AsyncCombobox<PickerOption>
           value=""
-          onValueChange={(id) => id && setIds((prev) => [...prev, id])}
-          disabled={available.length === 0}
-        >
-          <SelectTrigger>
-            <SelectValue placeholder={t('homepage.add_item')} />
-          </SelectTrigger>
-          <SelectContent>
-            {available.map((o) => (
-              <SelectItem key={o.id} value={o.id}>
-                {o.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+          onChange={(_, item) => add(item)}
+          placeholder={t('homepage.add_item')}
+          queryKey={queryKey}
+          fetchPage={fetchPage}
+          getItemId={(o) => o.id}
+          getItemLabel={(o) => o.label}
+          excludeIds={ids}
+        />
 
         {ids.length === 0 ? (
           <p className="py-4 text-center text-sm text-muted-foreground">
@@ -88,7 +95,7 @@ export function FeaturedPicker({
         ) : (
           <ul className="space-y-2">
             {ids.map((id, index) => {
-              const opt = byId.get(id);
+              const opt = itemMap.get(id);
               if (!opt) return null;
               return (
                 <li
@@ -140,7 +147,7 @@ export function FeaturedPicker({
 
         <div className="flex justify-end gap-2">
           {dirty && (
-            <Button type="button" variant="outline" onClick={() => setIds(value)} disabled={saving}>
+            <Button type="button" variant="outline" onClick={() => setIds(serverIds)} disabled={saving}>
               {t('common.cancel')}
             </Button>
           )}
