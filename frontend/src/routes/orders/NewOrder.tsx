@@ -172,7 +172,7 @@ export function NewOrder() {
             <div className="flex flex-wrap items-end gap-3 pt-1">
               <div className="min-w-64 flex-1 space-y-1">
                 <Label className="text-xs text-muted-foreground">{t('carts.product')}</Label>
-                <AsyncCombobox
+                <AsyncCombobox<Product>
                   value={productPick}
                   onChange={(id, item) => {
                     setProductPick(id);
