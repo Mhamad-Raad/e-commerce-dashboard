@@ -27,6 +27,155 @@ enum OrderStatus {
   REFUNDED
 }
 
+enum PaymentMethod {
+  COD
+  TRANSFER
+  CARD
+  WALLET
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  REFUNDED
+}
+
+// Iraq's 19 governorates.
+enum Governorate {
+  BAGHDAD
+  BASRA
+  NINEVEH
+  ERBIL
+  SULAYMANIYAH
+  DUHOK
+  KIRKUK
+  NAJAF
+  KARBALA
+  BABYLON
+  WASIT
+  MAYSAN
+  DHI_QAR
+  MUTHANNA
+  QADISIYYAH
+  DIYALA
+  ANBAR
+  SALADIN
+  HALABJA
+}
+
+// Major cities/districts, grouped by governorate. The governorate->city mapping
+// lives in common/iraq-geo.ts and is enforced when an address is saved.
+enum City {
+  // Baghdad
+  BAGHDAD
+  ABU_GHRAIB
+  MAHMUDIYAH
+  TARMIYAH
+  SADR_CITY
+  // Basra
+  BASRA
+  ZUBAIR
+  ABU_AL_KHASIB
+  QURNA
+  FAW
+  // Nineveh
+  MOSUL
+  TAL_AFAR
+  SINJAR
+  HAMDANIYA
+  SHEIKHAN
+  // Erbil
+  ERBIL
+  SHAQLAWA
+  KOYA
+  SORAN
+  CHOMAN
+  // Sulaymaniyah
+  SULAYMANIYAH
+  RANIA
+  CHAMCHAMAL
+  KALAR
+  DUKAN
+  // Duhok
+  DUHOK
+  ZAKHO
+  AMEDI
+  SEMEL
+  AKRE
+  // Kirkuk
+  KIRKUK
+  HAWIJA
+  DAQUQ
+  DIBIS
+  // Najaf
+  NAJAF
+  KUFA
+  MISHKHAB
+  MANATHERA
+  // Karbala
+  KARBALA
+  AIN_AL_TAMR
+  HINDIYA
+  // Babylon
+  HILLAH
+  MUSAYYIB
+  MAHAWIL
+  HASHIMIYA
+  // Wasit
+  KUT
+  SUWAIRA
+  NUMANIYA
+  AZIZIYA
+  BADRA
+  // Maysan
+  AMARAH
+  MAJAR_AL_KABIR
+  ALI_AL_GHARBI
+  QALAT_SALIH
+  // Dhi Qar
+  NASIRIYAH
+  SHATRA
+  RIFAI
+  SUQ_AL_SHUYUKH
+  CHIBAYISH
+  // Muthanna
+  SAMAWAH
+  RUMAITHA
+  KHIDHIR
+  SALMAN
+  // Qadisiyyah
+  DIWANIYAH
+  AFAK
+  SHAMIYA
+  HAMZA
+  // Diyala
+  BAQUBAH
+  MUQDADIYAH
+  KHALIS
+  KHANAQIN
+  BALADRUZ
+  // Anbar
+  RAMADI
+  FALLUJAH
+  HIT
+  HADITHA
+  QAIM
+  RUTBA
+  // Saladin
+  TIKRIT
+  SAMARRA
+  BALAD
+  DUJAIL
+  SHIRQAT
+  BAIJI
+  // Halabja
+  HALABJA
+  KHURMAL
+  SAYID_SADIQ
+  BIYARA
+}
+
 model User {
   id           String   @id @default(cuid())
   email        String   @unique
@@ -179,11 +328,30 @@ model Customer {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  carts  Cart[]
-  orders Order[]
+  carts     Cart[]
+  orders    Order[]
+  addresses Address[]
 
   @@index([isActive])
   @@index([createdAt])
+}
+
+model Address {
+  id              String      @id @default(cuid())
+  customerId      String
+  customer        Customer    @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  label           String?
+  governorate     Governorate
+  city            City
+  district        String?
+  street          String?
+  nearestLandmark String?
+  phone           String?
+  isDefault       Boolean     @default(false)
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  @@index([customerId])
 }
 
 model Cart {
@@ -232,11 +400,39 @@ model Order {
   placedAt      DateTime    @default(now())
   updatedAt     DateTime    @updatedAt
 
-  items OrderItem[]
+  // Shipping address snapshot (copied from a customer Address at order time so
+  // historical orders stay correct if the address is later edited/deleted).
+  shipName        String?
+  shipPhone       String?
+  shipGovernorate Governorate?
+  shipCity        City?
+  shipDistrict    String?
+  shipStreet      String?
+  shipLandmark    String?
+
+  items    OrderItem[]
+  payments Payment[]
 
   @@index([customerId])
   @@index([status])
   @@index([placedAt])
+}
+
+model Payment {
+  id          String        @id @default(cuid())
+  orderId     String
+  order       Order         @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  method      PaymentMethod
+  status      PaymentStatus @default(PENDING)
+  amountCents Int
+  reference   String?
+  note        String?
+  paidAt      DateTime?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  @@index([orderId])
+  @@index([status])
 }
 
 model OrderItem {

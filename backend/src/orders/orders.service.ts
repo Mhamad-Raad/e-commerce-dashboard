@@ -13,6 +13,7 @@ import { UpdateOrderStatusDto } from './dto/update-order.dto';
 const orderInclude = {
   customer: { select: { id: true, name: true, email: true } },
   items: { orderBy: { id: 'asc' as const } },
+  payments: { orderBy: { createdAt: 'asc' as const } },
 };
 
 const generateOrderNumber = () => {
@@ -123,6 +124,28 @@ export class OrdersService {
     const totalCents = subtotalCents + taxCents + shippingCents;
     const currency = dto.currency ?? products[0]?.currency ?? 'IQD';
 
+    // Optionally snapshot a customer address as the shipping address.
+    let shipping: Prisma.OrderUncheckedCreateInput | object = {};
+    if (dto.addressId) {
+      const address = await this.prisma.address.findUnique({
+        where: { id: dto.addressId },
+      });
+      if (!address || address.customerId !== dto.customerId) {
+        throw new BadRequestException(
+          'Selected address does not belong to this customer',
+        );
+      }
+      shipping = {
+        shipName: customer.name,
+        shipPhone: address.phone ?? customer.phone ?? null,
+        shipGovernorate: address.governorate,
+        shipCity: address.city,
+        shipDistrict: address.district,
+        shipStreet: address.street,
+        shipLandmark: address.nearestLandmark,
+      };
+    }
+
     const order = await this.prisma.order.create({
       data: {
         number: generateOrderNumber(),
@@ -132,6 +155,7 @@ export class OrdersService {
         shippingCents,
         totalCents,
         currency,
+        ...shipping,
         items: { create: lineItems },
       },
       include: orderInclude,

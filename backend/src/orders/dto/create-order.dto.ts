@@ -47,4 +47,9 @@ export class CreateOrderDto {
   @IsString()
   @Length(3, 3)
   currency?: string;
+
+  // Optional: snapshot this customer address as the order's shipping address.
+  @IsOptional()
+  @IsString()
+  addressId?: string;
 }

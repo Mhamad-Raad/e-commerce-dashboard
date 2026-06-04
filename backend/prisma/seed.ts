@@ -1,4 +1,12 @@
-import { CartStatus, OrderStatus, PrismaClient, Role } from '@prisma/client';
+import {
+  CartStatus,
+  City,
+  Governorate,
+  OrderStatus,
+  PaymentMethod,
+  PrismaClient,
+  Role,
+} from '@prisma/client';
 import * as bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
@@ -96,6 +104,25 @@ const customerSeed = [
   { name: 'Omar Haddad',        email: 'omar.haddad@example.com',     city: 'Dubai',       country: 'UAE' },
 ];
 
+// One address per customer for the first few customers (max 3 enforced in app).
+const addressSeed: {
+  label: string;
+  governorate: Governorate;
+  city: City;
+  district?: string;
+  street?: string;
+  phone?: string;
+}[] = [
+  { label: 'Home', governorate: 'BAGHDAD', city: 'BAGHDAD', district: 'Karrada', street: 'Street 14', phone: '0770 123 4567' },
+  { label: 'Home', governorate: 'BASRA', city: 'BASRA', district: 'Al-Ashar', street: 'Corniche Rd', phone: '0771 234 5678' },
+  { label: 'Work', governorate: 'ERBIL', city: 'ERBIL', district: 'Ankawa', street: '100m Road', phone: '0750 345 6789' },
+  { label: 'Home', governorate: 'NINEVEH', city: 'MOSUL', district: 'Al-Majmoua', phone: '0772 456 7890' },
+  { label: 'Home', governorate: 'NAJAF', city: 'NAJAF', district: 'Old City', phone: '0780 567 8901' },
+  { label: 'Home', governorate: 'KARBALA', city: 'KARBALA', phone: '0781 678 9012' },
+  { label: 'Work', governorate: 'SULAYMANIYAH', city: 'SULAYMANIYAH', district: 'Salim Street', phone: '0770 789 0123' },
+  { label: 'Home', governorate: 'BABYLON', city: 'HILLAH', phone: '0782 890 1234' },
+];
+
 const ORDER_STATUSES: { status: OrderStatus; weight: number }[] = [
   { status: 'DELIVERED', weight: 8 },
   { status: 'PAID',      weight: 4 },
@@ -143,8 +170,10 @@ async function clearShopData() {
   await prisma.featuredCategory.deleteMany();
   await prisma.featuredStore.deleteMany();
   await prisma.heroBanner.deleteMany();
+  await prisma.payment.deleteMany();
   await prisma.orderItem.deleteMany();
   await prisma.order.deleteMany();
+  await prisma.address.deleteMany();
   await prisma.cartItem.deleteMany();
   await prisma.cart.deleteMany();
   await prisma.customer.deleteMany();
@@ -255,6 +284,28 @@ async function seedCustomers() {
   return customers;
 }
 
+type DefaultAddress = {
+  governorate: Governorate;
+  city: City;
+  district: string | null;
+  street: string | null;
+  nearestLandmark: string | null;
+  phone: string | null;
+};
+
+async function seedAddresses(customers: { id: string }[]) {
+  const byCustomer = new Map<string, DefaultAddress>();
+  const n = Math.min(addressSeed.length, customers.length);
+  for (let i = 0; i < n; i++) {
+    const created = await prisma.address.create({
+      data: { ...addressSeed[i], customerId: customers[i].id, isDefault: true },
+    });
+    byCustomer.set(customers[i].id, created);
+  }
+  console.log(`✓ Addresses: ${n}`);
+  return byCustomer;
+}
+
 async function seedCarts(customers: { id: string }[], products: SeedProduct[]) {
   for (let i = 0; i < CART_STATUSES.length; i++) {
     const customer = customers[i % customers.length];
@@ -283,9 +334,14 @@ async function seedCarts(customers: { id: string }[], products: SeedProduct[]) {
   console.log(`✓ Carts: ${carts}`);
 }
 
-async function seedOrders(customers: { id: string }[], products: SeedProduct[]) {
+async function seedOrders(
+  customers: { id: string; name: string }[],
+  products: SeedProduct[],
+  defaultAddressByCustomer: Map<string, DefaultAddress>,
+) {
   const now = Date.now();
   const DAY_MS = 24 * 60 * 60 * 1000;
+  let paymentCount = 0;
 
   for (let i = 0; i < 30; i++) {
     const customer = customers[randomInt(0, customers.length - 1)];
@@ -316,7 +372,20 @@ async function seedOrders(customers: { id: string }[], products: SeedProduct[]) 
     const shippingCents = subtotalCents >= 100000 ? 0 : 5000;
     const totalCents = subtotalCents + taxCents + shippingCents;
 
-    await prisma.order.create({
+    const addr = defaultAddressByCustomer.get(customer.id);
+    const shipping = addr
+      ? {
+          shipName: customer.name,
+          shipPhone: addr.phone,
+          shipGovernorate: addr.governorate,
+          shipCity: addr.city,
+          shipDistrict: addr.district,
+          shipStreet: addr.street,
+          shipLandmark: addr.nearestLandmark,
+        }
+      : {};
+
+    const order = await prisma.order.create({
       data: {
         number: generateOrderNumber(),
         customerId: customer.id,
@@ -327,11 +396,27 @@ async function seedOrders(customers: { id: string }[], products: SeedProduct[]) 
         shippingCents,
         totalCents,
         currency: products[0].currency,
+        ...shipping,
         items: { create: items },
       },
     });
+
+    // Record a payment (COD is the norm in Iraq) consistent with the status.
+    if (status !== 'CANCELLED') {
+      const paid = status === 'PAID' || status === 'SHIPPED' || status === 'DELIVERED';
+      await prisma.payment.create({
+        data: {
+          orderId: order.id,
+          method: PaymentMethod.COD,
+          amountCents: totalCents,
+          status: status === 'REFUNDED' ? 'REFUNDED' : paid ? 'PAID' : 'PENDING',
+          paidAt: paid || status === 'REFUNDED' ? placedAt : null,
+        },
+      });
+      paymentCount++;
+    }
   }
-  console.log(`✓ Orders: 30`);
+  console.log(`✓ Orders: 30 (+${paymentCount} payments)`);
 }
 
 async function main() {
@@ -342,8 +427,9 @@ async function main() {
   const storeByCategory = await seedStores();
   const products = await seedProducts(categoryByName, storeByCategory);
   const customers = await seedCustomers();
+  const defaultAddressByCustomer = await seedAddresses(customers);
   await seedCarts(customers, products);
-  await seedOrders(customers, products);
+  await seedOrders(customers, products, defaultAddressByCustomer);
   await seedHomepage(products, categoryByName, storeByCategory);
   console.log('Done.');
 }

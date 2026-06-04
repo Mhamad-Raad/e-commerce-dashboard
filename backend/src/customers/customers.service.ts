@@ -36,7 +36,12 @@ export class CustomersService {
   }
 
   async findById(id: string) {
-    const customer = await this.prisma.customer.findUnique({ where: { id } });
+    const customer = await this.prisma.customer.findUnique({
+      where: { id },
+      include: {
+        addresses: { orderBy: [{ isDefault: 'desc' }, { createdAt: 'asc' }] },
+      },
+    });
     if (!customer) throw new NotFoundException(`Customer ${id} not found`);
     return customer;
   }
