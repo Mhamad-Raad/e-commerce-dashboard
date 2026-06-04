@@ -176,6 +176,7 @@ export class OrdersService {
           shippingCents,
           totalCents,
           currency,
+          notes: dto.notes,
           ...shipping,
           items: { create: lineItems },
         },

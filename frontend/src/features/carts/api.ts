@@ -1,5 +1,16 @@
 import { api } from '../../lib/api';
+import type { Order } from '../orders/types';
+import type { PaymentMethod } from '../payments/types';
 import type { Cart, CartListResponse, CartStatus } from './types';
+
+export interface CheckoutPayload {
+  addressId: string;
+  paymentMethod: PaymentMethod;
+  markPaid?: boolean;
+  notes?: string;
+  taxCents?: number;
+  shippingCents?: number;
+}
 
 export interface ListCartsParams {
   search?: string;
@@ -56,6 +67,10 @@ export const cartsApi = {
   },
   removeCoupon: async (cartId: string): Promise<Cart> => {
     const res = await api.delete<Cart>(`/carts/${cartId}/coupon`);
+    return res.data;
+  },
+  checkout: async (cartId: string, payload: CheckoutPayload): Promise<Order> => {
+    const res = await api.post<Order>(`/carts/${cartId}/checkout`, payload);
     return res.data;
   },
 };

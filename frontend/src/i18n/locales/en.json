@@ -294,6 +294,15 @@
       "refunded": "Refunded"
     }
   },
+  "checkout": {
+    "title": "Checkout",
+    "place_order": "Place order",
+    "mark_paid": "Mark as paid now",
+    "notes": "Notes",
+    "no_address": "This customer has no saved address. Add one before checking out.",
+    "manage_addresses": "Manage addresses",
+    "success_toast": "Order placed"
+  },
   "coupons": {
     "title": "Coupons",
     "new": "New coupon",

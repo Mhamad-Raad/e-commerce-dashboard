@@ -197,6 +197,17 @@ export function OrderDetail() {
         </Card>
       )}
 
+      {order.notes && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-sm">{t('checkout.notes')}</CardTitle>
+          </CardHeader>
+          <CardContent className="whitespace-pre-wrap pt-0 text-sm text-muted-foreground">
+            {order.notes}
+          </CardContent>
+        </Card>
+      )}
+
       <OrderPayments order={order} />
 
       <Card className="ms-auto max-w-sm">

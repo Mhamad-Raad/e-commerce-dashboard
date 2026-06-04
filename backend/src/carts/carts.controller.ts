@@ -12,6 +12,7 @@ import {
 } from '@nestjs/common';
 import { CartsService } from './carts.service';
 import { AddCartItemDto, UpdateCartItemDto } from './dto/cart-item.dto';
+import { CheckoutCartDto } from './dto/checkout.dto';
 import { CreateCartDto } from './dto/create-cart.dto';
 import { ListCartsQueryDto } from './dto/list-carts.query.dto';
 import { UpdateCartDto } from './dto/update-cart.dto';
@@ -64,6 +65,11 @@ export class CartsController {
   @HttpCode(HttpStatus.OK)
   removeItem(@Param('id') id: string, @Param('itemId') itemId: string) {
     return this.carts.removeItem(id, itemId);
+  }
+
+  @Post(':id/checkout')
+  checkout(@Param('id') id: string, @Body() dto: CheckoutCartDto) {
+    return this.carts.checkout(id, dto);
   }
 
   @Post(':id/coupon')

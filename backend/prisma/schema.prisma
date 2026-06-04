@@ -449,6 +449,7 @@ model Order {
   shippingCents Int         @default(0)
   totalCents    Int
   currency      String      @default("IQD")
+  notes         String?
   status        OrderStatus @default(PENDING)
   placedAt      DateTime    @default(now())
   updatedAt     DateTime    @updatedAt

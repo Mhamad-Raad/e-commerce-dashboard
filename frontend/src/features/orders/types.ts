@@ -47,6 +47,7 @@ export interface Order {
   shipDistrict: string | null;
   shipStreet: string | null;
   shipLandmark: string | null;
+  notes: string | null;
   customer: OrderCustomerSummary;
   items: OrderItem[];
   payments?: Payment[];

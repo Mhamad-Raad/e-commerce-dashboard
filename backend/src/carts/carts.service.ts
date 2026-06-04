@@ -8,8 +8,11 @@ import { Prisma } from '@prisma/client';
 import { couponApplicabilityError, couponDiscountCents } from '../common/coupon';
 import { buildPaginated, paginate } from '../common/pagination';
 import { effectivePriceCents } from '../common/pricing';
+import { OrdersService } from '../orders/orders.service';
+import { PaymentsService } from '../orders/payments.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { AddCartItemDto, UpdateCartItemDto } from './dto/cart-item.dto';
+import { CheckoutCartDto } from './dto/checkout.dto';
 import { CreateCartDto } from './dto/create-cart.dto';
 import { ListCartsQueryDto } from './dto/list-carts.query.dto';
 import { UpdateCartDto } from './dto/update-cart.dto';
@@ -27,7 +30,11 @@ const cartInclude = {
 
 @Injectable()
 export class CartsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private orders: OrdersService,
+    private payments: PaymentsService,
+  ) {}
 
   async list(query: ListCartsQueryDto) {
     const page = query.page ?? 1;
@@ -191,6 +198,49 @@ export class CartsService {
       data: { couponId: null, discountCents: 0 },
     });
     return this.findById(cartId);
+  }
+
+  /**
+   * Turn a cart into an order: carries items + coupon over (re-resolved at current
+   * prices via OrdersService.create), snapshots the chosen address, records a
+   * payment, and marks the cart CHECKED_OUT. Used for staff-assisted checkout.
+   */
+  async checkout(cartId: string, dto: CheckoutCartDto) {
+    const cart = await this.findById(cartId);
+    if (cart.status === 'CHECKED_OUT') {
+      throw new BadRequestException('This cart has already been checked out');
+    }
+    if (cart.items.length === 0) {
+      throw new BadRequestException('Cannot check out an empty cart');
+    }
+
+    const order = await this.orders.create({
+      customerId: cart.customerId,
+      items: cart.items.map((i) => ({
+        productId: i.productId,
+        variantId: i.variantId ?? undefined,
+        quantity: i.quantity,
+      })),
+      couponCode: cart.coupon?.code,
+      addressId: dto.addressId,
+      notes: dto.notes,
+      taxCents: dto.taxCents,
+      shippingCents: dto.shippingCents,
+    });
+
+    await this.payments.create(order.id, {
+      method: dto.paymentMethod,
+      amountCents: order.totalCents,
+      status: dto.markPaid ? 'PAID' : 'PENDING',
+    });
+
+    await this.prisma.cart.update({
+      where: { id: cartId },
+      data: { status: 'CHECKED_OUT' },
+    });
+
+    // Re-fetch so the returned order includes the payment just recorded.
+    return this.orders.findById(order.id);
   }
 
   // Keep the cart's stored discount in sync after items change; drop the coupon

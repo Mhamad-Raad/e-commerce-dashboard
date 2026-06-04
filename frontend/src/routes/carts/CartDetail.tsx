@@ -2,9 +2,10 @@ import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { ArrowLeft, Plus, ShoppingCart, Trash2 } from 'lucide-react';
+import { ArrowLeft, CreditCard, Plus, ShoppingCart, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
-import { cartsApi, cartStatusTone } from '@/features/carts/api';
+import { cartsApi, cartStatusTone, type CheckoutPayload } from '@/features/carts/api';
+import { CheckoutDialog } from './CheckoutDialog';
 import { productsApi, variantsApi } from '@/features/products/api';
 import { cartSubtotalCents, cartTotalCents, type CartStatus } from '@/features/carts/types';
 import { ConfirmDialog } from '@/components/ConfirmDialog';
@@ -45,6 +46,7 @@ export function CartDetail() {
   const [quantity, setQuantity] = useState(1);
   const [couponInput, setCouponInput] = useState('');
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [checkoutOpen, setCheckoutOpen] = useState(false);
 
   const cartQuery = useQuery({
     queryKey: ['cart', id],
@@ -139,6 +141,18 @@ export function CartDetail() {
     onError,
   });
 
+  const checkout = useMutation({
+    mutationFn: (payload: CheckoutPayload) => cartsApi.checkout(id!, payload),
+    onSuccess: (order) => {
+      queryClient.invalidateQueries({ queryKey: ['carts'] });
+      queryClient.invalidateQueries({ queryKey: ['orders'] });
+      setCheckoutOpen(false);
+      toast.success(t('checkout.success_toast'));
+      navigate(`/orders/${order.id}`);
+    },
+    onError,
+  });
+
   const statusLabel = (s: CartStatus) => t(`carts.status.${s.toLowerCase()}`);
 
   if (cartQuery.isLoading) {
@@ -195,6 +209,12 @@ export function CartDetail() {
                 ))}
               </SelectContent>
             </Select>
+            {cart.status !== 'CHECKED_OUT' && cart.items.length > 0 && (
+              <Button onClick={() => setCheckoutOpen(true)}>
+                <CreditCard className="h-4 w-4" />
+                {t('checkout.title')}
+              </Button>
+            )}
             <Button variant="destructive" onClick={() => setConfirmDelete(true)}>
               <Trash2 className="h-4 w-4" />
               {t('common.delete')}
@@ -391,6 +411,14 @@ export function CartDetail() {
           </Button>
         </CardContent>
       </Card>
+
+      <CheckoutDialog
+        open={checkoutOpen}
+        cart={cart}
+        saving={checkout.isPending}
+        onOpenChange={setCheckoutOpen}
+        onSubmit={(payload) => checkout.mutate(payload)}
+      />
 
       <ConfirmDialog
         open={confirmDelete}
