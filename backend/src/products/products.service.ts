@@ -34,7 +34,7 @@ export class ProductsService {
       this.prisma.product.findMany({
         where,
         orderBy: { createdAt: 'desc' },
-        include: { store: true, category: true },
+        include: { store: true, category: true, _count: { select: { variants: true } } },
         ...paginate(page, pageSize),
       }),
       this.prisma.product.count({ where }),
@@ -46,7 +46,11 @@ export class ProductsService {
   async findById(id: string) {
     const product = await this.prisma.product.findUnique({
       where: { id },
-      include: { store: true, category: true },
+      include: {
+        store: true,
+        category: true,
+        variants: { orderBy: [{ sortOrder: 'asc' }, { createdAt: 'asc' }] },
+      },
     });
     if (!product) throw new NotFoundException(`Product ${id} not found`);
     return product;

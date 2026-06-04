@@ -34,20 +34,49 @@ const bannerSeed = [
   { title: 'Glow up',               subtitle: 'Beauty picks of the week',   imageUrl: 'https://picsum.photos/seed/banner-3/1200/400', linkUrl: '/category/beauty',      sortOrder: 2 },
 ];
 
+// Prices are whole Iraqi dinars (IQD has no minor unit, so the integer field
+// holds dinars directly — see frontend lib/format.ts currency exponents).
 const productSeed = [
-  { name: 'USB-C Hub 7-in-1', sku: 'HUB-7N1', category: 'Electronics', priceCents: 4999, stock: 80, imageUrl: 'https://picsum.photos/seed/hub/400/300' },
-  { name: 'Wireless Mouse', sku: 'WMOUSE-01', category: 'Electronics', priceCents: 2999, stock: 150, imageUrl: 'https://picsum.photos/seed/mouse/400/300' },
-  { name: 'Mechanical Keyboard 65%', sku: 'KEYB-65', category: 'Electronics', priceCents: 12999, stock: 40, imageUrl: 'https://picsum.photos/seed/keyboard/400/300' },
-  { name: 'Noise-Cancelling Headphones', sku: 'NCH-PRO', category: 'Electronics', priceCents: 24999, stock: 25, imageUrl: 'https://picsum.photos/seed/headphones/400/300' },
-  { name: 'Classic Cotton T-Shirt', sku: 'TEE-CLASSIC', category: 'Apparel', priceCents: 1999, stock: 200, imageUrl: 'https://picsum.photos/seed/tee/400/300' },
-  { name: 'Denim Jacket', sku: 'JACKET-DENIM', category: 'Apparel', priceCents: 7999, stock: 60, imageUrl: 'https://picsum.photos/seed/jacket/400/300' },
-  { name: 'Running Shoes', sku: 'SHOE-RUN', category: 'Apparel', priceCents: 8999, stock: 75, imageUrl: 'https://picsum.photos/seed/shoes/400/300' },
-  { name: 'Ceramic Mug Set (4)', sku: 'MUG-SET4', category: 'Home', priceCents: 3499, stock: 90, imageUrl: 'https://picsum.photos/seed/mug/400/300' },
-  { name: 'Linen Throw Blanket', sku: 'THROW-LINEN', category: 'Home', priceCents: 5499, stock: 50, imageUrl: 'https://picsum.photos/seed/throw/400/300' },
-  { name: 'Bedside Lamp', sku: 'LAMP-BED', category: 'Home', priceCents: 4499, stock: 35, imageUrl: 'https://picsum.photos/seed/lamp/400/300' },
-  { name: 'Vitamin C Serum 30ml', sku: 'SERUM-VITC', category: 'Beauty', priceCents: 2499, stock: 120, imageUrl: 'https://picsum.photos/seed/serum/400/300' },
-  { name: 'Hydrating Toner 200ml', sku: 'TONER-HYDRA', category: 'Beauty', priceCents: 1899, stock: 100, imageUrl: 'https://picsum.photos/seed/toner/400/300' },
+  { name: 'USB-C Hub 7-in-1', sku: 'HUB-7N1', category: 'Electronics', priceCents: 65000, stock: 80, imageUrl: 'https://picsum.photos/seed/hub/400/300' },
+  { name: 'Wireless Mouse', sku: 'WMOUSE-01', category: 'Electronics', priceCents: 39000, stock: 150, imageUrl: 'https://picsum.photos/seed/mouse/400/300' },
+  { name: 'Mechanical Keyboard 65%', sku: 'KEYB-65', category: 'Electronics', priceCents: 170000, stock: 40, imageUrl: 'https://picsum.photos/seed/keyboard/400/300' },
+  { name: 'Noise-Cancelling Headphones', sku: 'NCH-PRO', category: 'Electronics', priceCents: 325000, stock: 25, imageUrl: 'https://picsum.photos/seed/headphones/400/300' },
+  { name: 'Classic Cotton T-Shirt', sku: 'TEE-CLASSIC', category: 'Apparel', priceCents: 25000, stock: 200, imageUrl: 'https://picsum.photos/seed/tee/400/300' },
+  { name: 'Denim Jacket', sku: 'JACKET-DENIM', category: 'Apparel', priceCents: 105000, stock: 60, imageUrl: 'https://picsum.photos/seed/jacket/400/300' },
+  { name: 'Running Shoes', sku: 'SHOE-RUN', category: 'Apparel', priceCents: 118000, stock: 75, imageUrl: 'https://picsum.photos/seed/shoes/400/300' },
+  { name: 'Ceramic Mug Set (4)', sku: 'MUG-SET4', category: 'Home', priceCents: 45000, stock: 90, imageUrl: 'https://picsum.photos/seed/mug/400/300' },
+  { name: 'Linen Throw Blanket', sku: 'THROW-LINEN', category: 'Home', priceCents: 72000, stock: 50, imageUrl: 'https://picsum.photos/seed/throw/400/300' },
+  { name: 'Bedside Lamp', sku: 'LAMP-BED', category: 'Home', priceCents: 59000, stock: 35, imageUrl: 'https://picsum.photos/seed/lamp/400/300' },
+  { name: 'Vitamin C Serum', sku: 'SERUM-VITC', category: 'Beauty', priceCents: 32000, stock: 120, imageUrl: 'https://picsum.photos/seed/serum/400/300' },
+  { name: 'Hydrating Toner', sku: 'TONER-HYDRA', category: 'Beauty', priceCents: 25000, stock: 100, imageUrl: 'https://picsum.photos/seed/toner/400/300' },
 ];
+
+// Optional variants keyed by product SKU. Products not listed here are "simple"
+// (sold at their own price/stock with no variant). Each variant carries its own
+// SKU, price (IQD) and stock.
+const variantSeed: Record<string, { name: string; sku: string; priceCents: number; stock: number }[]> = {
+  'TEE-CLASSIC': [
+    { name: 'Black / S', sku: 'TEE-CLASSIC-BK-S', priceCents: 25000, stock: 50 },
+    { name: 'Black / M', sku: 'TEE-CLASSIC-BK-M', priceCents: 25000, stock: 60 },
+    { name: 'Black / L', sku: 'TEE-CLASSIC-BK-L', priceCents: 25000, stock: 40 },
+    { name: 'White / M', sku: 'TEE-CLASSIC-WT-M', priceCents: 25000, stock: 30 },
+    { name: 'White / L', sku: 'TEE-CLASSIC-WT-L', priceCents: 25000, stock: 20 },
+  ],
+  'JACKET-DENIM': [
+    { name: 'S', sku: 'JACKET-DENIM-S', priceCents: 105000, stock: 15 },
+    { name: 'M', sku: 'JACKET-DENIM-M', priceCents: 105000, stock: 25 },
+    { name: 'L', sku: 'JACKET-DENIM-L', priceCents: 110000, stock: 20 },
+  ],
+  'SHOE-RUN': [
+    { name: 'EU 40', sku: 'SHOE-RUN-40', priceCents: 118000, stock: 20 },
+    { name: 'EU 42', sku: 'SHOE-RUN-42', priceCents: 118000, stock: 30 },
+    { name: 'EU 44', sku: 'SHOE-RUN-44', priceCents: 118000, stock: 25 },
+  ],
+  'SERUM-VITC': [
+    { name: '30ml', sku: 'SERUM-VITC-30', priceCents: 32000, stock: 70 },
+    { name: '50ml', sku: 'SERUM-VITC-50', priceCents: 48000, stock: 50 },
+  ],
+};
 
 const customerSeed = [
   { name: 'Alice Carter',       email: 'alice.carter@example.com',    city: 'New York',    country: 'USA' },
@@ -155,20 +184,47 @@ async function seedProducts(
   storeByCategory: Map<string, string>,
 ) {
   const fallbackStoreId = storeByCategory.values().next().value as string;
+  let variantCount = 0;
   for (const p of productSeed) {
     const { category, ...rest } = p;
-    await prisma.product.create({
+    const product = await prisma.product.create({
       data: {
         ...rest,
         categoryId: categoryByName.get(category) ?? null,
         storeId: storeByCategory.get(category) ?? fallbackStoreId,
       },
     });
+    const variants = variantSeed[p.sku];
+    if (variants) {
+      await prisma.productVariant.createMany({
+        data: variants.map((v, i) => ({ ...v, productId: product.id, sortOrder: i })),
+      });
+      variantCount += variants.length;
+    }
   }
-  const products = await prisma.product.findMany();
-  console.log(`✓ Products: ${products.length}`);
+  const products = await prisma.product.findMany({ include: { variants: true } });
+  console.log(`✓ Products: ${products.length} (+${variantCount} variants)`);
   return products;
 }
+
+type SeedProduct = {
+  id: string;
+  name: string;
+  sku: string;
+  priceCents: number;
+  currency: string;
+  variants: { id: string; name: string; priceCents: number }[];
+};
+
+// Pick a purchasable line: if the product has variants, choose one at random and
+// snapshot its name + price; otherwise sell the simple product itself.
+const pickLine = (product: SeedProduct) => {
+  if (product.variants.length) {
+    const v = product.variants[randomInt(0, product.variants.length - 1)];
+    return { variantId: v.id, variantName: v.name, priceCents: v.priceCents, key: v.id };
+  }
+  return { variantId: null, variantName: null, priceCents: product.priceCents, key: product.id };
+};
 
 async function seedHomepage(
   products: { id: string }[],
@@ -199,10 +255,7 @@ async function seedCustomers() {
   return customers;
 }
 
-async function seedCarts(
-  customers: { id: string }[],
-  products: { id: string; priceCents: number }[],
-) {
+async function seedCarts(customers: { id: string }[], products: SeedProduct[]) {
   for (let i = 0; i < CART_STATUSES.length; i++) {
     const customer = customers[i % customers.length];
     const status = CART_STATUSES[i];
@@ -211,12 +264,15 @@ async function seedCarts(
     const items = [];
     while (items.length < itemCount && items.length < products.length) {
       const product = products[randomInt(0, products.length - 1)];
-      if (picked.has(product.id)) continue;
-      picked.add(product.id);
+      const line = pickLine(product);
+      if (picked.has(line.key)) continue;
+      picked.add(line.key);
       items.push({
         productId: product.id,
+        variantId: line.variantId,
+        variantName: line.variantName,
         quantity: randomInt(1, 3),
-        priceCents: product.priceCents,
+        priceCents: line.priceCents,
       });
     }
     await prisma.cart.create({
@@ -227,10 +283,7 @@ async function seedCarts(
   console.log(`✓ Carts: ${carts}`);
 }
 
-async function seedOrders(
-  customers: { id: string }[],
-  products: { id: string; name: string; sku: string; priceCents: number; currency: string }[],
-) {
+async function seedOrders(customers: { id: string }[], products: SeedProduct[]) {
   const now = Date.now();
   const DAY_MS = 24 * 60 * 60 * 1000;
 
@@ -244,20 +297,23 @@ async function seedOrders(
     const items = [];
     while (items.length < itemCount && items.length < products.length) {
       const product = products[randomInt(0, products.length - 1)];
-      if (picked.has(product.id)) continue;
-      picked.add(product.id);
+      const line = pickLine(product);
+      if (picked.has(line.key)) continue;
+      picked.add(line.key);
       items.push({
         productId: product.id,
+        variantId: line.variantId,
+        variantName: line.variantName,
         name: product.name,
         sku: product.sku,
         quantity: randomInt(1, 3),
-        priceCents: product.priceCents,
+        priceCents: line.priceCents,
       });
     }
 
     const subtotalCents = items.reduce((s, it) => s + it.priceCents * it.quantity, 0);
     const taxCents = Math.round(subtotalCents * 0.08);
-    const shippingCents = subtotalCents >= 10000 ? 0 : 599;
+    const shippingCents = subtotalCents >= 100000 ? 0 : 5000;
     const totalCents = subtotalCents + taxCents + shippingCents;
 
     await prisma.order.create({

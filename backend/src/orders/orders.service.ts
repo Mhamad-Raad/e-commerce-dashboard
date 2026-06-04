@@ -77,14 +77,40 @@ export class OrdersService {
     }
     const productMap = new Map(products.map((p) => [p.id, p]));
 
+    const variantIds = dto.items
+      .map((i) => i.variantId)
+      .filter((id): id is string => Boolean(id));
+    const variants = variantIds.length
+      ? await this.prisma.productVariant.findMany({
+          where: { id: { in: variantIds } },
+        })
+      : [];
+    const variantMap = new Map(variants.map((v) => [v.id, v]));
+
     const lineItems = dto.items.map((i) => {
       const product = productMap.get(i.productId)!;
+      let variantId: string | null = null;
+      let variantName: string | null = null;
+      let priceCents = product.priceCents;
+      if (i.variantId) {
+        const variant = variantMap.get(i.variantId);
+        if (!variant || variant.productId !== product.id) {
+          throw new BadRequestException(
+            `Variant ${i.variantId} does not belong to product ${product.name}`,
+          );
+        }
+        variantId = variant.id;
+        variantName = variant.name;
+        priceCents = variant.priceCents;
+      }
       return {
         productId: product.id,
+        variantId,
+        variantName,
         name: product.name,
         sku: product.sku,
         quantity: i.quantity,
-        priceCents: product.priceCents,
+        priceCents,
       };
     });
 
@@ -95,7 +121,7 @@ export class OrdersService {
     const taxCents = dto.taxCents ?? 0;
     const shippingCents = dto.shippingCents ?? 0;
     const totalCents = subtotalCents + taxCents + shippingCents;
-    const currency = dto.currency ?? products[0]?.currency ?? 'USD';
+    const currency = dto.currency ?? products[0]?.currency ?? 'IQD';
 
     const order = await this.prisma.order.create({
       data: {

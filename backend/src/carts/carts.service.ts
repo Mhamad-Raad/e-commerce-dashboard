@@ -93,18 +93,41 @@ export class CartsService {
     const product = await this.prisma.product.findUnique({ where: { id: dto.productId } });
     if (!product) throw new NotFoundException(`Product ${dto.productId} not found`);
 
+    // Resolve an optional variant: snapshot its name + price, otherwise fall
+    // back to the product's own price (a "simple" product with no variants).
+    let variantId: string | null = null;
+    let variantName: string | null = null;
+    let priceCents = product.priceCents;
+    if (dto.variantId) {
+      const variant = await this.prisma.productVariant.findUnique({
+        where: { id: dto.variantId },
+      });
+      if (!variant || variant.productId !== dto.productId) {
+        throw new BadRequestException(
+          'Selected variant does not belong to this product',
+        );
+      }
+      variantId = variant.id;
+      variantName = variant.name;
+      priceCents = variant.priceCents;
+    }
+
     try {
       await this.prisma.cartItem.create({
         data: {
           cartId,
           productId: dto.productId,
+          variantId,
+          variantName,
           quantity: dto.quantity,
-          priceCents: product.priceCents,
+          priceCents,
         },
       });
     } catch (err) {
       if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === 'P2002') {
-        throw new ConflictException('Product already in this cart — update its quantity instead');
+        throw new ConflictException(
+          'This product/variant is already in the cart — update its quantity instead',
+        );
       }
       throw err;
     }
