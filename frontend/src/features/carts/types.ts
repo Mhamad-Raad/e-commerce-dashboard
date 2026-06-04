@@ -17,6 +17,8 @@ export interface CartItem {
   id: string;
   cartId: string;
   productId: string;
+  variantId: string | null;
+  variantName: string | null;
   quantity: number;
   priceCents: number;
   product: CartItemProductSummary;

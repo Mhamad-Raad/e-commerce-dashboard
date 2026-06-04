@@ -29,8 +29,17 @@ export const cartsApi = {
   remove: async (id: string): Promise<void> => {
     await api.delete(`/carts/${id}`);
   },
-  addItem: async (cartId: string, productId: string, quantity: number): Promise<Cart> => {
-    const res = await api.post<Cart>(`/carts/${cartId}/items`, { productId, quantity });
+  addItem: async (
+    cartId: string,
+    productId: string,
+    quantity: number,
+    variantId?: string,
+  ): Promise<Cart> => {
+    const res = await api.post<Cart>(`/carts/${cartId}/items`, {
+      productId,
+      quantity,
+      variantId: variantId || undefined,
+    });
     return res.data;
   },
   updateItem: async (cartId: string, itemId: string, quantity: number): Promise<Cart> => {

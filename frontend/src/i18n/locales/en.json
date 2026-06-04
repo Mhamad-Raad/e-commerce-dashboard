@@ -81,7 +81,22 @@
     "delete_message": "Delete \"{{name}}\"? This can't be undone.",
     "saved_toast": "Product saved",
     "deleted_toast": "Product deleted",
-    "no_image": "No image"
+    "no_image": "No image",
+    "variants_count": "Variants",
+    "select_variant": "Select a variant"
+  },
+  "variants": {
+    "title": "Variants",
+    "add": "Add variant",
+    "new": "New variant",
+    "edit": "Edit variant",
+    "name": "Variant",
+    "name_placeholder": "e.g. Red / 50ml",
+    "empty": "No variants — this product is sold at its base price.",
+    "saved_toast": "Variant saved",
+    "deleted_toast": "Variant deleted",
+    "delete_title": "Delete variant",
+    "delete_message": "Delete \"{{name}}\"? This can't be undone."
   },
   "categories": {
     "title": "Categories",

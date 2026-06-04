@@ -20,7 +20,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { extractErrorMessage } from '@/lib/format';
+import { extractErrorMessage, fromMinor, toMinor } from '@/lib/format';
 
 const schema = z.object({
   name: z.string().min(1).max(200),
@@ -41,7 +41,7 @@ const defaultValues: FormValues = {
   name: '',
   sku: '',
   price: '',
-  currency: 'USD',
+  currency: 'IQD',
   stock: '0',
   storeId: '',
   categoryId: '',
@@ -78,7 +78,7 @@ export function ProductForm() {
       reset({
         name: p.name,
         sku: p.sku,
-        price: (p.priceCents / 100).toString(),
+        price: fromMinor(p.priceCents, p.currency).toString(),
         currency: p.currency,
         stock: p.stock.toString(),
         storeId: p.storeId,
@@ -95,7 +95,7 @@ export function ProductForm() {
       const payload: ProductWritePayload = {
         name: values.name.trim(),
         sku: values.sku.trim(),
-        priceCents: Math.round(Number(values.price) * 100),
+        priceCents: toMinor(Number(values.price), values.currency),
         currency: values.currency.toUpperCase(),
         stock: Number(values.stock),
         storeId: values.storeId,

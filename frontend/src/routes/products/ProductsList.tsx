@@ -77,6 +77,16 @@ export function ProductsList() {
         ),
     },
     { key: 'price', header: t('products.price'), cell: (p) => formatMoney(p.priceCents, p.currency) },
+    {
+      key: 'variants',
+      header: t('products.variants_count'),
+      cell: (p) =>
+        p._count?.variants ? (
+          p._count.variants
+        ) : (
+          <span className="text-muted-foreground">—</span>
+        ),
+    },
     { key: 'stock', header: t('products.stock'), cell: (p) => p.stock },
     {
       key: 'status',

@@ -9,6 +9,7 @@ import { ProductImage } from '@/features/products/ProductImage';
 import { PageHeader } from '@/components/PageHeader';
 import { ConfirmDialog } from '@/components/ConfirmDialog';
 import { DetailRow } from '@/components/DetailRow';
+import { ProductVariants } from './ProductVariants';
 import { StatusBadge } from '@/components/StatusBadge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -152,6 +153,8 @@ export function ProductDetail() {
           </CardContent>
         </Card>
       </div>
+
+      <ProductVariants product={product} />
 
       <ConfirmDialog
         open={confirmOpen}

@@ -1,11 +1,11 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { ArrowLeft, Plus, ShoppingCart, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { cartsApi, cartStatusTone } from '@/features/carts/api';
-import { productsApi } from '@/features/products/api';
+import { productsApi, variantsApi } from '@/features/products/api';
 import { cartTotalCents, type CartStatus } from '@/features/carts/types';
 import { ConfirmDialog } from '@/components/ConfirmDialog';
 import { PageHeader } from '@/components/PageHeader';
@@ -41,6 +41,7 @@ export function CartDetail() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [productId, setProductId] = useState('');
+  const [variantId, setVariantId] = useState('');
   const [quantity, setQuantity] = useState(1);
   const [confirmDelete, setConfirmDelete] = useState(false);
 
@@ -55,6 +56,20 @@ export function CartDetail() {
     queryFn: () => productsApi.list({ pageSize: 100, isActive: true }),
   });
 
+  const selectedProduct = productsQuery.data?.items.find((p) => p.id === productId);
+  const hasVariants = (selectedProduct?._count?.variants ?? 0) > 0;
+  const variantsQuery = useQuery({
+    queryKey: ['product-variants', productId],
+    queryFn: () => variantsApi.list(productId),
+    enabled: !!productId && hasVariants,
+  });
+  const activeVariants = (variantsQuery.data ?? []).filter((v) => v.isActive);
+
+  // Reset the variant choice whenever the product changes.
+  useEffect(() => {
+    setVariantId('');
+  }, [productId]);
+
   const onCartChanged = () => {
     queryClient.invalidateQueries({ queryKey: ['cart', id] });
     queryClient.invalidateQueries({ queryKey: ['carts'] });
@@ -62,15 +77,18 @@ export function CartDetail() {
   const onError = (err: unknown) => toast.error(extractErrorMessage(err));
 
   const addItem = useMutation({
-    mutationFn: () => cartsApi.addItem(id!, productId, quantity),
+    mutationFn: () => cartsApi.addItem(id!, productId, quantity, variantId || undefined),
     onSuccess: () => {
       setProductId('');
+      setVariantId('');
       setQuantity(1);
       onCartChanged();
       toast.success(t('carts.item_added_toast'));
     },
     onError,
   });
+
+  const needsVariant = hasVariants && !variantId;
 
   const updateItem = useMutation({
     mutationFn: ({ itemId, qty }: { itemId: string; qty: number }) =>
@@ -185,7 +203,14 @@ export function CartDetail() {
             <TableBody>
               {cart.items.map((item) => (
                 <TableRow key={item.id} className="hover:bg-transparent">
-                  <TableCell className="font-medium">{item.product.name}</TableCell>
+                  <TableCell className="font-medium">
+                    {item.product.name}
+                    {item.variantName && (
+                      <span className="ms-1 text-xs font-normal text-muted-foreground">
+                        · {item.variantName}
+                      </span>
+                    )}
+                  </TableCell>
                   <TableCell className="font-mono text-xs text-muted-foreground">
                     {item.product.sku}
                   </TableCell>
@@ -251,6 +276,23 @@ export function CartDetail() {
               </SelectContent>
             </Select>
           </div>
+          {hasVariants && (
+            <div className="min-w-48 space-y-1">
+              <Label>{t('variants.name')}</Label>
+              <Select value={variantId || undefined} onValueChange={setVariantId}>
+                <SelectTrigger>
+                  <SelectValue placeholder={t('products.select_variant')} />
+                </SelectTrigger>
+                <SelectContent>
+                  {activeVariants.map((v) => (
+                    <SelectItem key={v.id} value={v.id}>
+                      {v.name} — {formatMoney(v.priceCents, selectedProduct?.currency)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
           <div className="space-y-1">
             <Label>{t('carts.quantity')}</Label>
             <Input
@@ -261,7 +303,10 @@ export function CartDetail() {
               className="w-24"
             />
           </div>
-          <Button onClick={() => productId && addItem.mutate()} disabled={!productId || addItem.isPending}>
+          <Button
+            onClick={() => productId && addItem.mutate()}
+            disabled={!productId || needsVariant || addItem.isPending}
+          >
             <Plus className="h-4 w-4" />
             {addItem.isPending ? t('common.working') : t('carts.add_to_cart')}
           </Button>

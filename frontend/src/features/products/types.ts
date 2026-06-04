@@ -8,6 +8,20 @@ export interface ProductCategoryRef {
   name: string;
 }
 
+export interface ProductVariant {
+  id: string;
+  productId: string;
+  name: string;
+  sku: string;
+  priceCents: number;
+  stock: number;
+  imageUrl: string | null;
+  isActive: boolean;
+  sortOrder: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface Product {
   id: string;
   name: string;
@@ -24,6 +38,18 @@ export interface Product {
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
+  variants?: ProductVariant[];
+  _count?: { variants: number };
+}
+
+export interface VariantWritePayload {
+  name: string;
+  sku: string;
+  priceCents: number;
+  stock: number;
+  imageUrl?: string;
+  sortOrder?: number;
+  isActive?: boolean;
 }
 
 export interface ProductListResponse {

@@ -81,7 +81,22 @@
     "delete_message": "حذف \"{{name}}\"؟ لا يمكن التراجع عن ذلك.",
     "saved_toast": "تم حفظ المنتج",
     "deleted_toast": "تم حذف المنتج",
-    "no_image": "لا توجد صورة"
+    "no_image": "لا توجد صورة",
+    "variants_count": "المتغيرات",
+    "select_variant": "اختر متغيرًا"
+  },
+  "variants": {
+    "title": "المتغيرات",
+    "add": "إضافة متغير",
+    "new": "متغير جديد",
+    "edit": "تعديل المتغير",
+    "name": "المتغير",
+    "name_placeholder": "مثال: أحمر / 50 مل",
+    "empty": "لا توجد متغيرات — يُباع هذا المنتج بسعره الأساسي.",
+    "saved_toast": "تم حفظ المتغير",
+    "deleted_toast": "تم حذف المتغير",
+    "delete_title": "حذف المتغير",
+    "delete_message": "حذف \"{{name}}\"؟ لا يمكن التراجع عن ذلك."
   },
   "categories": {
     "title": "الفئات",

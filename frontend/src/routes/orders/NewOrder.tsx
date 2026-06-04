@@ -1,11 +1,11 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { ArrowLeft, ClipboardList, Plus, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { customersApi } from '@/features/customers/api';
-import { productsApi } from '@/features/products/api';
+import { productsApi, variantsApi } from '@/features/products/api';
 import type { Product } from '@/features/products/types';
 import { ordersApi } from '@/features/orders/api';
 import { PageHeader } from '@/components/PageHeader';
@@ -15,6 +15,13 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
   Table,
   TableBody,
   TableCell,
@@ -22,15 +29,20 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { formatMoney, extractErrorMessage } from '@/lib/format';
+import { formatMoney, extractErrorMessage, toMinor } from '@/lib/format';
 
 interface DraftItem {
   productId: string;
+  variantId: string | null;
+  variantName: string | null;
   name: string;
   priceCents: number;
   currency: string;
   quantity: number;
 }
+
+const lineKey = (productId: string, variantId: string | null) =>
+  `${productId}:${variantId ?? ''}`;
 
 export function NewOrder() {
   const { t } = useTranslation();
@@ -39,56 +51,85 @@ export function NewOrder() {
   const [items, setItems] = useState<DraftItem[]>([]);
   const [productPick, setProductPick] = useState('');
   const [pickedProduct, setPickedProduct] = useState<Product | null>(null);
+  const [variantPick, setVariantPick] = useState('');
   const [quantityPick, setQuantityPick] = useState(1);
-  const [taxDollars, setTaxDollars] = useState('0');
-  const [shippingDollars, setShippingDollars] = useState('0');
+  const [taxInput, setTaxInput] = useState('0');
+  const [shippingInput, setShippingInput] = useState('0');
+
+  // Order currency follows the items (all products share IQD by default).
+  const currency = items[0]?.currency ?? pickedProduct?.currency ?? 'IQD';
+
+  const hasVariants = (pickedProduct?._count?.variants ?? 0) > 0;
+  const { data: variantOptions } = useQuery({
+    queryKey: ['product-variants', pickedProduct?.id],
+    queryFn: () => variantsApi.list(pickedProduct!.id),
+    enabled: !!pickedProduct && hasVariants,
+  });
+  const activeVariants = (variantOptions ?? []).filter((v) => v.isActive);
+
+  // Reset the variant choice whenever the product changes.
+  useEffect(() => {
+    setVariantPick('');
+  }, [pickedProduct?.id]);
 
   const subtotalCents = useMemo(
     () => items.reduce((sum, i) => sum + i.priceCents * i.quantity, 0),
     [items],
   );
 
-  const taxCents = Math.max(0, Math.round(Number(taxDollars) * 100) || 0);
-  const shippingCents = Math.max(0, Math.round(Number(shippingDollars) * 100) || 0);
+  const taxCents = Math.max(0, toMinor(Number(taxInput) || 0, currency));
+  const shippingCents = Math.max(0, toMinor(Number(shippingInput) || 0, currency));
   const totalCents = subtotalCents + taxCents + shippingCents;
 
+  const needsVariant = hasVariants && !variantPick;
+
   const addItem = () => {
-    if (!pickedProduct) return;
+    if (!pickedProduct || needsVariant) return;
     const product = pickedProduct;
+    const variant = activeVariants.find((v) => v.id === variantPick) ?? null;
+    const draft: DraftItem = {
+      productId: product.id,
+      variantId: variant?.id ?? null,
+      variantName: variant?.name ?? null,
+      name: product.name,
+      priceCents: variant?.priceCents ?? product.priceCents,
+      currency: product.currency,
+      quantity: quantityPick,
+    };
     setItems((prev) => {
-      const existing = prev.find((i) => i.productId === product.id);
+      const key = lineKey(draft.productId, draft.variantId);
+      const existing = prev.find((i) => lineKey(i.productId, i.variantId) === key);
       if (existing) {
         return prev.map((i) =>
-          i.productId === product.id ? { ...i, quantity: i.quantity + quantityPick } : i,
+          lineKey(i.productId, i.variantId) === key
+            ? { ...i, quantity: i.quantity + quantityPick }
+            : i,
         );
       }
-      return [
-        ...prev,
-        {
-          productId: product.id,
-          name: product.name,
-          priceCents: product.priceCents,
-          currency: product.currency,
-          quantity: quantityPick,
-        },
-      ];
+      return [...prev, draft];
     });
     setProductPick('');
     setPickedProduct(null);
+    setVariantPick('');
     setQuantityPick(1);
   };
 
-  const removeItem = (productId: string) => {
-    setItems((prev) => prev.filter((i) => i.productId !== productId));
+  const removeItem = (key: string) => {
+    setItems((prev) => prev.filter((i) => lineKey(i.productId, i.variantId) !== key));
   };
 
   const createOrder = useMutation({
     mutationFn: () =>
       ordersApi.create({
         customerId,
-        items: items.map((i) => ({ productId: i.productId, quantity: i.quantity })),
+        items: items.map((i) => ({
+          productId: i.productId,
+          variantId: i.variantId ?? undefined,
+          quantity: i.quantity,
+        })),
         taxCents: taxCents || undefined,
         shippingCents: shippingCents || undefined,
+        currency,
       }),
     onSuccess: (order) => navigate(`/orders/${order.id}`),
     onError: (err) => toast.error(extractErrorMessage(err)),
@@ -145,25 +186,35 @@ export function NewOrder() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {items.map((i) => (
-                      <TableRow key={i.productId} className="hover:bg-transparent">
-                        <TableCell className="font-medium">{i.name}</TableCell>
-                        <TableCell>{i.quantity}</TableCell>
-                        <TableCell>{formatMoney(i.priceCents, i.currency)}</TableCell>
-                        <TableCell>{formatMoney(i.priceCents * i.quantity, i.currency)}</TableCell>
-                        <TableCell className="text-end">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8 text-destructive hover:bg-destructive/10 hover:text-destructive"
-                            onClick={() => removeItem(i.productId)}
-                            aria-label={t('common.delete')}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    ))}
+                    {items.map((i) => {
+                      const key = lineKey(i.productId, i.variantId);
+                      return (
+                        <TableRow key={key} className="hover:bg-transparent">
+                          <TableCell className="font-medium">
+                            {i.name}
+                            {i.variantName && (
+                              <span className="ms-1 text-xs font-normal text-muted-foreground">
+                                · {i.variantName}
+                              </span>
+                            )}
+                          </TableCell>
+                          <TableCell>{i.quantity}</TableCell>
+                          <TableCell>{formatMoney(i.priceCents, i.currency)}</TableCell>
+                          <TableCell>{formatMoney(i.priceCents * i.quantity, i.currency)}</TableCell>
+                          <TableCell className="text-end">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8 text-destructive hover:bg-destructive/10 hover:text-destructive"
+                              onClick={() => removeItem(key)}
+                              aria-label={t('common.delete')}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
                   </TableBody>
                 </Table>
               </div>
@@ -189,6 +240,23 @@ export function NewOrder() {
                   getItemLabel={(p) => `${p.name} (${formatMoney(p.priceCents, p.currency)})`}
                 />
               </div>
+              {hasVariants && (
+                <div className="min-w-48 space-y-1">
+                  <Label className="text-xs text-muted-foreground">{t('variants.name')}</Label>
+                  <Select value={variantPick} onValueChange={setVariantPick}>
+                    <SelectTrigger>
+                      <SelectValue placeholder={t('products.select_variant')} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {activeVariants.map((v) => (
+                        <SelectItem key={v.id} value={v.id}>
+                          {v.name} — {formatMoney(v.priceCents, currency)}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
               <div className="space-y-1">
                 <Label className="text-xs text-muted-foreground">{t('carts.quantity')}</Label>
                 <Input
@@ -199,7 +267,12 @@ export function NewOrder() {
                   className="w-24"
                 />
               </div>
-              <Button type="button" variant="outline" onClick={addItem} disabled={!pickedProduct}>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={addItem}
+                disabled={!pickedProduct || needsVariant}
+              >
                 <Plus className="h-4 w-4" />
                 {t('carts.add_item')}
               </Button>
@@ -209,14 +282,14 @@ export function NewOrder() {
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div className="space-y-1">
               <Label className="text-xs text-muted-foreground">{t('orders.tax')}</Label>
-              <Input inputMode="decimal" value={taxDollars} onChange={(e) => setTaxDollars(e.target.value)} />
+              <Input inputMode="decimal" value={taxInput} onChange={(e) => setTaxInput(e.target.value)} />
             </div>
             <div className="space-y-1">
               <Label className="text-xs text-muted-foreground">{t('orders.shipping')}</Label>
               <Input
                 inputMode="decimal"
-                value={shippingDollars}
-                onChange={(e) => setShippingDollars(e.target.value)}
+                value={shippingInput}
+                onChange={(e) => setShippingInput(e.target.value)}
               />
             </div>
           </div>
@@ -224,19 +297,19 @@ export function NewOrder() {
           <div className="space-y-1.5 border-t pt-4 text-sm">
             <div className="flex justify-between text-muted-foreground">
               <span>{t('orders.subtotal')}</span>
-              <span>{formatMoney(subtotalCents)}</span>
+              <span>{formatMoney(subtotalCents, currency)}</span>
             </div>
             <div className="flex justify-between text-muted-foreground">
               <span>{t('orders.tax')}</span>
-              <span>{formatMoney(taxCents)}</span>
+              <span>{formatMoney(taxCents, currency)}</span>
             </div>
             <div className="flex justify-between text-muted-foreground">
               <span>{t('orders.shipping')}</span>
-              <span>{formatMoney(shippingCents)}</span>
+              <span>{formatMoney(shippingCents, currency)}</span>
             </div>
             <div className="mt-2 flex justify-between text-base font-semibold">
               <span>{t('orders.total')}</span>
-              <span>{formatMoney(totalCents)}</span>
+              <span>{formatMoney(totalCents, currency)}</span>
             </div>
           </div>
 

@@ -1,11 +1,36 @@
-export const formatMoney = (cents: number, currency = 'USD') => {
+// Number of minor-unit digits per currency. Money is stored as an integer in the
+// currency's minor unit; IQD has no minor unit in practice, so its integer holds
+// whole dinars (exponent 0). Anything not listed defaults to 2 (cents-style).
+const MINOR_DIGITS: Record<string, number> = {
+  IQD: 0,
+  USD: 2,
+  EUR: 2,
+  GBP: 2,
+};
+
+export const minorDigits = (currency = 'IQD') =>
+  MINOR_DIGITS[currency.toUpperCase()] ?? 2;
+
+/** Convert a decimal amount (what the user types) into integer minor units. */
+export const toMinor = (amount: number, currency = 'IQD') =>
+  Math.round(amount * 10 ** minorDigits(currency));
+
+/** Convert integer minor units back into a decimal amount (for form inputs). */
+export const fromMinor = (minor: number, currency = 'IQD') =>
+  minor / 10 ** minorDigits(currency);
+
+export const formatMoney = (minor: number, currency = 'IQD') => {
+  const digits = minorDigits(currency);
+  const value = minor / 10 ** digits;
   try {
     return new Intl.NumberFormat(undefined, {
       style: 'currency',
       currency,
-    }).format(cents / 100);
+      minimumFractionDigits: digits,
+      maximumFractionDigits: digits,
+    }).format(value);
   } catch {
-    return `${(cents / 100).toFixed(2)} ${currency}`;
+    return `${value.toFixed(digits)} ${currency}`;
   }
 };
 

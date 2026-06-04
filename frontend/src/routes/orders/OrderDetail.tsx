@@ -148,7 +148,14 @@ export function OrderDetail() {
           <TableBody>
             {order.items.map((item) => (
               <TableRow key={item.id} className="hover:bg-transparent">
-                <TableCell className="font-medium">{item.name}</TableCell>
+                <TableCell className="font-medium">
+                  {item.name}
+                  {item.variantName && (
+                    <span className="ms-1 text-xs font-normal text-muted-foreground">
+                      · {item.variantName}
+                    </span>
+                  )}
+                </TableCell>
                 <TableCell className="font-mono text-xs text-muted-foreground">{item.sku}</TableCell>
                 <TableCell>{formatMoney(item.priceCents, order.currency)}</TableCell>
                 <TableCell>{item.quantity}</TableCell>

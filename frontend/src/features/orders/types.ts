@@ -16,6 +16,8 @@ export interface OrderItem {
   id: string;
   orderId: string;
   productId: string;
+  variantId: string | null;
+  variantName: string | null;
   name: string;
   sku: string;
   quantity: number;
@@ -47,7 +49,7 @@ export interface OrderListResponse {
 
 export interface CreateOrderPayload {
   customerId: string;
-  items: Array<{ productId: string; quantity: number }>;
+  items: Array<{ productId: string; variantId?: string; quantity: number }>;
   taxCents?: number;
   shippingCents?: number;
   currency?: string;
