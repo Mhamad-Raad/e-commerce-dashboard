@@ -9,12 +9,13 @@ import { ProductImage } from '@/features/products/ProductImage';
 import { PageHeader } from '@/components/PageHeader';
 import { ConfirmDialog } from '@/components/ConfirmDialog';
 import { DetailRow } from '@/components/DetailRow';
+import { PriceLabel } from '@/components/PriceLabel';
 import { ProductVariants } from './ProductVariants';
 import { StatusBadge } from '@/components/StatusBadge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { formatDate, formatMoney, extractErrorMessage } from '@/lib/format';
+import { formatDate, extractErrorMessage } from '@/lib/format';
 
 export function ProductDetail() {
   const { id } = useParams<{ id: string }>();
@@ -120,7 +121,11 @@ export function ProductDetail() {
           </CardHeader>
           <CardContent className="divide-y pt-0">
             <DetailRow label={t('products.price')}>
-              {formatMoney(product.priceCents, product.currency)}
+              <PriceLabel
+                priceCents={product.priceCents}
+                salePriceCents={product.salePriceCents}
+                currency={product.currency}
+              />
             </DetailRow>
             <DetailRow label={t('products.stock')}>{product.stock}</DetailRow>
             <DetailRow label={t('products.store')}>

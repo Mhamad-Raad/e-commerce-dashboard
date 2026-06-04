@@ -5,16 +5,21 @@ import { cn } from '@/lib/utils';
 interface FormFieldProps {
   label: string;
   error?: string;
+  hint?: string;
   children: ReactNode;
 }
 
 /** Label + control + validation message, used across the entity forms. */
-export function FormField({ label, error, children }: FormFieldProps) {
+export function FormField({ label, error, hint, children }: FormFieldProps) {
   return (
     <div className="space-y-1.5">
       <Label className={cn(error && 'text-destructive')}>{label}</Label>
       {children}
-      {error && <p className="text-xs text-destructive">{error}</p>}
+      {error ? (
+        <p className="text-xs text-destructive">{error}</p>
+      ) : (
+        hint && <p className="text-xs text-muted-foreground">{hint}</p>
+      )}
     </div>
   );
 }

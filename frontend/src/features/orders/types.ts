@@ -31,6 +31,8 @@ export interface Order {
   number: string;
   customerId: string;
   subtotalCents: number;
+  discountCents: number;
+  couponCode: string | null;
   taxCents: number;
   shippingCents: number;
   totalCents: number;
@@ -64,4 +66,5 @@ export interface CreateOrderPayload {
   shippingCents?: number;
   currency?: string;
   addressId?: string;
+  couponCode?: string;
 }

@@ -1,3 +1,5 @@
+import type { Coupon } from '../coupons/types';
+
 export type CartStatus = 'OPEN' | 'CHECKED_OUT' | 'ABANDONED';
 
 export interface CartCustomerSummary {
@@ -28,6 +30,9 @@ export interface Cart {
   id: string;
   customerId: string;
   status: CartStatus;
+  couponId: string | null;
+  coupon?: Coupon | null;
+  discountCents: number;
   createdAt: string;
   updatedAt: string;
   customer: CartCustomerSummary;
@@ -41,5 +46,8 @@ export interface CartListResponse {
   pageSize: number;
 }
 
-export const cartTotalCents = (cart: Pick<Cart, 'items'>) =>
+export const cartSubtotalCents = (cart: Pick<Cart, 'items'>) =>
   cart.items.reduce((sum, i) => sum + i.priceCents * i.quantity, 0);
+
+export const cartTotalCents = (cart: Pick<Cart, 'items' | 'discountCents'>) =>
+  Math.max(0, cartSubtotalCents(cart) - (cart.discountCents ?? 0));

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useMutation, useQuery } from '@tanstack/react-query';
+import { couponsApi } from '@/features/coupons/api';
 import { useTranslation } from 'react-i18next';
 import { ArrowLeft, ClipboardList, Plus, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
@@ -58,6 +59,8 @@ export function NewOrder() {
   const [quantityPick, setQuantityPick] = useState(1);
   const [taxInput, setTaxInput] = useState('0');
   const [shippingInput, setShippingInput] = useState('0');
+  const [couponInput, setCouponInput] = useState('');
+  const [appliedCoupon, setAppliedCoupon] = useState<{ code: string; discountCents: number } | null>(null);
 
   // Order currency follows the items (all products share IQD by default).
   const currency = items[0]?.currency ?? pickedProduct?.currency ?? 'IQD';
@@ -92,7 +95,24 @@ export function NewOrder() {
 
   const taxCents = Math.max(0, toMinor(Number(taxInput) || 0, currency));
   const shippingCents = Math.max(0, toMinor(Number(shippingInput) || 0, currency));
-  const totalCents = subtotalCents + taxCents + shippingCents;
+  const discountCents = appliedCoupon?.discountCents ?? 0;
+  const totalCents = Math.max(0, subtotalCents - discountCents + taxCents + shippingCents);
+
+  // A coupon is validated against a specific subtotal; if the items change the
+  // applied coupon is cleared so it must be re-applied against the new total.
+  useEffect(() => {
+    setAppliedCoupon(null);
+  }, [items]);
+
+  const applyCoupon = useMutation({
+    mutationFn: () => couponsApi.validate(couponInput.trim(), subtotalCents),
+    onSuccess: (res) => {
+      setAppliedCoupon({ code: res.coupon.code, discountCents: res.discountCents });
+      setCouponInput('');
+      toast.success(t('coupons.applied_toast'));
+    },
+    onError: (err) => toast.error(extractErrorMessage(err)),
+  });
 
   const needsVariant = hasVariants && !variantPick;
 
@@ -144,6 +164,7 @@ export function NewOrder() {
         shippingCents: shippingCents || undefined,
         currency,
         addressId: addressId || undefined,
+        couponCode: appliedCoupon?.code,
       }),
     onSuccess: (order) => navigate(`/orders/${order.id}`),
     onError: (err) => toast.error(extractErrorMessage(err)),
@@ -327,11 +348,54 @@ export function NewOrder() {
             </div>
           </div>
 
+          <div className="space-y-1">
+            <Label className="text-xs text-muted-foreground">{t('coupons.coupon')}</Label>
+            {appliedCoupon ? (
+              <div className="flex items-center gap-3">
+                <span className="rounded-md bg-emerald-500/15 px-2 py-1 font-mono text-xs text-emerald-600 dark:text-emerald-400">
+                  {appliedCoupon.code}
+                </span>
+                <span className="text-sm text-muted-foreground">
+                  −{formatMoney(appliedCoupon.discountCents, currency)}
+                </span>
+                <Button type="button" variant="outline" size="sm" onClick={() => setAppliedCoupon(null)}>
+                  {t('coupons.remove')}
+                </Button>
+              </div>
+            ) : (
+              <div className="flex gap-2">
+                <Input
+                  className="font-mono uppercase"
+                  value={couponInput}
+                  onChange={(e) => setCouponInput(e.target.value)}
+                  placeholder={t('coupons.code_placeholder')}
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => couponInput.trim() && applyCoupon.mutate()}
+                  disabled={!couponInput.trim() || items.length === 0 || applyCoupon.isPending}
+                >
+                  {t('coupons.apply')}
+                </Button>
+              </div>
+            )}
+          </div>
+
           <div className="space-y-1.5 border-t pt-4 text-sm">
             <div className="flex justify-between text-muted-foreground">
               <span>{t('orders.subtotal')}</span>
               <span>{formatMoney(subtotalCents, currency)}</span>
             </div>
+            {discountCents > 0 && (
+              <div className="flex justify-between text-emerald-600 dark:text-emerald-400">
+                <span>
+                  {t('coupons.discount')}
+                  {appliedCoupon && <span className="ms-1 font-mono text-xs">({appliedCoupon.code})</span>}
+                </span>
+                <span>−{formatMoney(discountCents, currency)}</span>
+              </div>
+            )}
             <div className="flex justify-between text-muted-foreground">
               <span>{t('orders.tax')}</span>
               <span>{formatMoney(taxCents, currency)}</span>

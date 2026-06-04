@@ -14,6 +14,7 @@ export interface ProductVariant {
   name: string;
   sku: string;
   priceCents: number;
+  salePriceCents: number | null;
   stock: number;
   imageUrl: string | null;
   isActive: boolean;
@@ -28,6 +29,7 @@ export interface Product {
   description: string | null;
   sku: string;
   priceCents: number;
+  salePriceCents: number | null;
   currency: string;
   stock: number;
   imageUrl: string | null;
@@ -46,6 +48,7 @@ export interface VariantWritePayload {
   name: string;
   sku: string;
   priceCents: number;
+  salePriceCents?: number | null;
   stock: number;
   imageUrl?: string;
   sortOrder?: number;
@@ -64,6 +67,7 @@ export interface ProductWritePayload {
   description?: string;
   sku: string;
   priceCents: number;
+  salePriceCents?: number | null;
   currency?: string;
   stock: number;
   imageUrl?: string;

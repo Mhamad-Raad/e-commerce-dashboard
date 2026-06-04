@@ -6,6 +6,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 
 interface RowActionsProps {
   editTo?: string;
+  onEdit?: () => void;
   onDelete?: () => void;
 }
 
@@ -14,7 +15,7 @@ interface RowActionsProps {
  * DataTable already stops click propagation, but we guard here too so the
  * component is safe to use anywhere inside a clickable row.
  */
-export function RowActions({ editTo, onDelete }: RowActionsProps) {
+export function RowActions({ editTo, onEdit, onDelete }: RowActionsProps) {
   const { t } = useTranslation();
 
   return (
@@ -29,6 +30,22 @@ export function RowActions({ editTo, onDelete }: RowActionsProps) {
               <Link to={editTo} aria-label={t('common.edit')}>
                 <Pencil className="h-4 w-4" />
               </Link>
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>{t('common.edit')}</TooltipContent>
+        </Tooltip>
+      )}
+      {onEdit && (
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8"
+              onClick={onEdit}
+              aria-label={t('common.edit')}
+            >
+              <Pencil className="h-4 w-4" />
             </Button>
           </TooltipTrigger>
           <TooltipContent>{t('common.edit')}</TooltipContent>

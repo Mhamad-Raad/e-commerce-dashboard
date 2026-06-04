@@ -205,6 +205,15 @@ export function OrderDetail() {
             <span>{t('orders.subtotal')}</span>
             <span>{formatMoney(order.subtotalCents, order.currency)}</span>
           </div>
+          {order.discountCents > 0 && (
+            <div className="flex justify-between text-emerald-600 dark:text-emerald-400">
+              <span>
+                {t('coupons.discount')}
+                {order.couponCode && <span className="ms-1 font-mono text-xs">({order.couponCode})</span>}
+              </span>
+              <span>−{formatMoney(order.discountCents, order.currency)}</span>
+            </div>
+          )}
           <div className="flex justify-between text-muted-foreground">
             <span>{t('orders.tax')}</span>
             <span>{formatMoney(order.taxCents, order.currency)}</span>

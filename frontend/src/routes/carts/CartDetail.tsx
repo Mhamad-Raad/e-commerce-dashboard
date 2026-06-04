@@ -6,7 +6,7 @@ import { ArrowLeft, Plus, ShoppingCart, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { cartsApi, cartStatusTone } from '@/features/carts/api';
 import { productsApi, variantsApi } from '@/features/products/api';
-import { cartTotalCents, type CartStatus } from '@/features/carts/types';
+import { cartSubtotalCents, cartTotalCents, type CartStatus } from '@/features/carts/types';
 import { ConfirmDialog } from '@/components/ConfirmDialog';
 import { PageHeader } from '@/components/PageHeader';
 import { EmptyState } from '@/components/EmptyState';
@@ -43,6 +43,7 @@ export function CartDetail() {
   const [productId, setProductId] = useState('');
   const [variantId, setVariantId] = useState('');
   const [quantity, setQuantity] = useState(1);
+  const [couponInput, setCouponInput] = useState('');
   const [confirmDelete, setConfirmDelete] = useState(false);
 
   const cartQuery = useQuery({
@@ -112,6 +113,22 @@ export function CartDetail() {
     onError,
   });
 
+  const applyCoupon = useMutation({
+    mutationFn: () => cartsApi.applyCoupon(id!, couponInput.trim()),
+    onSuccess: () => {
+      setCouponInput('');
+      onCartChanged();
+      toast.success(t('coupons.applied_toast'));
+    },
+    onError,
+  });
+
+  const removeCoupon = useMutation({
+    mutationFn: () => cartsApi.removeCoupon(id!),
+    onSuccess: onCartChanged,
+    onError,
+  });
+
   const removeCart = useMutation({
     mutationFn: () => cartsApi.remove(id!),
     onSuccess: () => {
@@ -147,6 +164,7 @@ export function CartDetail() {
   }
 
   const cart = cartQuery.data;
+  const subtotal = cartSubtotalCents(cart);
   const total = cartTotalCents(cart);
 
   return (
@@ -244,6 +262,25 @@ export function CartDetail() {
                 </TableRow>
               ))}
               <TableRow className="hover:bg-transparent">
+                <TableCell colSpan={4} className="text-end text-muted-foreground">
+                  {t('orders.subtotal')}
+                </TableCell>
+                <TableCell colSpan={2}>{formatMoney(subtotal)}</TableCell>
+              </TableRow>
+              {cart.discountCents > 0 && (
+                <TableRow className="hover:bg-transparent">
+                  <TableCell colSpan={4} className="text-end text-muted-foreground">
+                    {t('coupons.discount')}
+                    {cart.coupon && (
+                      <span className="ms-1 font-mono text-xs">({cart.coupon.code})</span>
+                    )}
+                  </TableCell>
+                  <TableCell colSpan={2} className="text-emerald-600 dark:text-emerald-400">
+                    −{formatMoney(cart.discountCents)}
+                  </TableCell>
+                </TableRow>
+              )}
+              <TableRow className="hover:bg-transparent">
                 <TableCell colSpan={4} className="text-end font-medium text-muted-foreground">
                   {t('carts.total')}
                 </TableCell>
@@ -254,6 +291,48 @@ export function CartDetail() {
             </TableBody>
           </Table>
         )}
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-sm">{t('coupons.coupon')}</CardTitle>
+        </CardHeader>
+        <CardContent className="flex flex-wrap items-end gap-3 pt-0">
+          {cart.coupon ? (
+            <div className="flex items-center gap-3">
+              <StatusBadge label={cart.coupon.code} tone="green" />
+              <span className="text-sm text-muted-foreground">
+                −{formatMoney(cart.discountCents)}
+              </span>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => removeCoupon.mutate()}
+                disabled={removeCoupon.isPending}
+              >
+                {t('coupons.remove')}
+              </Button>
+            </div>
+          ) : (
+            <>
+              <div className="min-w-48 flex-1 space-y-1">
+                <Label>{t('coupons.code')}</Label>
+                <Input
+                  className="font-mono uppercase"
+                  value={couponInput}
+                  onChange={(e) => setCouponInput(e.target.value)}
+                  placeholder={t('coupons.code_placeholder')}
+                />
+              </div>
+              <Button
+                onClick={() => couponInput.trim() && applyCoupon.mutate()}
+                disabled={!couponInput.trim() || applyCoupon.isPending}
+              >
+                {applyCoupon.isPending ? t('common.working') : t('coupons.apply')}
+              </Button>
+            </>
+          )}
+        </CardContent>
       </Card>
 
       <Card>

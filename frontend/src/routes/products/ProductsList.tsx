@@ -15,9 +15,10 @@ import { TablePagination } from '@/components/TablePagination';
 import { RowActions } from '@/components/RowActions';
 import { DataTable, type Column } from '@/components/DataTable';
 import { StatusBadge } from '@/components/StatusBadge';
+import { PriceLabel } from '@/components/PriceLabel';
 import { Button } from '@/components/ui/button';
 import { useListParams } from '@/hooks/useListParams';
-import { formatDate, formatMoney, extractErrorMessage } from '@/lib/format';
+import { formatDate, extractErrorMessage } from '@/lib/format';
 
 export function ProductsList() {
   const { t } = useTranslation();
@@ -76,7 +77,13 @@ export function ProductsList() {
           <span className="text-muted-foreground">{t('common.none')}</span>
         ),
     },
-    { key: 'price', header: t('products.price'), cell: (p) => formatMoney(p.priceCents, p.currency) },
+    {
+      key: 'price',
+      header: t('products.price'),
+      cell: (p) => (
+        <PriceLabel priceCents={p.priceCents} salePriceCents={p.salePriceCents} currency={p.currency} />
+      ),
+    },
     {
       key: 'variants',
       header: t('products.variants_count'),

@@ -16,6 +16,7 @@
     "customers": "Customers",
     "carts": "Carts",
     "orders": "Orders",
+    "coupons": "Coupons",
     "reports": "Reports"
   },
   "common": {
@@ -83,7 +84,10 @@
     "deleted_toast": "Product deleted",
     "no_image": "No image",
     "variants_count": "Variants",
-    "select_variant": "Select a variant"
+    "select_variant": "Select a variant",
+    "sale_price": "Sale price",
+    "sale_price_placeholder": "No sale",
+    "sale_price_hint": "Leave blank for no discount"
   },
   "variants": {
     "title": "Variants",
@@ -283,6 +287,39 @@
       "paid": "Paid",
       "failed": "Failed",
       "refunded": "Refunded"
+    }
+  },
+  "coupons": {
+    "title": "Coupons",
+    "new": "New coupon",
+    "edit": "Edit coupon",
+    "coupon": "Coupon",
+    "search_placeholder": "Search by code",
+    "total_count": "{{count}} total",
+    "code": "Code",
+    "code_placeholder": "e.g. WELCOME10",
+    "type": "Type",
+    "discount": "Discount",
+    "value_percent": "Percent off (%)",
+    "value_fixed": "Amount off",
+    "min_subtotal": "Min. subtotal",
+    "max_redemptions": "Max redemptions",
+    "max_redemptions_hint": "Leave blank for unlimited",
+    "redemptions": "Redemptions",
+    "starts_at": "Starts",
+    "expires_at": "Expires",
+    "apply": "Apply",
+    "remove": "Remove",
+    "applied_toast": "Coupon applied",
+    "empty_title": "No coupons yet",
+    "empty_desc": "Create a coupon to offer cart discounts.",
+    "saved_toast": "Coupon saved",
+    "deleted_toast": "Coupon deleted",
+    "delete_title": "Delete coupon",
+    "delete_message": "Delete coupon \"{{code}}\"? This can't be undone.",
+    "types": {
+      "percent": "Percentage",
+      "fixed": "Fixed amount"
     }
   },
   "carts": {

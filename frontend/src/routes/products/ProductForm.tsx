@@ -26,6 +26,13 @@ const schema = z.object({
   name: z.string().min(1).max(200),
   sku: z.string().min(2).max(40).regex(/^[A-Z0-9_-]+$/i),
   price: z.string().min(1).refine((v) => !Number.isNaN(Number(v)) && Number(v) >= 0),
+  salePrice: z
+    .string()
+    .optional()
+    .or(z.literal(''))
+    .refine((v) => !v || (!Number.isNaN(Number(v)) && Number(v) >= 0), {
+      message: 'Invalid sale price',
+    }),
   currency: z.string().length(3),
   stock: z.string().min(1).refine((v) => Number.isInteger(Number(v)) && Number(v) >= 0),
   storeId: z.string().min(1),
@@ -41,6 +48,7 @@ const defaultValues: FormValues = {
   name: '',
   sku: '',
   price: '',
+  salePrice: '',
   currency: 'IQD',
   stock: '0',
   storeId: '',
@@ -79,6 +87,7 @@ export function ProductForm() {
         name: p.name,
         sku: p.sku,
         price: fromMinor(p.priceCents, p.currency).toString(),
+        salePrice: p.salePriceCents != null ? fromMinor(p.salePriceCents, p.currency).toString() : '',
         currency: p.currency,
         stock: p.stock.toString(),
         storeId: p.storeId,
@@ -96,6 +105,7 @@ export function ProductForm() {
         name: values.name.trim(),
         sku: values.sku.trim(),
         priceCents: toMinor(Number(values.price), values.currency),
+        salePriceCents: values.salePrice ? toMinor(Number(values.salePrice), values.currency) : null,
         currency: values.currency.toUpperCase(),
         stock: Number(values.stock),
         storeId: values.storeId,
@@ -149,6 +159,13 @@ export function ProductForm() {
               </FormField>
               <FormField label={t('products.price')} error={errors.price?.message}>
                 <Input inputMode="decimal" {...register('price')} />
+              </FormField>
+              <FormField
+                label={t('products.sale_price')}
+                error={errors.salePrice?.message}
+                hint={t('products.sale_price_hint')}
+              >
+                <Input inputMode="decimal" placeholder={t('products.sale_price_placeholder')} {...register('salePrice')} />
               </FormField>
               <FormField label={t('common.currency')} error={errors.currency?.message}>
                 <Input className="uppercase" maxLength={3} {...register('currency')} />

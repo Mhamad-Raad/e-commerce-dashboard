@@ -50,6 +50,14 @@ export const cartsApi = {
     const res = await api.delete<Cart>(`/carts/${cartId}/items/${itemId}`);
     return res.data;
   },
+  applyCoupon: async (cartId: string, code: string): Promise<Cart> => {
+    const res = await api.post<Cart>(`/carts/${cartId}/coupon`, { code });
+    return res.data;
+  },
+  removeCoupon: async (cartId: string): Promise<Cart> => {
+    const res = await api.delete<Cart>(`/carts/${cartId}/coupon`);
+    return res.data;
+  },
 };
 
 export const cartStatusTone = (status: CartStatus): 'green' | 'amber' | 'slate' => {

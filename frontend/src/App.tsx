@@ -63,6 +63,9 @@ const NewOrder = lazy(() =>
 const OrderDetail = lazy(() =>
   import('./routes/orders/OrderDetail').then((m) => ({ default: m.OrderDetail })),
 );
+const CouponsList = lazy(() =>
+  import('./routes/coupons/CouponsList').then((m) => ({ default: m.CouponsList })),
+);
 const Reports = lazy(() =>
   import('./routes/reports/Reports').then((m) => ({ default: m.Reports })),
 );
@@ -110,6 +113,7 @@ export default function App() {
           <Route path="/orders" element={<OrdersList />} />
           <Route path="/orders/new" element={<NewOrder />} />
           <Route path="/orders/:id" element={<OrderDetail />} />
+          <Route path="/coupons" element={<CouponsList />} />
           <Route path="/reports" element={<Reports />} />
         </Route>
       </Routes>

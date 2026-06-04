@@ -16,6 +16,7 @@
     "customers": "العملاء",
     "carts": "السلال",
     "orders": "الطلبات",
+    "coupons": "الكوبونات",
     "reports": "التقارير"
   },
   "common": {
@@ -83,7 +84,10 @@
     "deleted_toast": "تم حذف المنتج",
     "no_image": "لا توجد صورة",
     "variants_count": "المتغيرات",
-    "select_variant": "اختر متغيرًا"
+    "select_variant": "اختر متغيرًا",
+    "sale_price": "سعر التخفيض",
+    "sale_price_placeholder": "بدون تخفيض",
+    "sale_price_hint": "اتركه فارغًا لعدم وجود خصم"
   },
   "variants": {
     "title": "المتغيرات",
@@ -283,6 +287,39 @@
       "paid": "مدفوع",
       "failed": "فشل",
       "refunded": "مسترد"
+    }
+  },
+  "coupons": {
+    "title": "الكوبونات",
+    "new": "كوبون جديد",
+    "edit": "تعديل الكوبون",
+    "coupon": "كوبون",
+    "search_placeholder": "ابحث بالرمز",
+    "total_count": "{{count}} إجمالاً",
+    "code": "الرمز",
+    "code_placeholder": "مثال: WELCOME10",
+    "type": "النوع",
+    "discount": "الخصم",
+    "value_percent": "نسبة الخصم (%)",
+    "value_fixed": "قيمة الخصم",
+    "min_subtotal": "الحد الأدنى للمجموع",
+    "max_redemptions": "أقصى عدد استخدامات",
+    "max_redemptions_hint": "اتركه فارغًا لعدد غير محدود",
+    "redemptions": "الاستخدامات",
+    "starts_at": "يبدأ",
+    "expires_at": "ينتهي",
+    "apply": "تطبيق",
+    "remove": "إزالة",
+    "applied_toast": "تم تطبيق الكوبون",
+    "empty_title": "لا توجد كوبونات بعد",
+    "empty_desc": "أنشئ كوبونًا لتقديم خصومات على السلة.",
+    "saved_toast": "تم حفظ الكوبون",
+    "deleted_toast": "تم حذف الكوبون",
+    "delete_title": "حذف الكوبون",
+    "delete_message": "حذف الكوبون \"{{code}}\"؟ لا يمكن التراجع عن ذلك.",
+    "types": {
+      "percent": "نسبة مئوية",
+      "fixed": "مبلغ ثابت"
     }
   },
   "carts": {

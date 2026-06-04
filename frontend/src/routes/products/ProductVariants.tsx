@@ -7,9 +7,10 @@ import { variantsApi } from '@/features/products/api';
 import type { Product, ProductVariant, VariantWritePayload } from '@/features/products/types';
 import { ConfirmDialog } from '@/components/ConfirmDialog';
 import { StatusBadge } from '@/components/StatusBadge';
+import { PriceLabel } from '@/components/PriceLabel';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { extractErrorMessage, formatMoney } from '@/lib/format';
+import { extractErrorMessage } from '@/lib/format';
 import { VariantDialog } from './VariantDialog';
 
 export function ProductVariants({ product }: { product: Product }) {
@@ -91,7 +92,13 @@ export function ProductVariants({ product }: { product: Product }) {
                   <tr key={v.id} className="border-b last:border-0">
                     <td className="py-2.5 font-medium">{v.name}</td>
                     <td className="py-2.5 font-mono text-xs text-muted-foreground">{v.sku}</td>
-                    <td className="py-2.5 text-end">{formatMoney(v.priceCents, product.currency)}</td>
+                    <td className="py-2.5 text-end">
+                      <PriceLabel
+                        priceCents={v.priceCents}
+                        salePriceCents={v.salePriceCents}
+                        currency={product.currency}
+                      />
+                    </td>
                     <td className="py-2.5 text-end">{v.stock}</td>
                     <td className="py-2.5 text-center">
                       <StatusBadge

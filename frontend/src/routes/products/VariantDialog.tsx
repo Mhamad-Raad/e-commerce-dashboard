@@ -21,6 +21,11 @@ const schema = z.object({
   name: z.string().min(1).max(120),
   sku: z.string().min(2).max(40).regex(/^[A-Z0-9_-]+$/i),
   price: z.string().min(1).refine((v) => !Number.isNaN(Number(v)) && Number(v) >= 0),
+  salePrice: z
+    .string()
+    .optional()
+    .or(z.literal(''))
+    .refine((v) => !v || (!Number.isNaN(Number(v)) && Number(v) >= 0), { message: 'Invalid sale price' }),
   stock: z.string().refine((v) => Number.isInteger(Number(v)) && Number(v) >= 0),
   imageUrl: z.string().url().optional().or(z.literal('')),
   sortOrder: z.string().refine((v) => Number.isInteger(Number(v)) && Number(v) >= 0),
@@ -58,7 +63,7 @@ export function VariantDialog({
     formState: { errors },
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
-    defaultValues: { name: '', sku: '', price: '', stock: '0', imageUrl: '', sortOrder: '0', isActive: true },
+    defaultValues: { name: '', sku: '', price: '', salePrice: '', stock: '0', imageUrl: '', sortOrder: '0', isActive: true },
   });
 
   useEffect(() => {
@@ -67,6 +72,8 @@ export function VariantDialog({
         name: variant?.name ?? '',
         sku: variant?.sku ?? '',
         price: variant ? fromMinor(variant.priceCents, currency).toString() : '',
+        salePrice:
+          variant?.salePriceCents != null ? fromMinor(variant.salePriceCents, currency).toString() : '',
         stock: String(variant?.stock ?? 0),
         imageUrl: variant?.imageUrl ?? '',
         sortOrder: String(variant?.sortOrder ?? 0),
@@ -80,6 +87,7 @@ export function VariantDialog({
       name: values.name.trim(),
       sku: values.sku.trim(),
       priceCents: toMinor(Number(values.price), currency),
+      salePriceCents: values.salePrice ? toMinor(Number(values.salePrice), currency) : null,
       stock: Number(values.stock),
       imageUrl: values.imageUrl?.trim() || undefined,
       sortOrder: Number(values.sortOrder),
@@ -107,6 +115,9 @@ export function VariantDialog({
             </FormField>
             <FormField label={`${t('products.price')} (${currency})`} error={errors.price?.message}>
               <Input inputMode="decimal" {...register('price')} />
+            </FormField>
+            <FormField label={`${t('products.sale_price')} (${currency})`} error={errors.salePrice?.message}>
+              <Input inputMode="decimal" placeholder={t('products.sale_price_placeholder')} {...register('salePrice')} />
             </FormField>
             <FormField label={t('products.stock')} error={errors.stock?.message}>
               <Input inputMode="numeric" {...register('stock')} />
