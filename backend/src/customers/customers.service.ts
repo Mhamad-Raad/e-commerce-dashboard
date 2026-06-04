@@ -71,7 +71,19 @@ export class CustomersService {
 
   async remove(id: string) {
     await this.findById(id);
-    await this.prisma.customer.delete({ where: { id } });
-    return { success: true };
+    try {
+      await this.prisma.customer.delete({ where: { id } });
+      return { success: true };
+    } catch (err) {
+      if (
+        err instanceof Prisma.PrismaClientKnownRequestError &&
+        err.code === 'P2003'
+      ) {
+        throw new ConflictException(
+          'This customer has existing orders and cannot be deleted. Deactivate them instead.',
+        );
+      }
+      throw err;
+    }
   }
 }

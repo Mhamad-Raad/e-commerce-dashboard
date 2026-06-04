@@ -80,7 +80,15 @@ export class CouponsService {
 
   async remove(id: string) {
     await this.findById(id);
-    await this.prisma.coupon.delete({ where: { id } });
+    // Clear the cached discount on carts using this coupon; the FK SetNull only
+    // clears couponId, which would otherwise leave a stale discountCents behind.
+    await this.prisma.$transaction([
+      this.prisma.cart.updateMany({
+        where: { couponId: id },
+        data: { discountCents: 0 },
+      }),
+      this.prisma.coupon.delete({ where: { id } }),
+    ]);
     return { success: true };
   }
 
