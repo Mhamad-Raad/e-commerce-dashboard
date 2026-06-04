@@ -17,6 +17,7 @@
     "carts": "السلال",
     "orders": "الطلبات",
     "coupons": "الكوبونات",
+    "reviews": "التقييمات",
     "reports": "التقارير"
   },
   "common": {
@@ -87,7 +88,8 @@
     "select_variant": "اختر متغيرًا",
     "sale_price": "سعر التخفيض",
     "sale_price_placeholder": "بدون تخفيض",
-    "sale_price_hint": "اتركه فارغًا لعدم وجود خصم"
+    "sale_price_hint": "اتركه فارغًا لعدم وجود خصم",
+    "rating": "التقييم"
   },
   "variants": {
     "title": "المتغيرات",
@@ -321,6 +323,29 @@
       "percent": "نسبة مئوية",
       "fixed": "مبلغ ثابت"
     }
+  },
+  "reviews": {
+    "title": "التقييمات",
+    "total_count": "{{count}} إجمالاً",
+    "product": "المنتج",
+    "customer": "العميل",
+    "rating": "التقييم",
+    "comment": "التعليق",
+    "approved": "معتمد",
+    "pending": "قيد المراجعة",
+    "approve": "اعتماد",
+    "hide": "إخفاء",
+    "search_placeholder": "ابحث في التقييمات",
+    "filter_pending": "قيد المراجعة",
+    "filter_approved": "المعتمدة",
+    "filter_all": "كل التقييمات",
+    "updated_toast": "تم تحديث التقييم",
+    "deleted_toast": "تم حذف التقييم",
+    "delete_title": "حذف التقييم",
+    "delete_message": "حذف هذا التقييم؟ لا يمكن التراجع عن ذلك.",
+    "empty_title": "لا توجد تقييمات",
+    "empty_desc": "ستظهر تقييمات العملاء هنا للمراجعة.",
+    "empty_product": "لا توجد تقييمات لهذا المنتج بعد."
   },
   "carts": {
     "title": "السلال",

@@ -16,6 +16,7 @@ import { RowActions } from '@/components/RowActions';
 import { DataTable, type Column } from '@/components/DataTable';
 import { StatusBadge } from '@/components/StatusBadge';
 import { PriceLabel } from '@/components/PriceLabel';
+import { Stars } from '@/components/Stars';
 import { Button } from '@/components/ui/button';
 import { useListParams } from '@/hooks/useListParams';
 import { formatDate, extractErrorMessage } from '@/lib/format';
@@ -95,6 +96,16 @@ export function ProductsList() {
         ),
     },
     { key: 'stock', header: t('products.stock'), cell: (p) => p.stock },
+    {
+      key: 'rating',
+      header: t('products.rating'),
+      cell: (p) =>
+        p.ratingCount > 0 ? (
+          <Stars value={p.ratingAvg} count={p.ratingCount} />
+        ) : (
+          <span className="text-muted-foreground">—</span>
+        ),
+    },
     {
       key: 'status',
       header: t('common.status'),

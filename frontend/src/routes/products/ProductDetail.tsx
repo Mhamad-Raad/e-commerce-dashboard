@@ -11,6 +11,7 @@ import { ConfirmDialog } from '@/components/ConfirmDialog';
 import { DetailRow } from '@/components/DetailRow';
 import { PriceLabel } from '@/components/PriceLabel';
 import { ProductVariants } from './ProductVariants';
+import { ProductReviews } from './ProductReviews';
 import { StatusBadge } from '@/components/StatusBadge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -160,6 +161,8 @@ export function ProductDetail() {
       </div>
 
       <ProductVariants product={product} />
+
+      <ProductReviews product={product} />
 
       <ConfirmDialog
         open={confirmOpen}

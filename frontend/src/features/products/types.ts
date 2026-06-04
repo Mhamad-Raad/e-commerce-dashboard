@@ -38,6 +38,8 @@ export interface Product {
   categoryId: string | null;
   category?: ProductCategoryRef | null;
   isActive: boolean;
+  ratingAvg: number;
+  ratingCount: number;
   createdAt: string;
   updatedAt: string;
   variants?: ProductVariant[];
