@@ -100,6 +100,7 @@
     "edit": "Edit variant",
     "name": "Variant",
     "name_placeholder": "e.g. Red / 50ml",
+    "sort_order": "Display order",
     "empty": "No variants — this product is sold at its base price.",
     "saved_toast": "Variant saved",
     "deleted_toast": "Variant deleted",

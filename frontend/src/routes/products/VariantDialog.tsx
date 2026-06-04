@@ -122,7 +122,7 @@ export function VariantDialog({
             <FormField label={t('products.stock')} error={errors.stock?.message}>
               <Input inputMode="numeric" {...register('stock')} />
             </FormField>
-            <FormField label={t('homepage.banner_order')} error={errors.sortOrder?.message}>
+            <FormField label={t('variants.sort_order')} error={errors.sortOrder?.message}>
               <Input inputMode="numeric" {...register('sortOrder')} />
             </FormField>
           </div>
