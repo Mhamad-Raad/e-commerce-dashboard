@@ -94,8 +94,7 @@ export class OrdersService {
       const product = productMap.get(i.productId)!;
       let variantId: string | null = null;
       let variantName: string | null = null;
-      let priceCents = product.priceCents;
-      let priceBase = effectivePriceCents(product.priceCents, product.salePriceCents);
+      let priceCents = effectivePriceCents(product.priceCents, product.salePriceCents);
       if (i.variantId) {
         const variant = variantMap.get(i.variantId);
         if (!variant || variant.productId !== product.id) {
@@ -105,9 +104,8 @@ export class OrdersService {
         }
         variantId = variant.id;
         variantName = variant.name;
-        priceBase = effectivePriceCents(variant.priceCents, variant.salePriceCents);
+        priceCents = effectivePriceCents(variant.priceCents, variant.salePriceCents);
       }
-      priceCents = priceBase;
       return {
         productId: product.id,
         variantId,
@@ -145,7 +143,7 @@ export class OrdersService {
     const totalCents = Math.max(0, subtotalCents - discountCents + taxCents + shippingCents);
 
     // Optionally snapshot a customer address as the shipping address.
-    let shipping: Prisma.OrderUncheckedCreateInput | object = {};
+    let shipping: Partial<Prisma.OrderUncheckedCreateInput> = {};
     if (dto.addressId) {
       const address = await this.prisma.address.findUnique({
         where: { id: dto.addressId },
@@ -183,12 +181,18 @@ export class OrdersService {
         },
         include: orderInclude,
       });
-      // Count the redemption when an order actually uses the coupon.
+      // Count the redemption when an order actually uses the coupon. The
+      // increment takes a row lock so concurrent orders serialize here; we then
+      // verify the new count is within the limit and roll back if it isn't —
+      // closing the check-then-increment race in the pre-transaction validation.
       if (couponId) {
-        await tx.coupon.update({
+        const updated = await tx.coupon.update({
           where: { id: couponId },
           data: { redeemedCount: { increment: 1 } },
         });
+        if (updated.maxRedemptions != null && updated.redeemedCount > updated.maxRedemptions) {
+          throw new BadRequestException('Coupon redemption limit reached');
+        }
       }
       return created;
     });

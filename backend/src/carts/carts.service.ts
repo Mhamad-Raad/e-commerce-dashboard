@@ -115,25 +115,28 @@ export class CartsService {
       priceCents = effectivePriceCents(variant.priceCents, variant.salePriceCents);
     }
 
-    try {
-      await this.prisma.cartItem.create({
-        data: {
-          cartId,
-          productId: dto.productId,
-          variantId,
-          variantName,
-          quantity: dto.quantity,
-          priceCents,
-        },
-      });
-    } catch (err) {
-      if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === 'P2002') {
-        throw new ConflictException(
-          'This product/variant is already in the cart — update its quantity instead',
-        );
-      }
-      throw err;
+    // Dedupe explicitly: the (cartId, productId, variantId) unique index does NOT
+    // catch duplicates when variantId is NULL (Postgres treats NULLs as distinct),
+    // so a simple product could otherwise be added as multiple lines.
+    const existing = await this.prisma.cartItem.findFirst({
+      where: { cartId, productId: dto.productId, variantId },
+    });
+    if (existing) {
+      throw new ConflictException(
+        'This product/variant is already in the cart — update its quantity instead',
+      );
     }
+
+    await this.prisma.cartItem.create({
+      data: {
+        cartId,
+        productId: dto.productId,
+        variantId,
+        variantName,
+        quantity: dto.quantity,
+        priceCents,
+      },
+    });
     await this.recomputeCoupon(cartId);
     return this.findById(cartId);
   }
