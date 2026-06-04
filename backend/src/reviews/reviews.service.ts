@@ -22,22 +22,6 @@ const reviewInclude = {
 export class ReviewsService {
   constructor(private prisma: PrismaService) {}
 
-  /** Recompute a product's cached rating from its APPROVED reviews. */
-  private async recompute(productId: string) {
-    const agg = await this.prisma.review.aggregate({
-      where: { productId, isApproved: true },
-      _avg: { rating: true },
-      _count: true,
-    });
-    await this.prisma.product.update({
-      where: { id: productId },
-      data: {
-        ratingAvg: agg._avg.rating ? Math.round(agg._avg.rating * 100) / 100 : 0,
-        ratingCount: agg._count,
-      },
-    });
-  }
-
   async list(query: ListReviewsQueryDto) {
     const page = query.page ?? 1;
     const pageSize = query.pageSize ?? 20;
@@ -96,7 +80,6 @@ export class ReviewsService {
         },
         include: reviewInclude,
       });
-      if (review.isApproved) await this.recompute(dto.productId);
       return review;
     } catch (err) {
       if (err instanceof Prisma.PrismaClientKnownRequestError) {
@@ -112,20 +95,17 @@ export class ReviewsService {
   }
 
   async update(id: string, dto: UpdateReviewDto) {
-    const existing = await this.findById(id);
-    const review = await this.prisma.review.update({
+    await this.findById(id);
+    return this.prisma.review.update({
       where: { id },
       data: dto,
       include: reviewInclude,
     });
-    await this.recompute(existing.productId);
-    return review;
   }
 
   async remove(id: string) {
-    const existing = await this.findById(id);
+    await this.findById(id);
     await this.prisma.review.delete({ where: { id } });
-    await this.recompute(existing.productId);
     return { success: true };
   }
 }

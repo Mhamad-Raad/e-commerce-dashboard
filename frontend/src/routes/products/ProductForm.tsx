@@ -35,6 +35,20 @@ const schema = z.object({
     }),
   currency: z.string().length(3),
   stock: z.string().min(1).refine((v) => Number.isInteger(Number(v)) && Number(v) >= 0),
+  ratingAvg: z
+    .string()
+    .optional()
+    .or(z.literal(''))
+    .refine((v) => !v || (!Number.isNaN(Number(v)) && Number(v) >= 0 && Number(v) <= 5), {
+      message: 'Rating must be 0–5',
+    }),
+  ratingCount: z
+    .string()
+    .optional()
+    .or(z.literal(''))
+    .refine((v) => !v || (Number.isInteger(Number(v)) && Number(v) >= 0), {
+      message: 'Invalid count',
+    }),
   storeId: z.string().min(1),
   categoryId: z.string().optional().or(z.literal('')),
   imageUrl: z.string().url().optional().or(z.literal('')),
@@ -51,6 +65,8 @@ const defaultValues: FormValues = {
   salePrice: '',
   currency: 'IQD',
   stock: '0',
+  ratingAvg: '0',
+  ratingCount: '0',
   storeId: '',
   categoryId: '',
   imageUrl: '',
@@ -90,6 +106,8 @@ export function ProductForm() {
         salePrice: p.salePriceCents != null ? fromMinor(p.salePriceCents, p.currency).toString() : '',
         currency: p.currency,
         stock: p.stock.toString(),
+        ratingAvg: String(p.ratingAvg ?? 0),
+        ratingCount: String(p.ratingCount ?? 0),
         storeId: p.storeId,
         categoryId: p.categoryId ?? '',
         imageUrl: p.imageUrl ?? '',
@@ -108,6 +126,8 @@ export function ProductForm() {
         salePriceCents: values.salePrice ? toMinor(Number(values.salePrice), values.currency) : null,
         currency: values.currency.toUpperCase(),
         stock: Number(values.stock),
+        ratingAvg: values.ratingAvg !== '' ? Number(values.ratingAvg) : 0,
+        ratingCount: values.ratingCount !== '' ? Number(values.ratingCount) : 0,
         storeId: values.storeId,
         categoryId: values.categoryId || undefined,
         imageUrl: values.imageUrl?.trim() || undefined,
@@ -172,6 +192,16 @@ export function ProductForm() {
               </FormField>
               <FormField label={t('products.stock')} error={errors.stock?.message}>
                 <Input inputMode="numeric" {...register('stock')} />
+              </FormField>
+              <FormField
+                label={t('products.rating')}
+                error={errors.ratingAvg?.message}
+                hint={t('products.rating_hint')}
+              >
+                <Input inputMode="decimal" {...register('ratingAvg')} />
+              </FormField>
+              <FormField label={t('products.rating_count')} error={errors.ratingCount?.message}>
+                <Input inputMode="numeric" {...register('ratingCount')} />
               </FormField>
               <FormField label={t('products.store')} error={errors.storeId?.message}>
                 <AsyncCombobox

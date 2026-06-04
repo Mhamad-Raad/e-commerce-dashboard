@@ -89,7 +89,9 @@
     "sale_price": "سعر التخفيض",
     "sale_price_placeholder": "بدون تخفيض",
     "sale_price_hint": "اتركه فارغًا لعدم وجود خصم",
-    "rating": "التقييم"
+    "rating": "التقييم",
+    "rating_count": "عدد التقييمات",
+    "rating_hint": "من 0 إلى 5، يُزامَن من التطبيق"
   },
   "variants": {
     "title": "المتغيرات",

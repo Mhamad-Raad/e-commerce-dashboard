@@ -1,11 +1,13 @@
 import {
   IsBoolean,
   IsInt,
+  IsNumber,
   IsOptional,
   IsString,
   IsUrl,
   Length,
   Matches,
+  Max,
   Min,
   ValidateIf,
 } from 'class-validator';
@@ -40,6 +42,19 @@ export class CreateProductDto {
   @IsString()
   @Length(3, 3)
   currency?: string;
+
+  // Product rating shown to shoppers — sourced from the mobile app, manually
+  // overridable here. Decoupled from the dashboard's review moderation list.
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  @Max(5)
+  ratingAvg?: number;
+
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  ratingCount?: number;
 
   @IsInt()
   @Min(0)

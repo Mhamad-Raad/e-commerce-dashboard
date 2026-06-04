@@ -9,7 +9,6 @@ import {
   BarChart3,
   LayoutTemplate,
   TicketPercent,
-  Star,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -46,7 +45,6 @@ export const navGroups: NavGroup[] = [
       { to: '/carts', labelKey: 'nav.carts', icon: ShoppingCart },
       { to: '/orders', labelKey: 'nav.orders', icon: ClipboardList },
       { to: '/coupons', labelKey: 'nav.coupons', icon: TicketPercent },
-      { to: '/reviews', labelKey: 'nav.reviews', icon: Star },
     ],
   },
   {

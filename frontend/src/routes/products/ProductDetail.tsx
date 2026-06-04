@@ -10,6 +10,7 @@ import { PageHeader } from '@/components/PageHeader';
 import { ConfirmDialog } from '@/components/ConfirmDialog';
 import { DetailRow } from '@/components/DetailRow';
 import { PriceLabel } from '@/components/PriceLabel';
+import { Stars } from '@/components/Stars';
 import { ProductVariants } from './ProductVariants';
 import { ProductReviews } from './ProductReviews';
 import { StatusBadge } from '@/components/StatusBadge';
@@ -129,6 +130,13 @@ export function ProductDetail() {
               />
             </DetailRow>
             <DetailRow label={t('products.stock')}>{product.stock}</DetailRow>
+            <DetailRow label={t('products.rating')}>
+              {product.ratingCount > 0 ? (
+                <Stars value={product.ratingAvg} count={product.ratingCount} />
+              ) : (
+                <span className="text-muted-foreground">{t('common.none')}</span>
+              )}
+            </DetailRow>
             <DetailRow label={t('products.store')}>
               {product.store ? (
                 <Link to={`/stores/${product.store.id}`} className="text-primary hover:underline">

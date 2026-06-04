@@ -89,7 +89,9 @@
     "sale_price": "Sale price",
     "sale_price_placeholder": "No sale",
     "sale_price_hint": "Leave blank for no discount",
-    "rating": "Rating"
+    "rating": "Rating",
+    "rating_count": "Rating count",
+    "rating_hint": "0–5, synced from the app"
   },
   "variants": {
     "title": "Variants",

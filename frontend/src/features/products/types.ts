@@ -76,4 +76,6 @@ export interface ProductWritePayload {
   storeId: string;
   categoryId?: string;
   isActive?: boolean;
+  ratingAvg?: number;
+  ratingCount?: number;
 }
