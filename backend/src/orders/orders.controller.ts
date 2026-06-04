@@ -12,7 +12,7 @@ import {
 } from '@nestjs/common';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { ListOrdersQueryDto } from './dto/list-orders.query.dto';
-import { UpdateOrderStatusDto } from './dto/update-order.dto';
+import { UpdateOrderDto } from './dto/update-order.dto';
 import { OrdersService } from './orders.service';
 
 @Controller('orders')
@@ -34,9 +34,9 @@ export class OrdersController {
     return this.orders.create(dto);
   }
 
-  @Patch(':id/status')
-  updateStatus(@Param('id') id: string, @Body() dto: UpdateOrderStatusDto) {
-    return this.orders.updateStatus(id, dto);
+  @Patch(':id')
+  update(@Param('id') id: string, @Body() dto: UpdateOrderDto) {
+    return this.orders.update(id, dto);
   }
 
   @Delete(':id')

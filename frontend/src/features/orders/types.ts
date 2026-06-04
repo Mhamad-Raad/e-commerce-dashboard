@@ -1,12 +1,20 @@
 import type { Payment } from '../payments/types';
 
-export type OrderStatus =
-  | 'PENDING'
-  | 'PAID'
-  | 'SHIPPED'
-  | 'DELIVERED'
-  | 'CANCELLED'
-  | 'REFUNDED';
+// Single source of truth for order statuses on the frontend. Mirrors the
+// Prisma `OrderStatus` enum (backend is canonical) — keep the two in sync.
+// The array order is the lifecycle order shown in dropdowns.
+export const ORDER_STATUSES = [
+  'PENDING',
+  'PAID',
+  'PROCESSING',
+  'SHIPPED',
+  'OUT_FOR_DELIVERY',
+  'DELIVERED',
+  'CANCELLED',
+  'REFUNDED',
+] as const;
+
+export type OrderStatus = (typeof ORDER_STATUSES)[number];
 
 export interface OrderCustomerSummary {
   id: string;
@@ -48,6 +56,7 @@ export interface Order {
   shipStreet: string | null;
   shipLandmark: string | null;
   notes: string | null;
+  trackingNumber: string | null;
   customer: OrderCustomerSummary;
   items: OrderItem[];
   payments?: Payment[];

@@ -3,7 +3,7 @@ import { useQuery, keepPreviousData } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { ClipboardList, Plus } from 'lucide-react';
 import { ordersApi, orderStatusTone } from '@/features/orders/api';
-import type { Order, OrderStatus } from '@/features/orders/types';
+import { ORDER_STATUSES, type Order, type OrderStatus } from '@/features/orders/types';
 import { PageHeader } from '@/components/PageHeader';
 import { UrlSearchInput } from '@/components/UrlSearchInput';
 import { EmptyState } from '@/components/EmptyState';
@@ -21,7 +21,6 @@ import {
 import { useListParams } from '@/hooks/useListParams';
 import { formatDate, formatMoney } from '@/lib/format';
 
-const STATUSES: OrderStatus[] = ['PENDING', 'PAID', 'SHIPPED', 'DELIVERED', 'CANCELLED', 'REFUNDED'];
 const ALL = '__all__';
 
 export function OrdersList() {
@@ -111,7 +110,7 @@ export function OrdersList() {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value={ALL}>{t('orders.all_statuses')}</SelectItem>
-            {STATUSES.map((s) => (
+            {ORDER_STATUSES.map((s) => (
               <SelectItem key={s} value={s}>
                 {statusLabel(s)}
               </SelectItem>

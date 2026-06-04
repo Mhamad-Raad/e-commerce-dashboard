@@ -10,7 +10,7 @@ import { effectivePriceCents } from '../common/pricing';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { ListOrdersQueryDto } from './dto/list-orders.query.dto';
-import { UpdateOrderStatusDto } from './dto/update-order.dto';
+import { UpdateOrderDto } from './dto/update-order.dto';
 
 const orderInclude = {
   customer: { select: { id: true, name: true, email: true } },
@@ -201,9 +201,9 @@ export class OrdersService {
     return order;
   }
 
-  async updateStatus(id: string, dto: UpdateOrderStatusDto) {
+  async update(id: string, dto: UpdateOrderDto) {
     await this.findById(id);
-    await this.prisma.order.update({ where: { id }, data: { status: dto.status } });
+    await this.prisma.order.update({ where: { id }, data: dto });
     return this.findById(id);
   }
 

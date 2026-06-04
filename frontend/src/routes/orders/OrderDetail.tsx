@@ -1,16 +1,17 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { ArrowLeft, ClipboardList, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { ordersApi, orderStatusTone } from '@/features/orders/api';
-import type { OrderStatus } from '@/features/orders/types';
+import { ORDER_STATUSES, type OrderStatus } from '@/features/orders/types';
 import { ConfirmDialog } from '@/components/ConfirmDialog';
 import { PageHeader } from '@/components/PageHeader';
 import { StatusBadge } from '@/components/StatusBadge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
 import { MapPin } from 'lucide-react';
 import { humanizeGeo } from '@/lib/iraqGeo';
@@ -32,14 +33,13 @@ import {
 } from '@/components/ui/select';
 import { formatDate, formatMoney, extractErrorMessage } from '@/lib/format';
 
-const STATUSES: OrderStatus[] = ['PENDING', 'PAID', 'SHIPPED', 'DELIVERED', 'CANCELLED', 'REFUNDED'];
-
 export function OrderDetail() {
   const { id } = useParams<{ id: string }>();
   const { t } = useTranslation();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [trackingInput, setTrackingInput] = useState('');
 
   const orderQuery = useQuery({
     queryKey: ['order', id],
@@ -47,12 +47,25 @@ export function OrderDetail() {
     enabled: !!id,
   });
 
+  useEffect(() => {
+    setTrackingInput(orderQuery.data?.trackingNumber ?? '');
+  }, [orderQuery.data?.trackingNumber]);
+
   const updateStatus = useMutation({
     mutationFn: (status: OrderStatus) => ordersApi.updateStatus(id!, status),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['order', id] });
       queryClient.invalidateQueries({ queryKey: ['orders'] });
       toast.success(t('orders.status_updated_toast'));
+    },
+    onError: (err) => toast.error(extractErrorMessage(err)),
+  });
+
+  const updateTracking = useMutation({
+    mutationFn: () => ordersApi.update(id!, { trackingNumber: trackingInput.trim() || null }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['order', id] });
+      toast.success(t('orders.tracking_saved_toast'));
     },
     onError: (err) => toast.error(extractErrorMessage(err)),
   });
@@ -122,7 +135,7 @@ export function OrderDetail() {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                {STATUSES.map((s) => (
+                {ORDER_STATUSES.map((s) => (
                   <SelectItem key={s} value={s}>
                     {statusLabel(s)}
                   </SelectItem>
@@ -207,6 +220,27 @@ export function OrderDetail() {
           </CardContent>
         </Card>
       )}
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-sm">{t('orders.tracking')}</CardTitle>
+        </CardHeader>
+        <CardContent className="flex flex-wrap items-end gap-3 pt-0">
+          <Input
+            className="max-w-xs font-mono"
+            value={trackingInput}
+            onChange={(e) => setTrackingInput(e.target.value)}
+            placeholder={t('orders.tracking_placeholder')}
+          />
+          <Button
+            variant="outline"
+            onClick={() => updateTracking.mutate()}
+            disabled={updateTracking.isPending || trackingInput.trim() === (order.trackingNumber ?? '')}
+          >
+            {updateTracking.isPending ? t('common.saving') : t('common.save')}
+          </Button>
+        </CardContent>
+      </Card>
 
       <OrderPayments order={order} />
 

@@ -27,8 +27,15 @@ export const ordersApi = {
     const res = await api.post<Order>('/orders', payload);
     return res.data;
   },
+  update: async (
+    id: string,
+    payload: { status?: OrderStatus; trackingNumber?: string | null; notes?: string },
+  ): Promise<Order> => {
+    const res = await api.patch<Order>(`/orders/${id}`, payload);
+    return res.data;
+  },
   updateStatus: async (id: string, status: OrderStatus): Promise<Order> => {
-    const res = await api.patch<Order>(`/orders/${id}/status`, { status });
+    const res = await api.patch<Order>(`/orders/${id}`, { status });
     return res.data;
   },
   remove: async (id: string): Promise<void> => {
@@ -42,7 +49,11 @@ export const orderStatusTone = (status: OrderStatus): 'green' | 'amber' | 'slate
       return 'amber';
     case 'PAID':
       return 'blue';
+    case 'PROCESSING':
+      return 'amber';
     case 'SHIPPED':
+      return 'blue';
+    case 'OUT_FOR_DELIVERY':
       return 'blue';
     case 'DELIVERED':
       return 'green';

@@ -223,6 +223,9 @@
     "no_items": "No items added yet.",
     "shipping_address": "Shipping address",
     "select_address": "Select an address (optional)",
+    "tracking": "Tracking number",
+    "tracking_placeholder": "Courier tracking number",
+    "tracking_saved_toast": "Tracking number saved",
     "delete_title": "Delete order",
     "delete_message": "Delete order \"{{number}}\"? This can't be undone.",
     "deleted_toast": "Order deleted",
@@ -230,7 +233,9 @@
     "status": {
       "pending": "Pending",
       "paid": "Paid",
+      "processing": "Processing",
       "shipped": "Shipped",
+      "out_for_delivery": "Out for delivery",
       "delivered": "Delivered",
       "cancelled": "Cancelled",
       "refunded": "Refunded"

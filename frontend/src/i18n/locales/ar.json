@@ -223,6 +223,9 @@
     "no_items": "لم تتم إضافة أي عناصر بعد.",
     "shipping_address": "عنوان الشحن",
     "select_address": "اختر عنوانًا (اختياري)",
+    "tracking": "رقم التتبع",
+    "tracking_placeholder": "رقم تتبع شركة التوصيل",
+    "tracking_saved_toast": "تم حفظ رقم التتبع",
     "delete_title": "حذف الطلب",
     "delete_message": "حذف الطلب \"{{number}}\"؟ لا يمكن التراجع عن ذلك.",
     "deleted_toast": "تم حذف الطلب",
@@ -230,7 +233,9 @@
     "status": {
       "pending": "قيد الانتظار",
       "paid": "مدفوع",
+      "processing": "قيد التجهيز",
       "shipped": "تم الشحن",
+      "out_for_delivery": "قيد التوصيل",
       "delivered": "تم التسليم",
       "cancelled": "ملغى",
       "refunded": "مسترد"
