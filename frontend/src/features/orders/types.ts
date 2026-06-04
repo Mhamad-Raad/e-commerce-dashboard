@@ -1,3 +1,5 @@
+import type { Payment } from '../payments/types';
+
 export type OrderStatus =
   | 'PENDING'
   | 'PAID'
@@ -36,8 +38,16 @@ export interface Order {
   status: OrderStatus;
   placedAt: string;
   updatedAt: string;
+  shipName: string | null;
+  shipPhone: string | null;
+  shipGovernorate: string | null;
+  shipCity: string | null;
+  shipDistrict: string | null;
+  shipStreet: string | null;
+  shipLandmark: string | null;
   customer: OrderCustomerSummary;
   items: OrderItem[];
+  payments?: Payment[];
 }
 
 export interface OrderListResponse {
@@ -53,4 +63,5 @@ export interface CreateOrderPayload {
   taxCents?: number;
   shippingCents?: number;
   currency?: string;
+  addressId?: string;
 }

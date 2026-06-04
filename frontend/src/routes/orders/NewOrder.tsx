@@ -5,9 +5,11 @@ import { useTranslation } from 'react-i18next';
 import { ArrowLeft, ClipboardList, Plus, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { customersApi } from '@/features/customers/api';
+import { addressesApi } from '@/features/addresses/api';
 import { productsApi, variantsApi } from '@/features/products/api';
 import type { Product } from '@/features/products/types';
 import { ordersApi } from '@/features/orders/api';
+import { humanizeGeo } from '@/lib/iraqGeo';
 import { PageHeader } from '@/components/PageHeader';
 import { AsyncCombobox } from '@/components/AsyncCombobox';
 import { Button } from '@/components/ui/button';
@@ -48,6 +50,7 @@ export function NewOrder() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [customerId, setCustomerId] = useState('');
+  const [addressId, setAddressId] = useState('');
   const [items, setItems] = useState<DraftItem[]>([]);
   const [productPick, setProductPick] = useState('');
   const [pickedProduct, setPickedProduct] = useState<Product | null>(null);
@@ -71,6 +74,16 @@ export function NewOrder() {
   useEffect(() => {
     setVariantPick('');
   }, [pickedProduct?.id]);
+
+  // Load the chosen customer's saved addresses for an optional shipping pick.
+  const { data: addresses = [] } = useQuery({
+    queryKey: ['addresses', customerId],
+    queryFn: () => addressesApi.list(customerId),
+    enabled: !!customerId,
+  });
+  useEffect(() => {
+    setAddressId('');
+  }, [customerId]);
 
   const subtotalCents = useMemo(
     () => items.reduce((sum, i) => sum + i.priceCents * i.quantity, 0),
@@ -130,6 +143,7 @@ export function NewOrder() {
         taxCents: taxCents || undefined,
         shippingCents: shippingCents || undefined,
         currency,
+        addressId: addressId || undefined,
       }),
     onSuccess: (order) => navigate(`/orders/${order.id}`),
     onError: (err) => toast.error(extractErrorMessage(err)),
@@ -166,6 +180,25 @@ export function NewOrder() {
               getItemLabel={(c) => `${c.name} (${c.email})`}
             />
           </div>
+
+          {customerId && addresses.length > 0 && (
+            <div className="space-y-1.5">
+              <Label>{t('orders.shipping_address')}</Label>
+              <Select value={addressId || undefined} onValueChange={setAddressId}>
+                <SelectTrigger>
+                  <SelectValue placeholder={t('orders.select_address')} />
+                </SelectTrigger>
+                <SelectContent>
+                  {addresses.map((a) => (
+                    <SelectItem key={a.id} value={a.id}>
+                      {(a.label ? `${a.label} — ` : '') +
+                        `${humanizeGeo(a.city)}, ${humanizeGeo(a.governorate)}`}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
 
           <div className="space-y-2">
             <Label>{t('orders.items')}</Label>

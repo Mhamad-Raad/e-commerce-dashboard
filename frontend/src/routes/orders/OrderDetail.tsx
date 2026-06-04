@@ -10,8 +10,11 @@ import { ConfirmDialog } from '@/components/ConfirmDialog';
 import { PageHeader } from '@/components/PageHeader';
 import { StatusBadge } from '@/components/StatusBadge';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
+import { MapPin } from 'lucide-react';
+import { humanizeGeo } from '@/lib/iraqGeo';
+import { OrderPayments } from './OrderPayments';
 import {
   Table,
   TableBody,
@@ -167,6 +170,34 @@ export function OrderDetail() {
           </TableBody>
         </Table>
       </Card>
+
+      {order.shipGovernorate && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-sm">
+              <MapPin className="h-4 w-4" />
+              {t('orders.shipping_address')}
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="pt-0 text-sm">
+            {order.shipName && <p className="font-medium">{order.shipName}</p>}
+            <p className="text-muted-foreground">
+              {humanizeGeo(order.shipCity)}, {humanizeGeo(order.shipGovernorate)}
+            </p>
+            {(order.shipDistrict || order.shipStreet) && (
+              <p className="text-muted-foreground">
+                {[order.shipDistrict, order.shipStreet].filter(Boolean).join(' · ')}
+              </p>
+            )}
+            {order.shipLandmark && (
+              <p className="text-xs text-muted-foreground">{order.shipLandmark}</p>
+            )}
+            {order.shipPhone && <p className="mt-1 font-mono text-xs">{order.shipPhone}</p>}
+          </CardContent>
+        </Card>
+      )}
+
+      <OrderPayments order={order} />
 
       <Card className="ms-auto max-w-sm">
         <CardContent className="space-y-1.5 p-5 text-sm">

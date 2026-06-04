@@ -13,6 +13,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { formatDate, extractErrorMessage } from '@/lib/format';
+import { CustomerAddresses } from './CustomerAddresses';
 
 export function CustomerDetail() {
   const { id } = useParams<{ id: string }>();
@@ -125,6 +126,8 @@ export function CustomerDetail() {
           </CardContent>
         </Card>
       </div>
+
+      <CustomerAddresses customerId={customer.id} />
 
       <ConfirmDialog
         open={confirmOpen}
