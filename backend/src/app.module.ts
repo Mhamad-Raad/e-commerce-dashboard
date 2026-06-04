@@ -5,6 +5,7 @@ import { AuthModule } from './auth/auth.module';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 import { CartsModule } from './carts/carts.module';
 import { CategoriesModule } from './categories/categories.module';
+import { CouponsModule } from './coupons/coupons.module';
 import { CustomersModule } from './customers/customers.module';
 import { HomepageModule } from './homepage/homepage.module';
 import { OrdersModule } from './orders/orders.module';
@@ -26,6 +27,7 @@ import { UsersModule } from './users/users.module';
     CustomersModule,
     CartsModule,
     OrdersModule,
+    CouponsModule,
     HomepageModule,
     ReportsModule,
   ],

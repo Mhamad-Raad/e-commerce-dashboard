@@ -65,4 +65,15 @@ export class CartsController {
   removeItem(@Param('id') id: string, @Param('itemId') itemId: string) {
     return this.carts.removeItem(id, itemId);
   }
+
+  @Post(':id/coupon')
+  applyCoupon(@Param('id') id: string, @Body() body: { code: string }) {
+    return this.carts.applyCoupon(id, body.code);
+  }
+
+  @Delete(':id/coupon')
+  @HttpCode(HttpStatus.OK)
+  removeCoupon(@Param('id') id: string) {
+    return this.carts.removeCoupon(id);
+  }
 }

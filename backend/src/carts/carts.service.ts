@@ -5,7 +5,9 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
+import { couponApplicabilityError, couponDiscountCents } from '../common/coupon';
 import { buildPaginated, paginate } from '../common/pagination';
+import { effectivePriceCents } from '../common/pricing';
 import { PrismaService } from '../prisma/prisma.service';
 import { AddCartItemDto, UpdateCartItemDto } from './dto/cart-item.dto';
 import { CreateCartDto } from './dto/create-cart.dto';
@@ -14,6 +16,7 @@ import { UpdateCartDto } from './dto/update-cart.dto';
 
 const cartInclude = {
   customer: { select: { id: true, name: true, email: true } },
+  coupon: true,
   items: {
     include: {
       product: { select: { id: true, name: true, sku: true, imageUrl: true } },
@@ -97,7 +100,7 @@ export class CartsService {
     // back to the product's own price (a "simple" product with no variants).
     let variantId: string | null = null;
     let variantName: string | null = null;
-    let priceCents = product.priceCents;
+    let priceCents = effectivePriceCents(product.priceCents, product.salePriceCents);
     if (dto.variantId) {
       const variant = await this.prisma.productVariant.findUnique({
         where: { id: dto.variantId },
@@ -109,7 +112,7 @@ export class CartsService {
       }
       variantId = variant.id;
       variantName = variant.name;
-      priceCents = variant.priceCents;
+      priceCents = effectivePriceCents(variant.priceCents, variant.salePriceCents);
     }
 
     try {
@@ -131,6 +134,7 @@ export class CartsService {
       }
       throw err;
     }
+    await this.recomputeCoupon(cartId);
     return this.findById(cartId);
   }
 
@@ -143,6 +147,7 @@ export class CartsService {
       throw new BadRequestException('quantity is required');
     }
     await this.prisma.cartItem.update({ where: { id: itemId }, data: { quantity: dto.quantity } });
+    await this.recomputeCoupon(cartId);
     return this.findById(cartId);
   }
 
@@ -152,6 +157,55 @@ export class CartsService {
       throw new NotFoundException(`Item ${itemId} not found in cart ${cartId}`);
     }
     await this.prisma.cartItem.delete({ where: { id: itemId } });
+    await this.recomputeCoupon(cartId);
     return this.findById(cartId);
+  }
+
+  private cartSubtotal(items: { priceCents: number; quantity: number }[]) {
+    return items.reduce((sum, i) => sum + i.priceCents * i.quantity, 0);
+  }
+
+  async applyCoupon(cartId: string, code: string) {
+    const cart = await this.findById(cartId);
+    const subtotal = this.cartSubtotal(cart.items);
+    const coupon = await this.prisma.coupon.findUnique({
+      where: { code: code.toUpperCase() },
+    });
+    const error = couponApplicabilityError(coupon, subtotal, new Date());
+    if (error || !coupon) throw new BadRequestException(error ?? 'Invalid coupon');
+
+    await this.prisma.cart.update({
+      where: { id: cartId },
+      data: { couponId: coupon.id, discountCents: couponDiscountCents(coupon, subtotal) },
+    });
+    return this.findById(cartId);
+  }
+
+  async removeCoupon(cartId: string) {
+    await this.findById(cartId);
+    await this.prisma.cart.update({
+      where: { id: cartId },
+      data: { couponId: null, discountCents: 0 },
+    });
+    return this.findById(cartId);
+  }
+
+  // Keep the cart's stored discount in sync after items change; drop the coupon
+  // if it no longer applies (e.g. subtotal fell below its minimum).
+  private async recomputeCoupon(cartId: string) {
+    const cart = await this.prisma.cart.findUnique({
+      where: { id: cartId },
+      include: { items: true, coupon: true },
+    });
+    if (!cart || !cart.coupon) return;
+
+    const subtotal = this.cartSubtotal(cart.items);
+    const error = couponApplicabilityError(cart.coupon, subtotal, new Date());
+    await this.prisma.cart.update({
+      where: { id: cartId },
+      data: error
+        ? { couponId: null, discountCents: 0 }
+        : { discountCents: couponDiscountCents(cart.coupon, subtotal) },
+    });
   }
 }

@@ -46,7 +46,7 @@ const bannerSeed = [
 // holds dinars directly — see frontend lib/format.ts currency exponents).
 const productSeed = [
   { name: 'USB-C Hub 7-in-1', sku: 'HUB-7N1', category: 'Electronics', priceCents: 65000, stock: 80, imageUrl: 'https://picsum.photos/seed/hub/400/300' },
-  { name: 'Wireless Mouse', sku: 'WMOUSE-01', category: 'Electronics', priceCents: 39000, stock: 150, imageUrl: 'https://picsum.photos/seed/mouse/400/300' },
+  { name: 'Wireless Mouse', sku: 'WMOUSE-01', category: 'Electronics', priceCents: 39000, salePriceCents: 29000, stock: 150, imageUrl: 'https://picsum.photos/seed/mouse/400/300' },
   { name: 'Mechanical Keyboard 65%', sku: 'KEYB-65', category: 'Electronics', priceCents: 170000, stock: 40, imageUrl: 'https://picsum.photos/seed/keyboard/400/300' },
   { name: 'Noise-Cancelling Headphones', sku: 'NCH-PRO', category: 'Electronics', priceCents: 325000, stock: 25, imageUrl: 'https://picsum.photos/seed/headphones/400/300' },
   { name: 'Classic Cotton T-Shirt', sku: 'TEE-CLASSIC', category: 'Apparel', priceCents: 25000, stock: 200, imageUrl: 'https://picsum.photos/seed/tee/400/300' },
@@ -56,7 +56,13 @@ const productSeed = [
   { name: 'Linen Throw Blanket', sku: 'THROW-LINEN', category: 'Home', priceCents: 72000, stock: 50, imageUrl: 'https://picsum.photos/seed/throw/400/300' },
   { name: 'Bedside Lamp', sku: 'LAMP-BED', category: 'Home', priceCents: 59000, stock: 35, imageUrl: 'https://picsum.photos/seed/lamp/400/300' },
   { name: 'Vitamin C Serum', sku: 'SERUM-VITC', category: 'Beauty', priceCents: 32000, stock: 120, imageUrl: 'https://picsum.photos/seed/serum/400/300' },
-  { name: 'Hydrating Toner', sku: 'TONER-HYDRA', category: 'Beauty', priceCents: 25000, stock: 100, imageUrl: 'https://picsum.photos/seed/toner/400/300' },
+  { name: 'Hydrating Toner', sku: 'TONER-HYDRA', category: 'Beauty', priceCents: 25000, salePriceCents: 19000, stock: 100, imageUrl: 'https://picsum.photos/seed/toner/400/300' },
+];
+
+const couponSeed = [
+  { code: 'WELCOME10', type: 'PERCENT' as const, value: 10, minSubtotalCents: 0 },
+  { code: 'SAVE5000', type: 'FIXED' as const, value: 5000, minSubtotalCents: 50000 },
+  { code: 'VIP20', type: 'PERCENT' as const, value: 20, minSubtotalCents: 100000, maxRedemptions: 50 },
 ];
 
 // Optional variants keyed by product SKU. Products not listed here are "simple"
@@ -176,6 +182,7 @@ async function clearShopData() {
   await prisma.address.deleteMany();
   await prisma.cartItem.deleteMany();
   await prisma.cart.deleteMany();
+  await prisma.coupon.deleteMany();
   await prisma.customer.deleteMany();
   await prisma.product.deleteMany();
   await prisma.category.deleteMany();
@@ -419,6 +426,13 @@ async function seedOrders(
   console.log(`✓ Orders: 30 (+${paymentCount} payments)`);
 }
 
+async function seedCoupons() {
+  for (const c of couponSeed) {
+    await prisma.coupon.create({ data: c });
+  }
+  console.log(`✓ Coupons: ${couponSeed.length}`);
+}
+
 async function main() {
   console.log('Seeding…');
   await seedAdmin();
@@ -428,6 +442,7 @@ async function main() {
   const products = await seedProducts(categoryByName, storeByCategory);
   const customers = await seedCustomers();
   const defaultAddressByCustomer = await seedAddresses(customers);
+  await seedCoupons();
   await seedCarts(customers, products);
   await seedOrders(customers, products, defaultAddressByCustomer);
   await seedHomepage(products, categoryByName, storeByCategory);

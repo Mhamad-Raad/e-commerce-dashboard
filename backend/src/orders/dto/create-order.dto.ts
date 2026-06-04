@@ -52,4 +52,9 @@ export class CreateOrderDto {
   @IsOptional()
   @IsString()
   addressId?: string;
+
+  // Optional: apply a coupon code (validated + redeemed at creation).
+  @IsOptional()
+  @IsString()
+  couponCode?: string;
 }

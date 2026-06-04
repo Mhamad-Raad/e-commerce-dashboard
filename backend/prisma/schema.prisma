@@ -34,6 +34,11 @@ enum PaymentMethod {
   WALLET
 }
 
+enum DiscountType {
+  PERCENT
+  FIXED
+}
+
 enum PaymentStatus {
   PENDING
   PAID
@@ -227,21 +232,22 @@ model Category {
 }
 
 model Product {
-  id          String    @id @default(cuid())
-  name        String
-  description String?
-  sku         String    @unique
-  priceCents  Int
-  currency    String    @default("IQD")
-  stock       Int       @default(0)
-  imageUrl    String?
-  storeId     String
-  store       Store     @relation(fields: [storeId], references: [id], onDelete: Restrict)
-  categoryId  String?
-  category    Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
-  isActive    Boolean   @default(true)
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  id             String    @id @default(cuid())
+  name           String
+  description    String?
+  sku            String    @unique
+  priceCents     Int
+  salePriceCents Int?
+  currency       String    @default("IQD")
+  stock          Int       @default(0)
+  imageUrl       String?
+  storeId        String
+  store          Store     @relation(fields: [storeId], references: [id], onDelete: Restrict)
+  categoryId     String?
+  category       Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  isActive       Boolean   @default(true)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
 
   variants   ProductVariant[]
   cartItems  CartItem[]
@@ -255,18 +261,19 @@ model Product {
 }
 
 model ProductVariant {
-  id         String   @id @default(cuid())
-  productId  String
-  product    Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
-  name       String
-  sku        String   @unique
-  priceCents Int
-  stock      Int      @default(0)
-  imageUrl   String?
-  isActive   Boolean  @default(true)
-  sortOrder  Int      @default(0)
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  id             String   @id @default(cuid())
+  productId      String
+  product        Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  name           String
+  sku            String   @unique
+  priceCents     Int
+  salePriceCents Int?
+  stock          Int      @default(0)
+  imageUrl       String?
+  isActive       Boolean  @default(true)
+  sortOrder      Int      @default(0)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 
   cartItems  CartItem[]
   orderItems OrderItem[]
@@ -354,13 +361,35 @@ model Address {
   @@index([customerId])
 }
 
+model Coupon {
+  id               String       @id @default(cuid())
+  code             String       @unique
+  type             DiscountType
+  value            Int
+  minSubtotalCents Int          @default(0)
+  maxRedemptions   Int?
+  redeemedCount    Int          @default(0)
+  startsAt         DateTime?
+  expiresAt        DateTime?
+  isActive         Boolean      @default(true)
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+
+  carts Cart[]
+
+  @@index([isActive])
+}
+
 model Cart {
-  id         String     @id @default(cuid())
-  customerId String
-  customer   Customer   @relation(fields: [customerId], references: [id], onDelete: Cascade)
-  status     CartStatus @default(OPEN)
-  createdAt  DateTime   @default(now())
-  updatedAt  DateTime   @updatedAt
+  id            String     @id @default(cuid())
+  customerId    String
+  customer      Customer   @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  status        CartStatus @default(OPEN)
+  couponId      String?
+  coupon        Coupon?    @relation(fields: [couponId], references: [id], onDelete: SetNull)
+  discountCents Int        @default(0)
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
 
   items CartItem[]
 
@@ -392,6 +421,8 @@ model Order {
   customerId    String
   customer      Customer    @relation(fields: [customerId], references: [id])
   subtotalCents Int
+  discountCents Int         @default(0)
+  couponCode    String?
   taxCents      Int         @default(0)
   shippingCents Int         @default(0)
   totalCents    Int

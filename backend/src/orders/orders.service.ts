@@ -4,7 +4,9 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
+import { couponApplicabilityError, couponDiscountCents } from '../common/coupon';
 import { buildPaginated, paginate } from '../common/pagination';
+import { effectivePriceCents } from '../common/pricing';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { ListOrdersQueryDto } from './dto/list-orders.query.dto';
@@ -93,6 +95,7 @@ export class OrdersService {
       let variantId: string | null = null;
       let variantName: string | null = null;
       let priceCents = product.priceCents;
+      let priceBase = effectivePriceCents(product.priceCents, product.salePriceCents);
       if (i.variantId) {
         const variant = variantMap.get(i.variantId);
         if (!variant || variant.productId !== product.id) {
@@ -102,8 +105,9 @@ export class OrdersService {
         }
         variantId = variant.id;
         variantName = variant.name;
-        priceCents = variant.priceCents;
+        priceBase = effectivePriceCents(variant.priceCents, variant.salePriceCents);
       }
+      priceCents = priceBase;
       return {
         productId: product.id,
         variantId,
@@ -121,8 +125,24 @@ export class OrdersService {
     );
     const taxCents = dto.taxCents ?? 0;
     const shippingCents = dto.shippingCents ?? 0;
-    const totalCents = subtotalCents + taxCents + shippingCents;
     const currency = dto.currency ?? products[0]?.currency ?? 'IQD';
+
+    // Validate + apply an optional coupon against the subtotal.
+    let discountCents = 0;
+    let couponCode: string | null = null;
+    let couponId: string | null = null;
+    if (dto.couponCode) {
+      const coupon = await this.prisma.coupon.findUnique({
+        where: { code: dto.couponCode.toUpperCase() },
+      });
+      const error = couponApplicabilityError(coupon, subtotalCents, new Date());
+      if (error || !coupon) throw new BadRequestException(error ?? 'Invalid coupon');
+      discountCents = couponDiscountCents(coupon, subtotalCents);
+      couponCode = coupon.code;
+      couponId = coupon.id;
+    }
+
+    const totalCents = Math.max(0, subtotalCents - discountCents + taxCents + shippingCents);
 
     // Optionally snapshot a customer address as the shipping address.
     let shipping: Prisma.OrderUncheckedCreateInput | object = {};
@@ -146,19 +166,31 @@ export class OrdersService {
       };
     }
 
-    const order = await this.prisma.order.create({
-      data: {
-        number: generateOrderNumber(),
-        customerId: dto.customerId,
-        subtotalCents,
-        taxCents,
-        shippingCents,
-        totalCents,
-        currency,
-        ...shipping,
-        items: { create: lineItems },
-      },
-      include: orderInclude,
+    const order = await this.prisma.$transaction(async (tx) => {
+      const created = await tx.order.create({
+        data: {
+          number: generateOrderNumber(),
+          customerId: dto.customerId,
+          subtotalCents,
+          discountCents,
+          couponCode,
+          taxCents,
+          shippingCents,
+          totalCents,
+          currency,
+          ...shipping,
+          items: { create: lineItems },
+        },
+        include: orderInclude,
+      });
+      // Count the redemption when an order actually uses the coupon.
+      if (couponId) {
+        await tx.coupon.update({
+          where: { id: couponId },
+          data: { redeemedCount: { increment: 1 } },
+        });
+      }
+      return created;
     });
 
     return order;

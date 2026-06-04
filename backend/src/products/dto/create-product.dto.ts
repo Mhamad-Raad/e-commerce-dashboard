@@ -7,6 +7,7 @@ import {
   Length,
   Matches,
   Min,
+  ValidateIf,
 } from 'class-validator';
 
 export class CreateProductDto {
@@ -28,6 +29,12 @@ export class CreateProductDto {
   @IsInt()
   @Min(0)
   priceCents!: number;
+
+  @IsOptional()
+  @ValidateIf((_, value) => value !== null)
+  @IsInt()
+  @Min(0)
+  salePriceCents?: number | null;
 
   @IsOptional()
   @IsString()
