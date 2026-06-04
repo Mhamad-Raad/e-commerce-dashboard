@@ -176,6 +176,7 @@ async function clearShopData() {
   await prisma.featuredCategory.deleteMany();
   await prisma.featuredStore.deleteMany();
   await prisma.heroBanner.deleteMany();
+  await prisma.review.deleteMany();
   await prisma.payment.deleteMany();
   await prisma.orderItem.deleteMany();
   await prisma.order.deleteMany();
@@ -426,6 +427,58 @@ async function seedOrders(
   console.log(`✓ Orders: 30 (+${paymentCount} payments)`);
 }
 
+const reviewComments = [
+  'Great quality, exactly as described!',
+  'Fast delivery and well packaged.',
+  'Good value for the money.',
+  'Works perfectly, would buy again.',
+  'Decent product, packaging could be better.',
+  'Absolutely love it!',
+  'Met my expectations.',
+  'Solid choice, recommended.',
+];
+
+async function seedReviews(
+  products: { id: string }[],
+  customers: { id: string }[],
+) {
+  let count = 0;
+  let approved = 0;
+  for (let p = 0; p < Math.min(8, products.length); p++) {
+    const product = products[p];
+    const n = randomInt(2, 4);
+    for (let i = 0; i < n && i < customers.length; i++) {
+      const customer = customers[(p + i) % customers.length];
+      const rating = randomInt(3, 5);
+      const isApproved = Math.random() < 0.75;
+      await prisma.review.create({
+        data: {
+          productId: product.id,
+          customerId: customer.id,
+          rating,
+          comment: reviewComments[randomInt(0, reviewComments.length - 1)],
+          isApproved,
+        },
+      });
+      count++;
+      if (isApproved) approved++;
+    }
+    const agg = await prisma.review.aggregate({
+      where: { productId: product.id, isApproved: true },
+      _avg: { rating: true },
+      _count: true,
+    });
+    await prisma.product.update({
+      where: { id: product.id },
+      data: {
+        ratingAvg: agg._avg.rating ? Math.round(agg._avg.rating * 100) / 100 : 0,
+        ratingCount: agg._count,
+      },
+    });
+  }
+  console.log(`✓ Reviews: ${count} (${approved} approved)`);
+}
+
 async function seedCoupons() {
   for (const c of couponSeed) {
     await prisma.coupon.create({ data: c });
@@ -443,6 +496,7 @@ async function main() {
   const customers = await seedCustomers();
   const defaultAddressByCustomer = await seedAddresses(customers);
   await seedCoupons();
+  await seedReviews(products, customers);
   await seedCarts(customers, products);
   await seedOrders(customers, products, defaultAddressByCustomer);
   await seedHomepage(products, categoryByName, storeByCategory);
