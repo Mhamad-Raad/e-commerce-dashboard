@@ -11,6 +11,7 @@ import { productsApi } from '@/features/products/api';
 import type { ProductWritePayload } from '@/features/products/types';
 import { storesApi } from '@/features/stores/api';
 import { categoriesApi } from '@/features/categories/api';
+import { brandsApi } from '@/features/brands/api';
 import { PageHeader } from '@/components/PageHeader';
 import { FormField } from '@/components/FormField';
 import { AsyncCombobox } from '@/components/AsyncCombobox';
@@ -51,6 +52,7 @@ const schema = z.object({
     }),
   storeId: z.string().min(1),
   categoryId: z.string().optional().or(z.literal('')),
+  brandId: z.string().optional().or(z.literal('')),
   imageUrl: z.string().url().optional().or(z.literal('')),
   description: z.string().max(5000).optional().or(z.literal('')),
   isActive: z.boolean(),
@@ -69,6 +71,7 @@ const defaultValues: FormValues = {
   ratingCount: '0',
   storeId: '',
   categoryId: '',
+  brandId: '',
   imageUrl: '',
   description: '',
   isActive: true,
@@ -110,6 +113,7 @@ export function ProductForm() {
         ratingCount: String(p.ratingCount ?? 0),
         storeId: p.storeId,
         categoryId: p.categoryId ?? '',
+        brandId: p.brandId ?? '',
         imageUrl: p.imageUrl ?? '',
         description: p.description ?? '',
         isActive: p.isActive,
@@ -130,6 +134,7 @@ export function ProductForm() {
         ratingCount: values.ratingCount !== '' ? Number(values.ratingCount) : 0,
         storeId: values.storeId,
         categoryId: values.categoryId || undefined,
+        brandId: values.brandId || undefined,
         imageUrl: values.imageUrl?.trim() || undefined,
         description: values.description?.trim() || undefined,
         isActive: values.isActive,
@@ -155,6 +160,7 @@ export function ProductForm() {
   const isActive = watch('isActive');
   const storeId = watch('storeId');
   const categoryId = watch('categoryId');
+  const brandId = watch('brandId');
 
   return (
     <div className="mx-auto max-w-3xl space-y-5">
@@ -234,6 +240,23 @@ export function ProductForm() {
                   }
                   getItemId={(c) => c.id}
                   getItemLabel={(c) => c.name}
+                />
+              </FormField>
+              <FormField label={t('products.brand')} error={errors.brandId?.message}>
+                <AsyncCombobox
+                  value={brandId ?? ''}
+                  onChange={(v) => setValue('brandId', v)}
+                  selectedLabel={productQuery.data?.brand?.name ?? undefined}
+                  placeholder={t('products.select_brand')}
+                  allowClear
+                  queryKey={['brands']}
+                  fetchPage={(search, page) =>
+                    brandsApi
+                      .list({ search: search || undefined, page, pageSize: 20 })
+                      .then((r) => ({ items: r.items, total: r.total }))
+                  }
+                  getItemId={(b) => b.id}
+                  getItemLabel={(b) => b.name}
                 />
               </FormField>
               <div className="md:col-span-2">
