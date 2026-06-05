@@ -14,6 +14,7 @@ import { InventoryModule } from './inventory/inventory.module';
 import { OrdersModule } from './orders/orders.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { ProductsModule } from './products/products.module';
+import { RefundsModule } from './refunds/refunds.module';
 import { ReportsModule } from './reports/reports.module';
 import { ReviewsModule } from './reviews/reviews.module';
 import { SettingsModule } from './settings/settings.module';
@@ -37,6 +38,7 @@ import { UsersModule } from './users/users.module';
     FeeGroupsModule,
     HomepageModule,
     InventoryModule,
+    RefundsModule,
     ReportsModule,
     ReviewsModule,
     SettingsModule,

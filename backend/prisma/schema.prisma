@@ -60,16 +60,38 @@ enum OrderEventType {
   PAYMENT_RECORDED
   PAYMENT_UPDATED
   PAYMENT_REMOVED
+  REFUND_REQUESTED
+  REFUND_COMPLETED
 }
 
 // Why a stock level changed. ORDER decrements on order placement;
 // ORDER_CANCELLED reverses that when an order is cancelled/refunded/deleted;
+// RETURN puts goods back when a refund is completed with restock;
 // RESTOCK is a positive supplier top-up; ADJUSTMENT is a manual correction.
 enum StockMovementReason {
   ORDER
   ORDER_CANCELLED
+  RETURN
   RESTOCK
   ADJUSTMENT
+}
+
+enum RefundStatus {
+  REQUESTED
+  APPROVED
+  REJECTED
+  COMPLETED
+  CANCELLED
+}
+
+enum RefundReason {
+  DAMAGED
+  DEFECTIVE
+  WRONG_ITEM
+  NOT_AS_DESCRIBED
+  ARRIVED_LATE
+  CHANGED_MIND
+  OTHER
 }
 
 // Iraq's 19 governorates.
@@ -563,10 +585,51 @@ model Order {
   payments       Payment[]
   stockMovements StockMovement[]
   events         OrderEvent[]
+  refunds        Refund[]
 
   @@index([customerId])
   @@index([status])
   @@index([placedAt])
+}
+
+model Refund {
+  id          String       @id @default(cuid())
+  number      String       @unique
+  orderId     String
+  order       Order        @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  status      RefundStatus @default(REQUESTED)
+  reason      RefundReason
+  note        String?
+  amountCents Int
+  currency    String       @default("IQD")
+  // Whether completing this refund returns the items to inventory.
+  restock     Boolean      @default(true)
+  resolvedAt  DateTime?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  items RefundItem[]
+
+  @@index([orderId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+model RefundItem {
+  id          String  @id @default(cuid())
+  refundId    String
+  refund      Refund  @relation(fields: [refundId], references: [id], onDelete: Cascade)
+  // Plain reference to the source OrderItem (snapshot below keeps it correct even
+  // if the order is later edited); not an FK so refund history is independent.
+  orderItemId String
+  productId   String
+  variantId   String?
+  name        String
+  variantName String?
+  quantity    Int
+  priceCents  Int
+
+  @@index([refundId])
 }
 
 model OrderEvent {

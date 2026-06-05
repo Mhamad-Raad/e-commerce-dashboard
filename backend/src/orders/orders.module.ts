@@ -11,6 +11,6 @@ import { PaymentsService } from './payments.service';
   imports: [InventoryModule, FeeGroupsModule],
   controllers: [OrdersController, PaymentsController],
   providers: [OrdersService, PaymentsService, OrderEventsService],
-  exports: [OrdersService, PaymentsService],
+  exports: [OrdersService, PaymentsService, OrderEventsService],
 })
 export class OrdersModule {}
