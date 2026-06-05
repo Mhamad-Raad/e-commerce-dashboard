@@ -11,6 +11,7 @@ import { CustomersModule } from './customers/customers.module';
 import { FeeGroupsModule } from './feegroups/feegroups.module';
 import { HomepageModule } from './homepage/homepage.module';
 import { InventoryModule } from './inventory/inventory.module';
+import { NotificationsModule } from './notifications/notifications.module';
 import { OrdersModule } from './orders/orders.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { ProductsModule } from './products/products.module';
@@ -38,6 +39,7 @@ import { UsersModule } from './users/users.module';
     FeeGroupsModule,
     HomepageModule,
     InventoryModule,
+    NotificationsModule,
     RefundsModule,
     ReportsModule,
     ReviewsModule,

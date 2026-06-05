@@ -229,6 +229,26 @@ enum City {
   BIYARA
 }
 
+enum NotificationType {
+  ORDER_CREATED
+  REFUND_REQUESTED
+}
+
+// Store-wide activity feed shown in the dashboard navbar bell. Body text is
+// localized on the client from type + meta (kept consistent with EN/AR UI).
+model Notification {
+  id        String           @id @default(cuid())
+  type      NotificationType
+  meta      Json?
+  // Deep-link target, e.g. "/orders/<id>" or "/refunds/<id>".
+  link      String?
+  isRead    Boolean          @default(false)
+  createdAt DateTime         @default(now())
+
+  @@index([isRead])
+  @@index([createdAt])
+}
+
 // Single-row store-wide configuration (business identity + default currency).
 // Always addressed by the fixed id "singleton".
 model Setting {

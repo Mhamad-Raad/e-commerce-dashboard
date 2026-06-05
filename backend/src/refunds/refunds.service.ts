@@ -12,6 +12,7 @@ import {
 import { CSV_MAX_ROWS, toCsv } from '../common/csv';
 import { buildPaginated, paginate } from '../common/pagination';
 import { InventoryService } from '../inventory/inventory.service';
+import { NotificationsService } from '../notifications/notifications.service';
 import { OrderEventsService } from '../orders/order-events.service';
 import { PrismaService } from '../prisma/prisma.service';
 import {
@@ -61,6 +62,7 @@ export class RefundsService {
     private prisma: PrismaService,
     private inventory: InventoryService,
     private events: OrderEventsService,
+    private notifications: NotificationsService,
   ) {}
 
   async list(query: ListRefundsQueryDto) {
@@ -171,7 +173,7 @@ export class RefundsService {
   async create(dto: CreateRefundDto) {
     const order = await this.prisma.order.findUnique({
       where: { id: dto.orderId },
-      include: { items: true },
+      include: { items: true, customer: { select: { name: true } } },
     });
     if (!order) throw new NotFoundException(`Order ${dto.orderId} not found`);
     if (order.status === 'CANCELLED') {
@@ -230,6 +232,18 @@ export class RefundsService {
         amountCents,
         reason: dto.reason,
       });
+      await this.notifications.create(
+        tx,
+        'REFUND_REQUESTED',
+        {
+          number: created.number,
+          orderNumber: order.number,
+          customerName: order.customer.name,
+          amountCents,
+          currency: order.currency,
+        },
+        `/refunds/${created.id}`,
+      );
       return created;
     });
 

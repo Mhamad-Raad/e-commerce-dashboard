@@ -10,6 +10,7 @@ import { buildPaginated, paginate } from '../common/pagination';
 import { effectivePriceCents } from '../common/pricing';
 import { FeeGroupsService } from '../feegroups/feegroups.service';
 import { InventoryService } from '../inventory/inventory.service';
+import { NotificationsService } from '../notifications/notifications.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { OrderEventsService } from './order-events.service';
 import { CreateOrderDto } from './dto/create-order.dto';
@@ -41,6 +42,7 @@ export class OrdersService {
     private inventory: InventoryService,
     private events: OrderEventsService,
     private feeGroups: FeeGroupsService,
+    private notifications: NotificationsService,
   ) {}
 
   listEvents(orderId: string) {
@@ -317,6 +319,17 @@ export class OrdersService {
         currency: quote.currency,
         itemCount: quote.lineItems.length,
       });
+      await this.notifications.create(
+        tx,
+        'ORDER_CREATED',
+        {
+          number: created.number,
+          customerName: customer.name,
+          totalCents: quote.totalCents,
+          currency: quote.currency,
+        },
+        `/orders/${created.id}`,
+      );
       return created;
     });
 
