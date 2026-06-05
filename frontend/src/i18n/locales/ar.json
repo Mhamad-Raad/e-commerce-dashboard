@@ -588,6 +588,15 @@
     "from": "من",
     "to": "إلى"
   },
+  "receipt": {
+    "title": "إيصال",
+    "receipt": "إيصال",
+    "print": "طباعة / حفظ PDF",
+    "print_n": "طباعة {{count}} إيصال",
+    "bill_to": "فاتورة إلى",
+    "thanks": "شكراً لتعاملكم معنا.",
+    "none_selected": "لم يتم تحديد أي طلبات."
+  },
   "pagination": {
     "rows_per_page": "صفوف",
     "showing": "{{from}}–{{to}} من {{total}}"

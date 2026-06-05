@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { ArrowLeft, ClipboardList, Trash2 } from 'lucide-react';
+import { ArrowLeft, ClipboardList, Printer, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { ordersApi, orderStatusTone } from '@/features/orders/api';
 import { ORDER_STATUSES, type OrderStatus } from '@/features/orders/types';
@@ -154,6 +154,12 @@ export function OrderDetail() {
                 ))}
               </SelectContent>
             </Select>
+            <Button asChild variant="outline">
+              <Link to={`/receipts?ids=${order.id}`} target="_blank" rel="noopener">
+                <Printer className="h-4 w-4" />
+                {t('receipt.receipt')}
+              </Link>
+            </Button>
             <Button variant="destructive" onClick={() => setConfirmDelete(true)}>
               <Trash2 className="h-4 w-4" />
               {t('common.delete')}

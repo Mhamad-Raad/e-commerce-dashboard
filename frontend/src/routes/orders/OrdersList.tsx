@@ -1,7 +1,8 @@
+import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useQuery, keepPreviousData } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { ClipboardList, Plus } from 'lucide-react';
+import { ClipboardList, Plus, Printer } from 'lucide-react';
 import { ordersApi, orderStatusTone } from '@/features/orders/api';
 import { ORDER_STATUSES, type Order, type OrderStatus } from '@/features/orders/types';
 import { PageHeader } from '@/components/PageHeader';
@@ -11,6 +12,7 @@ import { TablePagination } from '@/components/TablePagination';
 import { DataTable, type Column } from '@/components/DataTable';
 import { StatusBadge } from '@/components/StatusBadge';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
   Select,
   SelectContent,
@@ -30,6 +32,7 @@ export function OrdersList() {
     key: 'orders',
   });
   const status = getFilter('status') as OrderStatus | '';
+  const [selected, setSelected] = useState<string[]>([]);
 
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ['orders', { search, status, page, limit }],
@@ -45,7 +48,32 @@ export function OrdersList() {
 
   const statusLabel = (s: OrderStatus) => t(`orders.status.${s.toLowerCase()}`);
 
+  const pageIds = data?.items.map((o) => o.id) ?? [];
+  const allSelected = pageIds.length > 0 && pageIds.every((id) => selected.includes(id));
+  const toggle = (id: string) =>
+    setSelected((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
+  const toggleAll = () =>
+    setSelected((prev) =>
+      allSelected
+        ? prev.filter((id) => !pageIds.includes(id))
+        : [...new Set([...prev, ...pageIds])],
+    );
+
   const columns: Column<Order>[] = [
+    {
+      key: 'select',
+      className: 'w-10',
+      header: (
+        <span onClick={(e) => e.stopPropagation()}>
+          <Checkbox checked={allSelected} onCheckedChange={toggleAll} aria-label="Select all" />
+        </span>
+      ),
+      cell: (o) => (
+        <span onClick={(e) => e.stopPropagation()}>
+          <Checkbox checked={selected.includes(o.id)} onCheckedChange={() => toggle(o.id)} />
+        </span>
+      ),
+    },
     {
       key: 'number',
       header: t('orders.number'),
@@ -86,12 +114,22 @@ export function OrdersList() {
         title={t('orders.title')}
         description={data ? t('orders.total_count', { count: data.total }) : undefined}
         action={
-          <Button asChild>
-            <Link to="/orders/new">
-              <Plus className="h-4 w-4" />
-              {t('orders.new')}
-            </Link>
-          </Button>
+          <div className="flex items-center gap-2">
+            {selected.length > 0 && (
+              <Button asChild variant="outline">
+                <Link to={`/receipts?ids=${selected.join(',')}`} target="_blank" rel="noopener">
+                  <Printer className="h-4 w-4" />
+                  {t('receipt.print_n', { count: selected.length })}
+                </Link>
+              </Button>
+            )}
+            <Button asChild>
+              <Link to="/orders/new">
+                <Plus className="h-4 w-4" />
+                {t('orders.new')}
+              </Link>
+            </Button>
+          </div>
         }
       />
 

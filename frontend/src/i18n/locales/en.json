@@ -588,6 +588,15 @@
     "from": "From",
     "to": "To"
   },
+  "receipt": {
+    "title": "Receipt",
+    "receipt": "Receipt",
+    "print": "Print / Save as PDF",
+    "print_n": "Print {{count}} receipt(s)",
+    "bill_to": "Bill to",
+    "thanks": "Thank you for your business.",
+    "none_selected": "No orders selected."
+  },
   "pagination": {
     "rows_per_page": "Rows",
     "showing": "{{from}}–{{to}} of {{total}}"

@@ -90,6 +90,9 @@ const RefundDetail = lazy(() =>
 const Settings = lazy(() =>
   import('./routes/settings/Settings').then((m) => ({ default: m.Settings })),
 );
+const Receipts = lazy(() =>
+  import('./routes/receipts/Receipts').then((m) => ({ default: m.Receipts })),
+);
 
 function PageLoader() {
   return (
@@ -104,6 +107,15 @@ export default function App() {
     <Suspense fallback={<PageLoader />}>
       <Routes>
         <Route path="/login" element={<Login />} />
+        {/* Standalone (no dashboard chrome) so it prints cleanly to PDF. */}
+        <Route
+          path="/receipts"
+          element={
+            <ProtectedRoute>
+              <Receipts />
+            </ProtectedRoute>
+          }
+        />
         <Route
           element={
             <ProtectedRoute>
