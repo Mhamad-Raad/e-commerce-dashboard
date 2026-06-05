@@ -41,7 +41,7 @@ export class BrandsService {
   async findById(id: string) {
     const brand = await this.prisma.brand.findUnique({
       where: { id },
-      include: { _count: { select: { products: true } } },
+      include: { feeGroup: true, _count: { select: { products: true } } },
     });
     if (!brand) throw new NotFoundException(`Brand ${id} not found`);
     return brand;

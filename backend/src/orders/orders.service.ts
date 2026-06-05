@@ -7,6 +7,7 @@ import { OrderEventType, OrderStatus, Prisma } from '@prisma/client';
 import { couponApplicabilityError, couponDiscountCents } from '../common/coupon';
 import { buildPaginated, paginate } from '../common/pagination';
 import { effectivePriceCents } from '../common/pricing';
+import { FeeGroupsService } from '../feegroups/feegroups.service';
 import { InventoryService } from '../inventory/inventory.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { OrderEventsService } from './order-events.service';
@@ -38,6 +39,7 @@ export class OrdersService {
     private prisma: PrismaService,
     private inventory: InventoryService,
     private events: OrderEventsService,
+    private feeGroups: FeeGroupsService,
   ) {}
 
   listEvents(orderId: string) {
@@ -137,9 +139,20 @@ export class OrdersService {
       (sum, i) => sum + i.priceCents * i.quantity,
       0,
     );
-    const taxCents = dto.taxCents ?? 0;
-    const shippingCents = dto.shippingCents ?? 0;
     const currency = dto.currency ?? products[0]?.currency ?? 'IQD';
+
+    // Resolve fee groups assigned to the order's stores/brands; staff may still
+    // override any individual amount via the DTO.
+    const storeIds = [...new Set(products.map((p) => p.storeId))];
+    const brandIds = [
+      ...new Set(products.map((p) => p.brandId).filter((id): id is string => Boolean(id))),
+    ];
+    const resolved = await this.feeGroups.resolveForOrder(storeIds, brandIds, subtotalCents);
+
+    const taxCents = dto.taxCents ?? resolved.taxCents;
+    const shippingCents = dto.shippingCents ?? 0;
+    const feesCents = dto.feesCents ?? resolved.feesCents;
+    const feesLabel = dto.feesLabel ?? resolved.feesLabel;
 
     // Validate + apply an optional coupon against the subtotal.
     let discountCents = 0;
@@ -156,7 +169,10 @@ export class OrdersService {
       couponId = coupon.id;
     }
 
-    const totalCents = Math.max(0, subtotalCents - discountCents + taxCents + shippingCents);
+    const totalCents = Math.max(
+      0,
+      subtotalCents - discountCents + taxCents + shippingCents + feesCents,
+    );
 
     // Optionally snapshot a customer address as the shipping address.
     let shipping: Partial<Prisma.OrderUncheckedCreateInput> = {};
@@ -190,6 +206,8 @@ export class OrdersService {
           couponCode,
           taxCents,
           shippingCents,
+          feesCents,
+          feesLabel,
           totalCents,
           currency,
           notes: dto.notes,

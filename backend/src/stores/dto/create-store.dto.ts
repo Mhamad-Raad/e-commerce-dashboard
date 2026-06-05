@@ -50,6 +50,11 @@ export class CreateStoreDto {
   country?: string;
 
   @IsOptional()
+  @IsString()
+  @Length(1, 40)
+  feeGroupId?: string | null;
+
+  @IsOptional()
   @IsBoolean()
   isActive?: boolean;
 }

@@ -45,6 +45,7 @@ export class StoresService {
     const store = await this.prisma.store.findUnique({
       where: { id },
       include: {
+        feeGroup: true,
         _count: { select: { products: true } },
         products: {
           orderBy: { createdAt: 'desc' },

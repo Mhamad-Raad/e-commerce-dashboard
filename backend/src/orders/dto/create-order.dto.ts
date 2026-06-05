@@ -43,6 +43,17 @@ export class CreateOrderDto {
   @Min(0)
   shippingCents?: number;
 
+  // Optional override of the auto-resolved fee-group charge + its label.
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  feesCents?: number;
+
+  @IsOptional()
+  @IsString()
+  @Length(0, 60)
+  feesLabel?: string;
+
   @IsOptional()
   @IsString()
   @Length(3, 3)

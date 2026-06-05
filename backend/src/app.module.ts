@@ -8,6 +8,7 @@ import { CartsModule } from './carts/carts.module';
 import { CategoriesModule } from './categories/categories.module';
 import { CouponsModule } from './coupons/coupons.module';
 import { CustomersModule } from './customers/customers.module';
+import { FeeGroupsModule } from './feegroups/feegroups.module';
 import { HomepageModule } from './homepage/homepage.module';
 import { InventoryModule } from './inventory/inventory.module';
 import { OrdersModule } from './orders/orders.module';
@@ -32,6 +33,7 @@ import { UsersModule } from './users/users.module';
     CartsModule,
     OrdersModule,
     CouponsModule,
+    FeeGroupsModule,
     HomepageModule,
     InventoryModule,
     ReportsModule,

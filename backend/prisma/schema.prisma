@@ -217,6 +217,27 @@ model User {
   updatedAt    DateTime @updatedAt
 }
 
+// A reusable tax + flat-fee rule the dashboard manages and assigns to stores
+// and/or brands. Resolved at checkout to add a labelled order-level fee
+// (e.g. "Transportation") plus optional tax, instead of staff typing them.
+model FeeGroup {
+  id         String   @id @default(cuid())
+  name       String
+  // Customer-facing label for the flat fee, e.g. "Transportation", "Handling".
+  label      String
+  feeCents   Int      @default(0)
+  // Percent of subtotal added as tax (0 = none). Stored as a whole percent.
+  taxRatePct Int      @default(0)
+  isActive   Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  stores Store[]
+  brands Brand[]
+
+  @@index([isActive])
+}
+
 model Store {
   id          String   @id @default(cuid())
   name        String
@@ -230,6 +251,8 @@ model Store {
   city        String?
   country     String?
   isActive    Boolean  @default(true)
+  feeGroupId  String?
+  feeGroup    FeeGroup? @relation(fields: [feeGroupId], references: [id], onDelete: SetNull)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -263,6 +286,8 @@ model Brand {
   description String?
   logoUrl     String?
   isActive    Boolean  @default(true)
+  feeGroupId  String?
+  feeGroup    FeeGroup? @relation(fields: [feeGroupId], references: [id], onDelete: SetNull)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -495,6 +520,9 @@ model Order {
   couponCode     String?
   taxCents       Int         @default(0)
   shippingCents  Int         @default(0)
+  // Auto-resolved fee-group charge (e.g. transportation) + its display label.
+  feesCents      Int         @default(0)
+  feesLabel      String?
   totalCents     Int
   currency       String      @default("IQD")
   notes          String?

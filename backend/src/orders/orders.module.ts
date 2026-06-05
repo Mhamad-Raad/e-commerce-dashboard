@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { FeeGroupsModule } from '../feegroups/feegroups.module';
 import { InventoryModule } from '../inventory/inventory.module';
 import { OrderEventsService } from './order-events.service';
 import { OrdersController } from './orders.controller';
@@ -7,7 +8,7 @@ import { PaymentsController } from './payments.controller';
 import { PaymentsService } from './payments.service';
 
 @Module({
-  imports: [InventoryModule],
+  imports: [InventoryModule, FeeGroupsModule],
   controllers: [OrdersController, PaymentsController],
   providers: [OrdersService, PaymentsService, OrderEventsService],
   exports: [OrdersService, PaymentsService],
