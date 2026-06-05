@@ -4,6 +4,7 @@ import type {
   Order,
   OrderEvent,
   OrderListResponse,
+  OrderPreview,
   OrderStatus,
 } from './types';
 
@@ -30,6 +31,10 @@ export const ordersApi = {
   },
   create: async (payload: CreateOrderPayload): Promise<Order> => {
     const res = await api.post<Order>('/orders', payload);
+    return res.data;
+  },
+  preview: async (payload: CreateOrderPayload): Promise<OrderPreview> => {
+    const res = await api.post<OrderPreview>('/orders/preview', payload);
     return res.data;
   },
   update: async (

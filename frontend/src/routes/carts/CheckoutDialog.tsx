@@ -1,8 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, keepPreviousData } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { addressesApi } from '@/features/addresses/api';
+import { ordersApi } from '@/features/orders/api';
 import { PAYMENT_METHODS, type PaymentMethod } from '@/features/payments/types';
 import type { CheckoutPayload } from '@/features/carts/api';
 import type { Cart } from '@/features/carts/types';
@@ -63,7 +64,34 @@ export function CheckoutDialog({ open, cart, saving, onOpenChange, onSubmit }: C
 
   const taxCents = Math.max(0, toMinor(Number(taxInput) || 0, CURRENCY));
   const shippingCents = Math.max(0, toMinor(Number(shippingInput) || 0, CURRENCY));
-  const total = cartTotalCents(cart) + taxCents + shippingCents;
+  const localTotal = cartTotalCents(cart) + taxCents + shippingCents;
+
+  // Server quote so the customer-facing fee (e.g. transportation) + auto tax show
+  // before the order is placed, matching what checkout will actually charge.
+  const previewPayload = useMemo(
+    () => ({
+      customerId: cart.customerId,
+      items: cart.items.map((i) => ({
+        productId: i.productId,
+        variantId: i.variantId ?? undefined,
+        quantity: i.quantity,
+      })),
+      taxCents: taxCents || undefined,
+      shippingCents: shippingCents || undefined,
+      currency: CURRENCY,
+      couponCode: cart.coupon?.code,
+    }),
+    [cart, taxCents, shippingCents],
+  );
+
+  const { data: preview } = useQuery({
+    queryKey: ['order-preview', previewPayload],
+    queryFn: () => ordersApi.preview(previewPayload),
+    enabled: open && cart.items.length > 0,
+    placeholderData: keepPreviousData,
+  });
+
+  const total = preview?.totalCents ?? localTotal;
 
   const submit = () => {
     if (!addressId) return;
@@ -146,9 +174,23 @@ export function CheckoutDialog({ open, cart, saving, onOpenChange, onSubmit }: C
               <Textarea rows={2} value={notes} onChange={(e) => setNotes(e.target.value)} />
             </FormField>
 
-            <div className="flex justify-between border-t pt-3 text-base font-semibold">
-              <span>{t('orders.total')}</span>
-              <span>{formatMoney(total, CURRENCY)}</span>
+            <div className="space-y-1.5 border-t pt-3 text-sm">
+              {!!preview && preview.taxCents > 0 && (
+                <div className="flex justify-between text-muted-foreground">
+                  <span>{t('orders.tax')}</span>
+                  <span>{formatMoney(preview.taxCents, CURRENCY)}</span>
+                </div>
+              )}
+              {!!preview && preview.feesCents > 0 && (
+                <div className="flex justify-between text-muted-foreground">
+                  <span>{preview.feesLabel || t('orders.fees')}</span>
+                  <span>{formatMoney(preview.feesCents, CURRENCY)}</span>
+                </div>
+              )}
+              <div className="flex justify-between text-base font-semibold">
+                <span>{t('orders.total')}</span>
+                <span>{formatMoney(total, CURRENCY)}</span>
+              </div>
             </div>
           </div>
         )}

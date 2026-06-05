@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, keepPreviousData } from '@tanstack/react-query';
 import { couponsApi } from '@/features/coupons/api';
 import { useTranslation } from 'react-i18next';
 import { ArrowLeft, ClipboardList, Plus, Trash2 } from 'lucide-react';
@@ -151,21 +151,44 @@ export function NewOrder() {
     setItems((prev) => prev.filter((i) => lineKey(i.productId, i.variantId) !== key));
   };
 
+  // Server-computed quote so staff see fee-group fees + auto tax BEFORE placing.
+  const previewPayload = useMemo(
+    () => ({
+      customerId,
+      items: items.map((i) => ({
+        productId: i.productId,
+        variantId: i.variantId ?? undefined,
+        quantity: i.quantity,
+      })),
+      taxCents: taxCents || undefined,
+      shippingCents: shippingCents || undefined,
+      currency,
+      couponCode: appliedCoupon?.code,
+    }),
+    [customerId, items, taxCents, shippingCents, currency, appliedCoupon],
+  );
+
+  const { data: preview } = useQuery({
+    queryKey: ['order-preview', previewPayload],
+    queryFn: () => ordersApi.preview(previewPayload),
+    enabled: !!customerId && items.length > 0,
+    placeholderData: keepPreviousData,
+  });
+
+  // Prefer the server quote (it knows about fee groups); fall back to the local
+  // estimate while it loads or before a customer/items exist.
+  const view = {
+    subtotal: preview?.subtotalCents ?? subtotalCents,
+    discount: preview?.discountCents ?? discountCents,
+    tax: preview?.taxCents ?? taxCents,
+    shipping: preview?.shippingCents ?? shippingCents,
+    fees: preview?.feesCents ?? 0,
+    feesLabel: preview?.feesLabel ?? null,
+    total: preview?.totalCents ?? totalCents,
+  };
+
   const createOrder = useMutation({
-    mutationFn: () =>
-      ordersApi.create({
-        customerId,
-        items: items.map((i) => ({
-          productId: i.productId,
-          variantId: i.variantId ?? undefined,
-          quantity: i.quantity,
-        })),
-        taxCents: taxCents || undefined,
-        shippingCents: shippingCents || undefined,
-        currency,
-        addressId: addressId || undefined,
-        couponCode: appliedCoupon?.code,
-      }),
+    mutationFn: () => ordersApi.create({ ...previewPayload, addressId: addressId || undefined }),
     onSuccess: (order) => navigate(`/orders/${order.id}`),
     onError: (err) => toast.error(extractErrorMessage(err)),
   });
@@ -385,28 +408,34 @@ export function NewOrder() {
           <div className="space-y-1.5 border-t pt-4 text-sm">
             <div className="flex justify-between text-muted-foreground">
               <span>{t('orders.subtotal')}</span>
-              <span>{formatMoney(subtotalCents, currency)}</span>
+              <span>{formatMoney(view.subtotal, currency)}</span>
             </div>
-            {discountCents > 0 && (
+            {view.discount > 0 && (
               <div className="flex justify-between text-emerald-600 dark:text-emerald-400">
                 <span>
                   {t('coupons.discount')}
                   {appliedCoupon && <span className="ms-1 font-mono text-xs">({appliedCoupon.code})</span>}
                 </span>
-                <span>−{formatMoney(discountCents, currency)}</span>
+                <span>−{formatMoney(view.discount, currency)}</span>
               </div>
             )}
             <div className="flex justify-between text-muted-foreground">
               <span>{t('orders.tax')}</span>
-              <span>{formatMoney(taxCents, currency)}</span>
+              <span>{formatMoney(view.tax, currency)}</span>
             </div>
             <div className="flex justify-between text-muted-foreground">
               <span>{t('orders.shipping')}</span>
-              <span>{formatMoney(shippingCents, currency)}</span>
+              <span>{formatMoney(view.shipping, currency)}</span>
             </div>
+            {view.fees > 0 && (
+              <div className="flex justify-between text-muted-foreground">
+                <span>{view.feesLabel || t('orders.fees')}</span>
+                <span>{formatMoney(view.fees, currency)}</span>
+              </div>
+            )}
             <div className="mt-2 flex justify-between text-base font-semibold">
               <span>{t('orders.total')}</span>
-              <span>{formatMoney(totalCents, currency)}</span>
+              <span>{formatMoney(view.total, currency)}</span>
             </div>
           </div>
 

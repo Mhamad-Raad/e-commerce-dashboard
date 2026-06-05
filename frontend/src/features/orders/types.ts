@@ -84,6 +84,7 @@ export interface CreateOrderPayload {
 export const ORDER_EVENT_TYPES = [
   'CREATED',
   'STATUS_CHANGED',
+  'STOCK_RESERVED',
   'STOCK_RESTORED',
   'TRACKING_UPDATED',
   'NOTE_UPDATED',
@@ -100,4 +101,16 @@ export interface OrderEvent {
   type: OrderEventType;
   meta: Record<string, unknown> | null;
   createdAt: string;
+}
+
+export interface OrderPreview {
+  subtotalCents: number;
+  discountCents: number;
+  couponCode: string | null;
+  taxCents: number;
+  shippingCents: number;
+  feesCents: number;
+  feesLabel: string | null;
+  totalCents: number;
+  currency: string;
 }

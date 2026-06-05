@@ -4,6 +4,7 @@ import {
   Banknote,
   CreditCard,
   History,
+  PackageCheck,
   PackagePlus,
   RefreshCcw,
   StickyNote,
@@ -20,6 +21,7 @@ import { formatDate, formatMoney } from '@/lib/format';
 const icons: Record<OrderEventType, LucideIcon> = {
   CREATED: PackagePlus,
   STATUS_CHANGED: RefreshCcw,
+  STOCK_RESERVED: PackageCheck,
   STOCK_RESTORED: Undo2,
   TRACKING_UPDATED: Truck,
   NOTE_UPDATED: StickyNote,
@@ -53,6 +55,8 @@ export function OrderTimeline({ order }: Props) {
         return t('orders.events.created', { count: Number(meta.itemCount ?? 0), total: money(meta.totalCents) });
       case 'STATUS_CHANGED':
         return t('orders.events.status_changed', { from: status(meta.from), to: status(meta.to) });
+      case 'STOCK_RESERVED':
+        return t('orders.events.stock_reserved');
       case 'STOCK_RESTORED':
         return t('orders.events.stock_restored');
       case 'TRACKING_UPDATED':

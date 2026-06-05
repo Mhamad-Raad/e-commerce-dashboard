@@ -262,6 +262,7 @@
     "events": {
       "created": "تم إنشاء الطلب · {{count}} عنصر، {{total}}",
       "status_changed": "تغيّرت الحالة من {{from}} إلى {{to}}",
+      "stock_reserved": "تم حجز المخزون من المستودع",
       "stock_restored": "أُعيد المخزون إلى المستودع",
       "tracking_updated": "تم ضبط التتبع على {{tracking}}",
       "tracking_cleared": "تم مسح رقم التتبع",
