@@ -11,7 +11,7 @@ import { StatusBadge } from '@/components/StatusBadge';
 import { TablePagination } from '@/components/TablePagination';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
   Table,
@@ -242,6 +242,7 @@ export function Reports() {
         <Card>
           <CardHeader>
             <CardTitle className="text-sm">{t('reports.by_brand')}</CardTitle>
+            <CardDescription>{t('reports.basis_merchandise')}</CardDescription>
           </CardHeader>
           <CardContent className="pt-0">
             <BarList
@@ -254,6 +255,7 @@ export function Reports() {
         <Card>
           <CardHeader>
             <CardTitle className="text-sm">{t('reports.by_store')}</CardTitle>
+            <CardDescription>{t('reports.basis_merchandise')}</CardDescription>
           </CardHeader>
           <CardContent className="pt-0">
             <BarList
@@ -269,6 +271,7 @@ export function Reports() {
         <Card>
           <CardHeader>
             <CardTitle className="text-sm">{t('reports.by_governorate')}</CardTitle>
+            <CardDescription>{t('reports.basis_net')}</CardDescription>
           </CardHeader>
           <CardContent className="pt-0">
             <BarList

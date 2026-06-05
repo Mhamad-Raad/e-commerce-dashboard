@@ -6,6 +6,7 @@ import { Bell, CheckCheck } from 'lucide-react';
 import { toast } from 'sonner';
 import { notificationsApi } from '@/features/notifications/api';
 import type { AppNotification } from '@/features/notifications/types';
+import { useAuth } from '@/lib/auth';
 import { Button } from '@/components/ui/button';
 import {
   Popover,
@@ -21,6 +22,7 @@ export function NotificationBell() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { user } = useAuth();
   const [open, setOpen] = useState(false);
   const seenIds = useRef<Set<string> | null>(null);
 
@@ -61,7 +63,8 @@ export function NotificationBell() {
       seenIds.current = new Set(items.map((n) => n.id));
       return;
     }
-    const fresh = items.filter((n) => !seenIds.current!.has(n.id));
+    // Toast genuinely new items, but not the ones this user caused themselves.
+    const fresh = items.filter((n) => !seenIds.current!.has(n.id) && n.actorId !== user?.id);
     for (const n of fresh.reverse()) {
       toast(describe(n), { action: n.link ? { label: t('common.view'), onClick: () => navigate(n.link!) } : undefined });
     }

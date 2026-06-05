@@ -242,6 +242,9 @@ model Notification {
   meta      Json?
   // Deep-link target, e.g. "/orders/<id>" or "/refunds/<id>".
   link      String?
+  // User who caused it (if any) — the client suppresses the toast for its own
+  // actions while still showing them in the feed.
+  actorId   String?
   isRead    Boolean          @default(false)
   createdAt DateTime         @default(now())
 

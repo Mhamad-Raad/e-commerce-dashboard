@@ -174,7 +174,7 @@ export class RefundsService {
     };
   }
 
-  async create(dto: CreateRefundDto) {
+  async create(dto: CreateRefundDto, actorId?: string) {
     const order = await this.prisma.order.findUnique({
       where: { id: dto.orderId },
       include: { items: true, customer: { select: { name: true } } },
@@ -221,7 +221,8 @@ export class RefundsService {
       });
 
       const computed = lines.reduce((sum, l) => sum + l.priceCents * l.quantity, 0);
-      const amountCents = dto.amountCents ?? computed;
+      // A manual override can't exceed what the order was actually worth.
+      const amountCents = Math.min(dto.amountCents ?? computed, order.totalCents);
 
       const created = await tx.refund.create({
         data: {
@@ -252,6 +253,7 @@ export class RefundsService {
           currency: order.currency,
         },
         `/refunds/${created.id}`,
+        actorId,
       );
       return created;
     });

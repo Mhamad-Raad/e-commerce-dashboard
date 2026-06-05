@@ -205,7 +205,7 @@ export class CartsService {
    * prices via OrdersService.create), snapshots the chosen address, records a
    * payment, and marks the cart CHECKED_OUT. Used for staff-assisted checkout.
    */
-  async checkout(cartId: string, dto: CheckoutCartDto) {
+  async checkout(cartId: string, dto: CheckoutCartDto, actorId?: string) {
     const cart = await this.findById(cartId);
     if (cart.status === 'CHECKED_OUT') {
       throw new BadRequestException('This cart has already been checked out');
@@ -214,19 +214,22 @@ export class CartsService {
       throw new BadRequestException('Cannot check out an empty cart');
     }
 
-    const order = await this.orders.create({
-      customerId: cart.customerId,
-      items: cart.items.map((i) => ({
-        productId: i.productId,
-        variantId: i.variantId ?? undefined,
-        quantity: i.quantity,
-      })),
-      couponCode: cart.coupon?.code,
-      addressId: dto.addressId,
-      notes: dto.notes,
-      taxCents: dto.taxCents,
-      shippingCents: dto.shippingCents,
-    });
+    const order = await this.orders.create(
+      {
+        customerId: cart.customerId,
+        items: cart.items.map((i) => ({
+          productId: i.productId,
+          variantId: i.variantId ?? undefined,
+          quantity: i.quantity,
+        })),
+        couponCode: cart.coupon?.code,
+        addressId: dto.addressId,
+        notes: dto.notes,
+        taxCents: dto.taxCents,
+        shippingCents: dto.shippingCents,
+      },
+      actorId,
+    );
 
     await this.payments.create(order.id, {
       method: dto.paymentMethod,

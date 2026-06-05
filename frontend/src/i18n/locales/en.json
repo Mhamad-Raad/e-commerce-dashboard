@@ -295,6 +295,8 @@
     "number": "Refund #",
     "order": "Order #",
     "amount": "Amount",
+    "refunded": "Refunded",
+    "net": "Net received",
     "reason": "Reason",
     "note": "Note",
     "restock": "Return items to stock",
@@ -585,6 +587,8 @@
     "by_brand": "Sales by brand",
     "by_store": "Sales by store",
     "by_governorate": "Sales by governorate",
+    "basis_merchandise": "Merchandise revenue (qty × price)",
+    "basis_net": "Net of tax & fees",
     "unknown_region": "Unknown",
     "charges": "Charges breakdown",
     "refunds": "Refunds",
@@ -604,7 +608,8 @@
     "print_n": "Print {{count}} receipt(s)",
     "bill_to": "Bill to",
     "thanks": "Thank you for your business.",
-    "none_selected": "No orders selected."
+    "none_selected": "No orders selected.",
+    "none_loaded": "None of the selected orders could be loaded."
   },
   "pagination": {
     "rows_per_page": "Rows",

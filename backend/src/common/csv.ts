@@ -16,17 +16,22 @@ const escape = (value: unknown): string => {
   return /[",\n\r]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
 };
 
+// Hard cap so an export can never try to load an unbounded result set into memory.
+export const CSV_MAX_ROWS = 10000;
+
 /**
  * Serialise rows to CSV. Prefixes a UTF-8 BOM so Excel renders Arabic and other
- * non-ASCII text correctly.
+ * non-ASCII text correctly. When the result hit CSV_MAX_ROWS, appends a visible
+ * note row so a truncated export isn't mistaken for the complete set.
  */
 export const toCsv = <T>(rows: T[], columns: CsvColumn<T>[]): string => {
   const head = columns.map((c) => escape(c.header)).join(',');
   const body = rows
     .map((row) => columns.map((c) => escape(c.value(row))).join(','))
     .join('\n');
-  return `﻿${head}\n${body}\n`;
+  const note =
+    rows.length >= CSV_MAX_ROWS
+      ? `${escape(`NOTE: export capped at ${CSV_MAX_ROWS} rows — refine your filters to export the rest`)}\n`
+      : '';
+  return `﻿${head}\n${body}\n${note}`;
 };
-
-// Hard cap so an export can never try to load an unbounded result set into memory.
-export const CSV_MAX_ROWS = 10000;

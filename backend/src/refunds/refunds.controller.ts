@@ -11,6 +11,7 @@ import {
   Post,
   Query,
 } from '@nestjs/common';
+import { CurrentUser, CurrentUserPayload } from '../auth/decorators/current-user.decorator';
 import { RefundsService } from './refunds.service';
 import {
   CreateRefundDto,
@@ -45,8 +46,8 @@ export class RefundsController {
   }
 
   @Post()
-  create(@Body() dto: CreateRefundDto) {
-    return this.refunds.create(dto);
+  create(@Body() dto: CreateRefundDto, @CurrentUser() user: CurrentUserPayload) {
+    return this.refunds.create(dto, user.id);
   }
 
   @Patch(':id')

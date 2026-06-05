@@ -10,6 +10,7 @@ import {
   Post,
   Query,
 } from '@nestjs/common';
+import { CurrentUser, CurrentUserPayload } from '../auth/decorators/current-user.decorator';
 import { CartsService } from './carts.service';
 import { AddCartItemDto, UpdateCartItemDto } from './dto/cart-item.dto';
 import { CheckoutCartDto } from './dto/checkout.dto';
@@ -68,8 +69,12 @@ export class CartsController {
   }
 
   @Post(':id/checkout')
-  checkout(@Param('id') id: string, @Body() dto: CheckoutCartDto) {
-    return this.carts.checkout(id, dto);
+  checkout(
+    @Param('id') id: string,
+    @Body() dto: CheckoutCartDto,
+    @CurrentUser() user: CurrentUserPayload,
+  ) {
+    return this.carts.checkout(id, dto, user.id);
   }
 
   @Post(':id/coupon')

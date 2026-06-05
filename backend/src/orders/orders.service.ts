@@ -242,7 +242,7 @@ export class OrdersService {
     };
   }
 
-  async create(dto: CreateOrderDto) {
+  async create(dto: CreateOrderDto, actorId?: string) {
     const customer = await this.prisma.customer.findUnique({
       where: { id: dto.customerId },
     });
@@ -324,6 +324,7 @@ export class OrdersService {
           currency: quote.currency,
         },
         `/orders/${created.id}`,
+        actorId,
       );
       return created;
     });

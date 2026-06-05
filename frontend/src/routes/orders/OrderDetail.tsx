@@ -117,6 +117,9 @@ export function OrderDetail() {
   }
 
   const order = orderQuery.data;
+  const refundedCents = (refundsQuery.data?.items ?? [])
+    .filter((r) => r.status === 'COMPLETED')
+    .reduce((sum, r) => sum + r.amountCents, 0);
 
   return (
     <div className="space-y-5">
@@ -295,6 +298,18 @@ export function OrderDetail() {
             <span>{t('orders.total')}</span>
             <span>{formatMoney(order.totalCents, order.currency)}</span>
           </div>
+          {refundedCents > 0 && (
+            <>
+              <div className="flex justify-between text-red-600 dark:text-red-400">
+                <span>{t('refunds.refunded')}</span>
+                <span>−{formatMoney(refundedCents, order.currency)}</span>
+              </div>
+              <div className="flex justify-between border-t pt-2 font-semibold">
+                <span>{t('refunds.net')}</span>
+                <span>{formatMoney(order.totalCents - refundedCents, order.currency)}</span>
+              </div>
+            </>
+          )}
         </CardContent>
       </Card>
 

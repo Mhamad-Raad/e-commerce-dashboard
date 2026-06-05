@@ -17,7 +17,13 @@ export function Receipts() {
 
   const ordersQuery = useQuery({
     queryKey: ['receipts', ids],
-    queryFn: () => Promise.all(ids.map((id) => ordersApi.get(id))),
+    // allSettled so one missing/deleted id doesn't blank the whole print batch.
+    queryFn: () =>
+      Promise.allSettled(ids.map((id) => ordersApi.get(id))).then((results) =>
+        results
+          .filter((r): r is PromiseFulfilledResult<Awaited<ReturnType<typeof ordersApi.get>>> => r.status === 'fulfilled')
+          .map((r) => r.value),
+      ),
     enabled: ids.length > 0,
   });
 
@@ -62,6 +68,8 @@ export function Receipts() {
 
       {!ready ? (
         <p className="p-8 text-center text-sm text-muted-foreground">{t('common.loading')}</p>
+      ) : (ordersQuery.data ?? []).length === 0 ? (
+        <p className="p-8 text-center text-sm text-muted-foreground">{t('receipt.none_loaded')}</p>
       ) : (
         (ordersQuery.data ?? []).map((order, idx) => (
           <div

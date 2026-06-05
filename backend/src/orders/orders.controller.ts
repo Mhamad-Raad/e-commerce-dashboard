@@ -11,6 +11,7 @@ import {
   Post,
   Query,
 } from '@nestjs/common';
+import { CurrentUser, CurrentUserPayload } from '../auth/decorators/current-user.decorator';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { ListOrdersQueryDto } from './dto/list-orders.query.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
@@ -49,8 +50,8 @@ export class OrdersController {
   }
 
   @Post()
-  create(@Body() dto: CreateOrderDto) {
-    return this.orders.create(dto);
+  create(@Body() dto: CreateOrderDto, @CurrentUser() user: CurrentUserPayload) {
+    return this.orders.create(dto, user.id);
   }
 
   @Patch(':id')

@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
+import { ScheduleModule } from '@nestjs/schedule';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { AuthModule } from './auth/auth.module';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
@@ -30,6 +31,7 @@ import { UsersModule } from './users/users.module';
     // admin dashboard, but caps scraping/abuse. Auth routes are far stricter
     // (see @Throttle on AuthController).
     ThrottlerModule.forRoot([{ ttl: 60_000, limit: 200 }]),
+    ScheduleModule.forRoot(),
     PrismaModule,
     AuthModule,
     UsersModule,
