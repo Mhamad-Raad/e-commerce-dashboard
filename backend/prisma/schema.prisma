@@ -206,6 +206,19 @@ enum City {
   BIYARA
 }
 
+// Single-row store-wide configuration (business identity + default currency).
+// Always addressed by the fixed id "singleton".
+model Setting {
+  id              String   @id @default("singleton")
+  businessName    String?
+  businessEmail   String?
+  businessPhone   String?
+  businessAddress String?
+  defaultCurrency String   @default("IQD")
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
 model User {
   id           String   @id @default(cuid())
   email        String   @unique

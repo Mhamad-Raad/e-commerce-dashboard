@@ -16,6 +16,7 @@ import { PrismaModule } from './prisma/prisma.module';
 import { ProductsModule } from './products/products.module';
 import { ReportsModule } from './reports/reports.module';
 import { ReviewsModule } from './reviews/reviews.module';
+import { SettingsModule } from './settings/settings.module';
 import { StoresModule } from './stores/stores.module';
 import { UsersModule } from './users/users.module';
 
@@ -38,6 +39,7 @@ import { UsersModule } from './users/users.module';
     InventoryModule,
     ReportsModule,
     ReviewsModule,
+    SettingsModule,
   ],
   providers: [
     {
