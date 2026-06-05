@@ -28,13 +28,14 @@ export class ProductsService {
     }
     if (query.storeId) where.storeId = query.storeId;
     if (query.categoryId) where.categoryId = query.categoryId;
+    if (query.brandId) where.brandId = query.brandId;
     if (query.isActive !== undefined) where.isActive = query.isActive === 'true';
 
     const [items, total] = await this.prisma.$transaction([
       this.prisma.product.findMany({
         where,
         orderBy: { createdAt: 'desc' },
-        include: { store: true, category: true, _count: { select: { variants: true } } },
+        include: { store: true, category: true, brand: true, _count: { select: { variants: true } } },
         ...paginate(page, pageSize),
       }),
       this.prisma.product.count({ where }),
@@ -49,6 +50,7 @@ export class ProductsService {
       include: {
         store: true,
         category: true,
+        brand: true,
         variants: { orderBy: [{ sortOrder: 'asc' }, { createdAt: 'asc' }] },
       },
     });
@@ -60,7 +62,7 @@ export class ProductsService {
     try {
       return await this.prisma.product.create({
         data: dto,
-        include: { store: true, category: true },
+        include: { store: true, category: true, brand: true },
       });
     } catch (err) {
       throw this.translateError(err, dto.sku);
@@ -73,7 +75,7 @@ export class ProductsService {
       return await this.prisma.product.update({
         where: { id },
         data: dto,
-        include: { store: true, category: true },
+        include: { store: true, category: true, brand: true },
       });
     } catch (err) {
       throw this.translateError(err, dto.sku);
@@ -105,7 +107,7 @@ export class ProductsService {
       }
       if (err.code === 'P2003' || err.code === 'P2025') {
         return new BadRequestException(
-          'The selected store or category does not exist',
+          'The selected store, category, or brand does not exist',
         );
       }
     }

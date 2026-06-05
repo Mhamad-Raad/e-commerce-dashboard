@@ -234,6 +234,21 @@ model Category {
   @@index([isActive])
 }
 
+model Brand {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  slug        String   @unique
+  description String?
+  logoUrl     String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  products Product[]
+
+  @@index([isActive])
+}
+
 model Product {
   id             String    @id @default(cuid())
   name           String
@@ -248,6 +263,8 @@ model Product {
   store          Store     @relation(fields: [storeId], references: [id], onDelete: Restrict)
   categoryId     String?
   category       Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  brandId        String?
+  brand          Brand?    @relation(fields: [brandId], references: [id], onDelete: SetNull)
   isActive       Boolean   @default(true)
   ratingAvg      Float     @default(0)
   ratingCount    Int       @default(0)
@@ -262,6 +279,7 @@ model Product {
 
   @@index([storeId])
   @@index([categoryId])
+  @@index([brandId])
   @@index([isActive])
   @@index([createdAt])
 }
