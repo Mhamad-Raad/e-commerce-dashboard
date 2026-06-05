@@ -11,6 +11,8 @@ import {
   LayoutTemplate,
   TicketPercent,
   Boxes,
+  Receipt,
+  Settings,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -49,11 +51,16 @@ export const navGroups: NavGroup[] = [
       { to: '/orders', labelKey: 'nav.orders', icon: ClipboardList },
       { to: '/coupons', labelKey: 'nav.coupons', icon: TicketPercent },
       { to: '/inventory', labelKey: 'nav.inventory', icon: Boxes },
+      { to: '/fee-groups', labelKey: 'nav.fee_groups', icon: Receipt },
     ],
   },
   {
     labelKey: 'nav.group_analytics',
     items: [{ to: '/reports', labelKey: 'nav.reports', icon: BarChart3 }],
+  },
+  {
+    labelKey: 'nav.group_system',
+    items: [{ to: '/settings', labelKey: 'nav.settings', icon: Settings }],
   },
 ];
 

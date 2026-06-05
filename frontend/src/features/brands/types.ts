@@ -4,6 +4,8 @@ export interface Brand {
   slug: string;
   description: string | null;
   logoUrl: string | null;
+  feeGroupId: string | null;
+  feeGroup?: { id: string; name: string } | null;
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
@@ -21,5 +23,6 @@ export interface BrandWritePayload {
   name: string;
   description?: string;
   logoUrl?: string;
+  feeGroupId?: string | null;
   isActive?: boolean;
 }

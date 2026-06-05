@@ -10,6 +10,8 @@ export interface Store {
   address: string | null;
   city: string | null;
   country: string | null;
+  feeGroupId: string | null;
+  feeGroup?: { id: string; name: string } | null;
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
@@ -49,5 +51,6 @@ export interface StoreWritePayload {
   address?: string;
   city?: string;
   country?: string;
+  feeGroupId?: string | null;
   isActive?: boolean;
 }

@@ -8,6 +8,7 @@
     "group_storefront": "Storefront",
     "group_management": "Management",
     "group_analytics": "Analytics",
+    "group_system": "System",
     "overview": "Overview",
     "homepage": "Homepage",
     "stores": "Stores",
@@ -19,8 +20,10 @@
     "orders": "Orders",
     "coupons": "Coupons",
     "inventory": "Inventory",
+    "fee_groups": "Fee groups",
     "reviews": "Reviews",
-    "reports": "Reports"
+    "reports": "Reports",
+    "settings": "Settings"
   },
   "common": {
     "save": "Save",
@@ -237,6 +240,7 @@
     "subtotal": "Subtotal",
     "tax": "Tax",
     "shipping": "Shipping",
+    "fees": "Fees",
     "placed": "Placed",
     "details": "Order details",
     "all_statuses": "All statuses",
@@ -468,6 +472,44 @@
       "restock": "Restock",
       "adjustment": "Adjustment"
     }
+  },
+  "fee_groups": {
+    "title": "Fee groups",
+    "subtitle": "Tax + flat fees applied automatically at checkout",
+    "new": "New fee group",
+    "edit": "Edit fee group",
+    "search_placeholder": "Search by name",
+    "total_count": "{{count}} total",
+    "name": "Name",
+    "name_placeholder": "e.g. Standard delivery",
+    "label": "Customer label",
+    "label_placeholder": "e.g. Transportation",
+    "label_hint": "What the customer sees on the order",
+    "fee": "Flat fee",
+    "tax_rate": "Tax rate",
+    "tax_rate_hint": "% of subtotal, 0 for none",
+    "assigned": "Assigned to",
+    "assigned_count": "{{stores}} stores · {{brands}} brands",
+    "assign_label": "Fee group",
+    "assign_hint": "Its fee + tax apply to this one's orders",
+    "assign_placeholder": "No fee group",
+    "empty_title": "No fee groups yet",
+    "empty_desc": "Create a fee group, then assign it to stores or brands.",
+    "saved_toast": "Fee group saved",
+    "deleted_toast": "Fee group deleted",
+    "delete_title": "Delete fee group",
+    "delete_message": "Delete \"{{name}}\"? Assigned stores/brands keep, but lose this fee."
+  },
+  "settings": {
+    "title": "Settings",
+    "subtitle": "Business identity and defaults",
+    "business_name": "Business name",
+    "business_email": "Business email",
+    "business_phone": "Business phone",
+    "business_address": "Business address",
+    "default_currency": "Default currency",
+    "default_currency_hint": "3-letter ISO code, e.g. IQD",
+    "saved_toast": "Settings saved"
   },
   "reports": {
     "title": "Reports",

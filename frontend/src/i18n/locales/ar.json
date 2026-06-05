@@ -8,6 +8,7 @@
     "group_storefront": "المتجر",
     "group_management": "الإدارة",
     "group_analytics": "التحليلات",
+    "group_system": "النظام",
     "overview": "نظرة عامة",
     "homepage": "الصفحة الرئيسية",
     "stores": "المتاجر",
@@ -19,8 +20,10 @@
     "orders": "الطلبات",
     "coupons": "الكوبونات",
     "inventory": "المخزون",
+    "fee_groups": "مجموعات الرسوم",
     "reviews": "التقييمات",
-    "reports": "التقارير"
+    "reports": "التقارير",
+    "settings": "الإعدادات"
   },
   "common": {
     "save": "حفظ",
@@ -237,6 +240,7 @@
     "subtotal": "المجموع الفرعي",
     "tax": "الضريبة",
     "shipping": "الشحن",
+    "fees": "رسوم",
     "placed": "تاريخ الطلب",
     "details": "تفاصيل الطلب",
     "all_statuses": "كل الحالات",
@@ -468,6 +472,44 @@
       "restock": "إعادة توريد",
       "adjustment": "تعديل"
     }
+  },
+  "fee_groups": {
+    "title": "مجموعات الرسوم",
+    "subtitle": "ضريبة + رسوم ثابتة تُطبَّق تلقائياً عند الدفع",
+    "new": "مجموعة رسوم جديدة",
+    "edit": "تعديل مجموعة الرسوم",
+    "search_placeholder": "ابحث بالاسم",
+    "total_count": "{{count}} إجمالاً",
+    "name": "الاسم",
+    "name_placeholder": "مثال: توصيل قياسي",
+    "label": "التسمية للعميل",
+    "label_placeholder": "مثال: النقل",
+    "label_hint": "ما يراه العميل على الطلب",
+    "fee": "رسوم ثابتة",
+    "tax_rate": "نسبة الضريبة",
+    "tax_rate_hint": "% من المجموع الفرعي، 0 لإلغائها",
+    "assigned": "مُسندة إلى",
+    "assigned_count": "{{stores}} متجر · {{brands}} علامة",
+    "assign_label": "مجموعة الرسوم",
+    "assign_hint": "تُطبَّق رسومها وضريبتها على طلبات هذا العنصر",
+    "assign_placeholder": "بدون مجموعة رسوم",
+    "empty_title": "لا توجد مجموعات رسوم بعد",
+    "empty_desc": "أنشئ مجموعة رسوم ثم أسندها إلى المتاجر أو العلامات.",
+    "saved_toast": "تم حفظ مجموعة الرسوم",
+    "deleted_toast": "تم حذف مجموعة الرسوم",
+    "delete_title": "حذف مجموعة الرسوم",
+    "delete_message": "حذف \"{{name}}\"؟ تبقى المتاجر/العلامات لكن تفقد هذه الرسوم."
+  },
+  "settings": {
+    "title": "الإعدادات",
+    "subtitle": "هوية النشاط والإعدادات الافتراضية",
+    "business_name": "اسم النشاط",
+    "business_email": "البريد الإلكتروني للنشاط",
+    "business_phone": "هاتف النشاط",
+    "business_address": "عنوان النشاط",
+    "default_currency": "العملة الافتراضية",
+    "default_currency_hint": "رمز ISO من 3 أحرف، مثل IQD",
+    "saved_toast": "تم حفظ الإعدادات"
   },
   "reports": {
     "title": "التقارير",

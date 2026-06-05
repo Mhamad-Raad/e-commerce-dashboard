@@ -9,8 +9,10 @@ import { toast } from 'sonner';
 import { z } from 'zod';
 import { brandsApi } from '@/features/brands/api';
 import type { BrandWritePayload } from '@/features/brands/types';
+import { feeGroupsApi } from '@/features/feegroups/api';
 import { PageHeader } from '@/components/PageHeader';
 import { FormField } from '@/components/FormField';
+import { AsyncCombobox } from '@/components/AsyncCombobox';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -23,6 +25,7 @@ const schema = z.object({
   name: z.string().min(1).max(60),
   logoUrl: z.string().url().optional().or(z.literal('')),
   description: z.string().max(1000).optional().or(z.literal('')),
+  feeGroupId: z.string().optional().or(z.literal('')),
   isActive: z.boolean(),
 });
 
@@ -32,6 +35,7 @@ const defaultValues: FormValues = {
   name: '',
   logoUrl: '',
   description: '',
+  feeGroupId: '',
   isActive: true,
 };
 
@@ -64,6 +68,7 @@ export function BrandForm() {
         name: b.name,
         logoUrl: b.logoUrl ?? '',
         description: b.description ?? '',
+        feeGroupId: b.feeGroupId ?? '',
         isActive: b.isActive,
       });
     }
@@ -75,6 +80,7 @@ export function BrandForm() {
         name: values.name.trim(),
         logoUrl: values.logoUrl?.trim() || undefined,
         description: values.description?.trim() || undefined,
+        feeGroupId: values.feeGroupId || null,
         isActive: values.isActive,
       };
       return isEdit ? brandsApi.update(id!, payload) : brandsApi.create(payload);
@@ -96,6 +102,7 @@ export function BrandForm() {
   }
 
   const isActive = watch('isActive');
+  const feeGroupId = watch('feeGroupId');
 
   return (
     <div className="mx-auto max-w-3xl space-y-5">
@@ -119,6 +126,27 @@ export function BrandForm() {
             </FormField>
             <FormField label={t('brands.description')} error={errors.description?.message}>
               <Textarea rows={3} {...register('description')} />
+            </FormField>
+            <FormField
+              label={t('fee_groups.assign_label')}
+              error={errors.feeGroupId?.message}
+              hint={t('fee_groups.assign_hint')}
+            >
+              <AsyncCombobox
+                value={feeGroupId ?? ''}
+                onChange={(v) => setValue('feeGroupId', v)}
+                selectedLabel={brandQuery.data?.feeGroup?.name ?? undefined}
+                placeholder={t('fee_groups.assign_placeholder')}
+                allowClear
+                queryKey={['fee-groups']}
+                fetchPage={(search, page) =>
+                  feeGroupsApi
+                    .list({ search: search || undefined, page, pageSize: 20 })
+                    .then((r) => ({ items: r.items, total: r.total }))
+                }
+                getItemId={(g) => g.id}
+                getItemLabel={(g) => g.name}
+              />
             </FormField>
 
             <label className="flex items-center gap-2 text-sm">

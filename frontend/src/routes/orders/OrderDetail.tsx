@@ -268,6 +268,12 @@ export function OrderDetail() {
             <span>{t('orders.shipping')}</span>
             <span>{formatMoney(order.shippingCents, order.currency)}</span>
           </div>
+          {order.feesCents > 0 && (
+            <div className="flex justify-between text-muted-foreground">
+              <span>{order.feesLabel || t('orders.fees')}</span>
+              <span>{formatMoney(order.feesCents, order.currency)}</span>
+            </div>
+          )}
           <div className="mt-2 flex justify-between border-t pt-2 text-base font-semibold">
             <span>{t('orders.total')}</span>
             <span>{formatMoney(order.totalCents, order.currency)}</span>

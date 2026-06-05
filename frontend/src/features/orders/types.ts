@@ -43,6 +43,8 @@ export interface Order {
   couponCode: string | null;
   taxCents: number;
   shippingCents: number;
+  feesCents: number;
+  feesLabel: string | null;
   totalCents: number;
   currency: string;
   status: OrderStatus;

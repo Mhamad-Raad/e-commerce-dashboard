@@ -78,6 +78,12 @@ const Reports = lazy(() =>
 const Inventory = lazy(() =>
   import('./routes/inventory/Inventory').then((m) => ({ default: m.Inventory })),
 );
+const FeeGroupsList = lazy(() =>
+  import('./routes/feegroups/FeeGroupsList').then((m) => ({ default: m.FeeGroupsList })),
+);
+const Settings = lazy(() =>
+  import('./routes/settings/Settings').then((m) => ({ default: m.Settings })),
+);
 
 function PageLoader() {
   return (
@@ -127,7 +133,9 @@ export default function App() {
           <Route path="/orders/:id" element={<OrderDetail />} />
           <Route path="/coupons" element={<CouponsList />} />
           <Route path="/inventory" element={<Inventory />} />
+          <Route path="/fee-groups" element={<FeeGroupsList />} />
           <Route path="/reports" element={<Reports />} />
+          <Route path="/settings" element={<Settings />} />
         </Route>
       </Routes>
     </Suspense>
