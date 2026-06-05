@@ -16,10 +16,7 @@ import { UpdateProductDto } from './dto/update-product.dto';
 export class ProductsService {
   constructor(private prisma: PrismaService) {}
 
-  async list(query: ListProductsQueryDto) {
-    const page = query.page ?? 1;
-    const pageSize = query.pageSize ?? 20;
-
+  private listWhere(query: ListProductsQueryDto): Prisma.ProductWhereInput {
     const where: Prisma.ProductWhereInput = {};
     if (query.search) {
       where.OR = [
@@ -31,6 +28,13 @@ export class ProductsService {
     if (query.categoryId) where.categoryId = query.categoryId;
     if (query.brandId) where.brandId = query.brandId;
     if (query.isActive !== undefined) where.isActive = query.isActive === 'true';
+    return where;
+  }
+
+  async list(query: ListProductsQueryDto) {
+    const page = query.page ?? 1;
+    const pageSize = query.pageSize ?? 20;
+    const where = this.listWhere(query);
 
     const [items, total] = await this.prisma.$transaction([
       this.prisma.product.findMany({
@@ -60,17 +64,7 @@ export class ProductsService {
   }
 
   async exportCsv(query: ListProductsQueryDto) {
-    const where: Prisma.ProductWhereInput = {};
-    if (query.search) {
-      where.OR = [
-        { name: { contains: query.search, mode: 'insensitive' } },
-        { sku: { contains: query.search, mode: 'insensitive' } },
-      ];
-    }
-    if (query.storeId) where.storeId = query.storeId;
-    if (query.categoryId) where.categoryId = query.categoryId;
-    if (query.brandId) where.brandId = query.brandId;
-    if (query.isActive !== undefined) where.isActive = query.isActive === 'true';
+    const where = this.listWhere(query);
 
     const products = await this.prisma.product.findMany({
       where,

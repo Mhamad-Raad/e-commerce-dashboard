@@ -49,10 +49,7 @@ export class OrdersService {
     return this.findById(orderId).then(() => this.events.list(orderId));
   }
 
-  async list(query: ListOrdersQueryDto) {
-    const page = query.page ?? 1;
-    const pageSize = query.pageSize ?? 20;
-
+  private listWhere(query: ListOrdersQueryDto): Prisma.OrderWhereInput {
     const where: Prisma.OrderWhereInput = {};
     if (query.status) where.status = query.status;
     if (query.customerId) where.customerId = query.customerId;
@@ -63,6 +60,13 @@ export class OrdersService {
         { customer: { email: { contains: query.search, mode: 'insensitive' } } },
       ];
     }
+    return where;
+  }
+
+  async list(query: ListOrdersQueryDto) {
+    const page = query.page ?? 1;
+    const pageSize = query.pageSize ?? 20;
+    const where = this.listWhere(query);
 
     const [items, total] = await this.prisma.$transaction([
       this.prisma.order.findMany({
@@ -87,16 +91,7 @@ export class OrdersService {
   }
 
   async exportCsv(query: ListOrdersQueryDto) {
-    const where: Prisma.OrderWhereInput = {};
-    if (query.status) where.status = query.status;
-    if (query.customerId) where.customerId = query.customerId;
-    if (query.search) {
-      where.OR = [
-        { number: { contains: query.search, mode: 'insensitive' } },
-        { customer: { name: { contains: query.search, mode: 'insensitive' } } },
-        { customer: { email: { contains: query.search, mode: 'insensitive' } } },
-      ];
-    }
+    const where = this.listWhere(query);
 
     const orders = await this.prisma.order.findMany({
       where,

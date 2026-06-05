@@ -65,10 +65,7 @@ export class RefundsService {
     private notifications: NotificationsService,
   ) {}
 
-  async list(query: ListRefundsQueryDto) {
-    const page = query.page ?? 1;
-    const pageSize = query.pageSize ?? 20;
-
+  private listWhere(query: ListRefundsQueryDto): Prisma.RefundWhereInput {
     const where: Prisma.RefundWhereInput = {};
     if (query.status) where.status = query.status;
     if (query.orderId) where.orderId = query.orderId;
@@ -79,6 +76,13 @@ export class RefundsService {
         { order: { customer: { name: { contains: query.search, mode: 'insensitive' } } } },
       ];
     }
+    return where;
+  }
+
+  async list(query: ListRefundsQueryDto) {
+    const page = query.page ?? 1;
+    const pageSize = query.pageSize ?? 20;
+    const where = this.listWhere(query);
 
     const [items, total] = await this.prisma.$transaction([
       this.prisma.refund.findMany({
@@ -102,15 +106,7 @@ export class RefundsService {
   }
 
   async exportCsv(query: ListRefundsQueryDto) {
-    const where: Prisma.RefundWhereInput = {};
-    if (query.status) where.status = query.status;
-    if (query.orderId) where.orderId = query.orderId;
-    if (query.search) {
-      where.OR = [
-        { number: { contains: query.search, mode: 'insensitive' } },
-        { order: { number: { contains: query.search, mode: 'insensitive' } } },
-      ];
-    }
+    const where = this.listWhere(query);
 
     const refunds = await this.prisma.refund.findMany({
       where,
@@ -133,6 +129,19 @@ export class RefundsService {
     ]);
   }
 
+  /** Quantity already claimed per order item by non-rejected refunds. */
+  private async claimedQuantities(
+    client: PrismaService | Prisma.TransactionClient,
+    orderId: string,
+  ): Promise<Map<string, number>> {
+    const claimed = await client.refundItem.groupBy({
+      by: ['orderItemId'],
+      _sum: { quantity: true },
+      where: { refund: { orderId, status: { in: ACTIVE_REFUND_STATUSES } } },
+    });
+    return new Map(claimed.map((c) => [c.orderItemId, c._sum.quantity ?? 0]));
+  }
+
   /** Per-order-item refundable quantities (ordered minus already-claimed). */
   async refundableForOrder(orderId: string) {
     const order = await this.prisma.order.findUnique({
@@ -141,12 +150,7 @@ export class RefundsService {
     });
     if (!order) throw new NotFoundException(`Order ${orderId} not found`);
 
-    const claimed = await this.prisma.refundItem.groupBy({
-      by: ['orderItemId'],
-      _sum: { quantity: true },
-      where: { refund: { orderId, status: { in: ACTIVE_REFUND_STATUSES } } },
-    });
-    const claimedMap = new Map(claimed.map((c) => [c.orderItemId, c._sum.quantity ?? 0]));
+    const claimedMap = await this.claimedQuantities(this.prisma, orderId);
 
     return {
       orderId: order.id,
@@ -181,39 +185,44 @@ export class RefundsService {
     }
 
     const orderItemMap = new Map(order.items.map((it) => [it.id, it]));
-    const refundable = await this.refundableForOrder(dto.orderId);
-    const remainingMap = new Map(
-      refundable.items.map((r) => [r.orderItemId, r.refundableQuantity]),
-    );
 
-    const lines = dto.items.map((input) => {
-      const orderItem = orderItemMap.get(input.orderItemId);
-      if (!orderItem) {
-        throw new BadRequestException(
-          `Item ${input.orderItemId} does not belong to this order`,
+    return this.prisma.$transaction(async (tx) => {
+      // Serialize refunds for this order: the row lock makes the remaining-qty
+      // read and the insert atomic against concurrent refund requests (closes
+      // the check-then-insert over-refund race).
+      await tx.$queryRaw`SELECT id FROM "Order" WHERE id = ${dto.orderId} FOR UPDATE`;
+
+      const claimedMap = await this.claimedQuantities(tx, dto.orderId);
+      const lines = dto.items.map((input) => {
+        const orderItem = orderItemMap.get(input.orderItemId);
+        if (!orderItem) {
+          throw new BadRequestException(
+            `Item ${input.orderItemId} does not belong to this order`,
+          );
+        }
+        const remaining = Math.max(
+          0,
+          orderItem.quantity - (claimedMap.get(input.orderItemId) ?? 0),
         );
-      }
-      const remaining = remainingMap.get(input.orderItemId) ?? 0;
-      if (input.quantity > remaining) {
-        throw new BadRequestException(
-          `Only ${remaining} of "${orderItem.name}" remain refundable`,
-        );
-      }
-      return {
-        orderItemId: orderItem.id,
-        productId: orderItem.productId,
-        variantId: orderItem.variantId,
-        name: orderItem.name,
-        variantName: orderItem.variantName,
-        quantity: input.quantity,
-        priceCents: orderItem.priceCents,
-      };
-    });
+        if (input.quantity > remaining) {
+          throw new BadRequestException(
+            `Only ${remaining} of "${orderItem.name}" remain refundable`,
+          );
+        }
+        return {
+          orderItemId: orderItem.id,
+          productId: orderItem.productId,
+          variantId: orderItem.variantId,
+          name: orderItem.name,
+          variantName: orderItem.variantName,
+          quantity: input.quantity,
+          priceCents: orderItem.priceCents,
+        };
+      });
 
-    const computed = lines.reduce((sum, l) => sum + l.priceCents * l.quantity, 0);
-    const amountCents = dto.amountCents ?? computed;
+      const computed = lines.reduce((sum, l) => sum + l.priceCents * l.quantity, 0);
+      const amountCents = dto.amountCents ?? computed;
 
-    const refund = await this.prisma.$transaction(async (tx) => {
       const created = await tx.refund.create({
         data: {
           number: generateRefundNumber(),
@@ -246,35 +255,37 @@ export class RefundsService {
       );
       return created;
     });
-
-    return refund;
   }
 
   async update(id: string, dto: UpdateRefundDto) {
-    const existing = await this.findById(id);
+    await this.prisma.$transaction(async (tx) => {
+      // Lock the refund row and re-read it inside the tx so a concurrent
+      // complete can't double-restock (the second sees status already COMPLETED).
+      await tx.$queryRaw`SELECT id FROM "Refund" WHERE id = ${id} FOR UPDATE`;
+      const existing = await tx.refund.findUnique({ where: { id }, include: { items: true } });
+      if (!existing) throw new NotFoundException(`Refund ${id} not found`);
 
-    // Field edits are only allowed before the refund leaves REQUESTED.
-    const editsRequested =
-      dto.reason !== undefined ||
-      dto.note !== undefined ||
-      dto.restock !== undefined ||
-      dto.amountCents !== undefined;
-    if (editsRequested && existing.status !== 'REQUESTED') {
-      throw new BadRequestException(
-        'A refund can only be edited while it is still requested',
-      );
-    }
-
-    const targetStatus = dto.status;
-    if (targetStatus && targetStatus !== existing.status) {
-      if (!TRANSITIONS[existing.status].includes(targetStatus)) {
+      // Field edits are only allowed before the refund leaves REQUESTED.
+      const editsRequested =
+        dto.reason !== undefined ||
+        dto.note !== undefined ||
+        dto.restock !== undefined ||
+        dto.amountCents !== undefined;
+      if (editsRequested && existing.status !== 'REQUESTED') {
         throw new BadRequestException(
-          `Cannot move a refund from ${existing.status} to ${targetStatus}`,
+          'A refund can only be edited while it is still requested',
         );
       }
-    }
 
-    await this.prisma.$transaction(async (tx) => {
+      const targetStatus = dto.status;
+      if (targetStatus && targetStatus !== existing.status) {
+        if (!TRANSITIONS[existing.status].includes(targetStatus)) {
+          throw new BadRequestException(
+            `Cannot move a refund from ${existing.status} to ${targetStatus}`,
+          );
+        }
+      }
+
       await tx.refund.update({
         where: { id },
         data: {

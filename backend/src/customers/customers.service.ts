@@ -11,10 +11,7 @@ import { UpdateCustomerDto } from './dto/update-customer.dto';
 export class CustomersService {
   constructor(private prisma: PrismaService) {}
 
-  async list(query: ListCustomersQueryDto) {
-    const page = query.page ?? 1;
-    const pageSize = query.pageSize ?? 20;
-
+  private listWhere(query: ListCustomersQueryDto): Prisma.CustomerWhereInput {
     const where: Prisma.CustomerWhereInput = {};
     if (query.search) {
       where.OR = [
@@ -23,6 +20,13 @@ export class CustomersService {
       ];
     }
     if (query.isActive !== undefined) where.isActive = query.isActive === 'true';
+    return where;
+  }
+
+  async list(query: ListCustomersQueryDto) {
+    const page = query.page ?? 1;
+    const pageSize = query.pageSize ?? 20;
+    const where = this.listWhere(query);
 
     const [items, total] = await this.prisma.$transaction([
       this.prisma.customer.findMany({
@@ -37,14 +41,7 @@ export class CustomersService {
   }
 
   async exportCsv(query: ListCustomersQueryDto) {
-    const where: Prisma.CustomerWhereInput = {};
-    if (query.search) {
-      where.OR = [
-        { name: { contains: query.search, mode: 'insensitive' } },
-        { email: { contains: query.search, mode: 'insensitive' } },
-      ];
-    }
-    if (query.isActive !== undefined) where.isActive = query.isActive === 'true';
+    const where = this.listWhere(query);
 
     const customers = await this.prisma.customer.findMany({
       where,
