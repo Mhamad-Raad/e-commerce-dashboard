@@ -4,6 +4,7 @@ import { Menu, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
 import { navItems } from '@/components/nav-items';
 import { Button } from '@/components/ui/button';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
+import { NotificationBell } from '@/components/NotificationBell';
 import { ThemeToggle } from '@/components/theme/ThemeToggle';
 
 interface NavbarProps {
@@ -49,6 +50,7 @@ export function Navbar({ collapsed, onToggleCollapsed, onOpenMobileMenu }: Navba
       <h1 className="truncate text-base font-semibold">{title}</h1>
 
       <div className="ms-auto flex items-center gap-1">
+        <NotificationBell />
         <LanguageSwitcher />
         <ThemeToggle />
       </div>

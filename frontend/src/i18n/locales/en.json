@@ -622,6 +622,13 @@
     "email_invalid": "Enter a valid email address.",
     "password_min": "Password must be at least 6 characters."
   },
+  "notifications": {
+    "title": "Notifications",
+    "empty": "You're all caught up.",
+    "mark_all_read": "Mark all read",
+    "order_created": "New order {{number}} from {{customer}} · {{amount}}",
+    "refund_requested": "Refund {{number}} requested on order {{order}} · {{amount}}"
+  },
   "toast": {
     "error": "Something went wrong"
   }

@@ -622,6 +622,13 @@
     "email_invalid": "أدخل عنوان بريد إلكتروني صالح.",
     "password_min": "يجب أن تتكوّن كلمة المرور من 6 أحرف على الأقل."
   },
+  "notifications": {
+    "title": "الإشعارات",
+    "empty": "لا جديد لديك.",
+    "mark_all_read": "تعليم الكل كمقروء",
+    "order_created": "طلب جديد {{number}} من {{customer}} · {{amount}}",
+    "refund_requested": "طلب استرجاع {{number}} على الطلب {{order}} · {{amount}}"
+  },
   "toast": {
     "error": "حدث خطأ ما"
   }
