@@ -11,6 +11,7 @@ import { EmptyState } from '@/components/EmptyState';
 import { TablePagination } from '@/components/TablePagination';
 import { DataTable, type Column } from '@/components/DataTable';
 import { StatusBadge } from '@/components/StatusBadge';
+import { ExportCsvButton } from '@/components/ExportCsvButton';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
@@ -115,6 +116,11 @@ export function OrdersList() {
         description={data ? t('orders.total_count', { count: data.total }) : undefined}
         action={
           <div className="flex items-center gap-2">
+            <ExportCsvButton
+              path="/orders/export"
+              filename="orders.csv"
+              params={{ search: search || undefined, status: status || undefined }}
+            />
             {selected.length > 0 && (
               <Button asChild variant="outline">
                 <Link to={`/receipts?ids=${selected.join(',')}`} target="_blank" rel="noopener">

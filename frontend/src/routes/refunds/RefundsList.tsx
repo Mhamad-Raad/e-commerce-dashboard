@@ -15,6 +15,7 @@ import { EmptyState } from '@/components/EmptyState';
 import { TablePagination } from '@/components/TablePagination';
 import { DataTable, type Column } from '@/components/DataTable';
 import { StatusBadge } from '@/components/StatusBadge';
+import { ExportCsvButton } from '@/components/ExportCsvButton';
 import {
   Select,
   SelectContent,
@@ -78,6 +79,13 @@ export function RefundsList() {
         icon={ReceiptText}
         title={t('refunds.title')}
         description={data ? t('refunds.total_count', { count: data.total }) : t('refunds.subtitle')}
+        action={
+          <ExportCsvButton
+            path="/refunds/export"
+            filename="refunds.csv"
+            params={{ search: search || undefined, status: status || undefined }}
+          />
+        }
       />
 
       <div className="flex flex-wrap items-center gap-3">

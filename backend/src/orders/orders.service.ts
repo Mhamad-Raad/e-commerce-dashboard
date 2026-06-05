@@ -5,6 +5,7 @@ import {
 } from '@nestjs/common';
 import { OrderEventType, OrderStatus, Prisma } from '@prisma/client';
 import { couponApplicabilityError, couponDiscountCents } from '../common/coupon';
+import { CSV_MAX_ROWS, toCsv } from '../common/csv';
 import { buildPaginated, paginate } from '../common/pagination';
 import { effectivePriceCents } from '../common/pricing';
 import { FeeGroupsService } from '../feegroups/feegroups.service';
@@ -81,6 +82,45 @@ export class OrdersService {
     });
     if (!order) throw new NotFoundException(`Order ${id} not found`);
     return order;
+  }
+
+  async exportCsv(query: ListOrdersQueryDto) {
+    const where: Prisma.OrderWhereInput = {};
+    if (query.status) where.status = query.status;
+    if (query.customerId) where.customerId = query.customerId;
+    if (query.search) {
+      where.OR = [
+        { number: { contains: query.search, mode: 'insensitive' } },
+        { customer: { name: { contains: query.search, mode: 'insensitive' } } },
+        { customer: { email: { contains: query.search, mode: 'insensitive' } } },
+      ];
+    }
+
+    const orders = await this.prisma.order.findMany({
+      where,
+      include: {
+        customer: { select: { name: true, email: true } },
+        _count: { select: { items: true } },
+      },
+      orderBy: { placedAt: 'desc' },
+      take: CSV_MAX_ROWS,
+    });
+
+    return toCsv(orders, [
+      { header: 'Number', value: (o) => o.number },
+      { header: 'Date', value: (o) => o.placedAt.toISOString() },
+      { header: 'Customer', value: (o) => o.customer.name },
+      { header: 'Email', value: (o) => o.customer.email },
+      { header: 'Status', value: (o) => o.status },
+      { header: 'Items', value: (o) => o._count.items },
+      { header: 'Subtotal', value: (o) => o.subtotalCents },
+      { header: 'Discount', value: (o) => o.discountCents },
+      { header: 'Tax', value: (o) => o.taxCents },
+      { header: 'Shipping', value: (o) => o.shippingCents },
+      { header: 'Fees', value: (o) => o.feesCents },
+      { header: 'Total', value: (o) => o.totalCents },
+      { header: 'Currency', value: (o) => o.currency },
+    ]);
   }
 
   /**

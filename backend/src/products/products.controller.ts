@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  Header,
   HttpCode,
   HttpStatus,
   Param,
@@ -22,6 +23,13 @@ export class ProductsController {
   @Get()
   list(@Query() query: ListProductsQueryDto) {
     return this.products.list(query);
+  }
+
+  @Get('export')
+  @Header('Content-Type', 'text/csv; charset=utf-8')
+  @Header('Content-Disposition', 'attachment; filename="products.csv"')
+  exportCsv(@Query() query: ListProductsQueryDto) {
+    return this.products.exportCsv(query);
   }
 
   @Get(':id')

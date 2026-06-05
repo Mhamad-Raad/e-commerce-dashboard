@@ -9,6 +9,7 @@ import type { Product } from '@/features/products/types';
 import { ProductImage } from '@/features/products/ProductImage';
 import { ConfirmDialog } from '@/components/ConfirmDialog';
 import { PageHeader } from '@/components/PageHeader';
+import { ExportCsvButton } from '@/components/ExportCsvButton';
 import { UrlSearchInput } from '@/components/UrlSearchInput';
 import { EmptyState } from '@/components/EmptyState';
 import { TablePagination } from '@/components/TablePagination';
@@ -136,12 +137,19 @@ export function ProductsList() {
         title={t('products.title')}
         description={data ? t('products.total_count', { count: data.total }) : undefined}
         action={
-          <Button asChild>
-            <Link to="/products/new">
-              <Plus className="h-4 w-4" />
-              {t('products.new')}
-            </Link>
-          </Button>
+          <div className="flex items-center gap-2">
+            <ExportCsvButton
+              path="/products/export"
+              filename="products.csv"
+              params={{ search: search || undefined }}
+            />
+            <Button asChild>
+              <Link to="/products/new">
+                <Plus className="h-4 w-4" />
+                {t('products.new')}
+              </Link>
+            </Button>
+          </div>
         }
       />
 

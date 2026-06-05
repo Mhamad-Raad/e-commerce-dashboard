@@ -1,5 +1,6 @@
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
+import { CSV_MAX_ROWS, toCsv } from '../common/csv';
 import { buildPaginated, paginate } from '../common/pagination';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateCustomerDto } from './dto/create-customer.dto';
@@ -33,6 +34,33 @@ export class CustomersService {
     ]);
 
     return buildPaginated(items, total, page, pageSize);
+  }
+
+  async exportCsv(query: ListCustomersQueryDto) {
+    const where: Prisma.CustomerWhereInput = {};
+    if (query.search) {
+      where.OR = [
+        { name: { contains: query.search, mode: 'insensitive' } },
+        { email: { contains: query.search, mode: 'insensitive' } },
+      ];
+    }
+    if (query.isActive !== undefined) where.isActive = query.isActive === 'true';
+
+    const customers = await this.prisma.customer.findMany({
+      where,
+      orderBy: { createdAt: 'desc' },
+      take: CSV_MAX_ROWS,
+    });
+
+    return toCsv(customers, [
+      { header: 'Name', value: (c) => c.name },
+      { header: 'Email', value: (c) => c.email },
+      { header: 'Phone', value: (c) => c.phone ?? '' },
+      { header: 'City', value: (c) => c.city ?? '' },
+      { header: 'Country', value: (c) => c.country ?? '' },
+      { header: 'Active', value: (c) => (c.isActive ? 'yes' : 'no') },
+      { header: 'Joined', value: (c) => c.createdAt.toISOString() },
+    ]);
   }
 
   async findById(id: string) {

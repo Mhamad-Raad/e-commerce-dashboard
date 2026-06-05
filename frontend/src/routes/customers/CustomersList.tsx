@@ -8,6 +8,7 @@ import { customersApi } from '@/features/customers/api';
 import type { Customer } from '@/features/customers/types';
 import { ConfirmDialog } from '@/components/ConfirmDialog';
 import { PageHeader } from '@/components/PageHeader';
+import { ExportCsvButton } from '@/components/ExportCsvButton';
 import { UrlSearchInput } from '@/components/UrlSearchInput';
 import { EmptyState } from '@/components/EmptyState';
 import { TablePagination } from '@/components/TablePagination';
@@ -88,12 +89,19 @@ export function CustomersList() {
         title={t('customers.title')}
         description={data ? t('customers.total_count', { count: data.total }) : undefined}
         action={
-          <Button asChild>
-            <Link to="/customers/new">
-              <Plus className="h-4 w-4" />
-              {t('customers.new')}
-            </Link>
-          </Button>
+          <div className="flex items-center gap-2">
+            <ExportCsvButton
+              path="/customers/export"
+              filename="customers.csv"
+              params={{ search: search || undefined }}
+            />
+            <Button asChild>
+              <Link to="/customers/new">
+                <Plus className="h-4 w-4" />
+                {t('customers.new')}
+              </Link>
+            </Button>
+          </div>
         }
       />
 

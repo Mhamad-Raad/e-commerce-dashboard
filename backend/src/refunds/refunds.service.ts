@@ -9,6 +9,7 @@ import {
   RefundStatus,
   StockMovementReason,
 } from '@prisma/client';
+import { CSV_MAX_ROWS, toCsv } from '../common/csv';
 import { buildPaginated, paginate } from '../common/pagination';
 import { InventoryService } from '../inventory/inventory.service';
 import { OrderEventsService } from '../orders/order-events.service';
@@ -96,6 +97,38 @@ export class RefundsService {
     });
     if (!refund) throw new NotFoundException(`Refund ${id} not found`);
     return refund;
+  }
+
+  async exportCsv(query: ListRefundsQueryDto) {
+    const where: Prisma.RefundWhereInput = {};
+    if (query.status) where.status = query.status;
+    if (query.orderId) where.orderId = query.orderId;
+    if (query.search) {
+      where.OR = [
+        { number: { contains: query.search, mode: 'insensitive' } },
+        { order: { number: { contains: query.search, mode: 'insensitive' } } },
+      ];
+    }
+
+    const refunds = await this.prisma.refund.findMany({
+      where,
+      include: { order: { select: { number: true, customer: { select: { name: true } } } } },
+      orderBy: { createdAt: 'desc' },
+      take: CSV_MAX_ROWS,
+    });
+
+    return toCsv(refunds, [
+      { header: 'Number', value: (r) => r.number },
+      { header: 'Order', value: (r) => r.order.number },
+      { header: 'Customer', value: (r) => r.order.customer.name },
+      { header: 'Reason', value: (r) => r.reason },
+      { header: 'Status', value: (r) => r.status },
+      { header: 'Amount', value: (r) => r.amountCents },
+      { header: 'Currency', value: (r) => r.currency },
+      { header: 'Restock', value: (r) => (r.restock ? 'yes' : 'no') },
+      { header: 'Created', value: (r) => r.createdAt.toISOString() },
+      { header: 'Resolved', value: (r) => r.resolvedAt?.toISOString() ?? '' },
+    ]);
   }
 
   /** Per-order-item refundable quantities (ordered minus already-claimed). */

@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  Header,
   HttpCode,
   HttpStatus,
   Param,
@@ -24,6 +25,13 @@ export class RefundsController {
   @Get()
   list(@Query() query: ListRefundsQueryDto) {
     return this.refunds.list(query);
+  }
+
+  @Get('export')
+  @Header('Content-Type', 'text/csv; charset=utf-8')
+  @Header('Content-Disposition', 'attachment; filename="refunds.csv"')
+  exportCsv(@Query() query: ListRefundsQueryDto) {
+    return this.refunds.exportCsv(query);
   }
 
   @Get('refundable/:orderId')

@@ -65,7 +65,8 @@
     "yes": "Yes",
     "no": "No",
     "none": "—",
-    "retry": "Try again"
+    "retry": "Try again",
+    "export_csv": "Export CSV"
   },
   "products": {
     "title": "Products",

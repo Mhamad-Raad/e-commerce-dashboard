@@ -5,6 +5,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
+import { CSV_MAX_ROWS, toCsv } from '../common/csv';
 import { buildPaginated, paginate } from '../common/pagination';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateProductDto } from './dto/create-product.dto';
@@ -56,6 +57,46 @@ export class ProductsService {
     });
     if (!product) throw new NotFoundException(`Product ${id} not found`);
     return product;
+  }
+
+  async exportCsv(query: ListProductsQueryDto) {
+    const where: Prisma.ProductWhereInput = {};
+    if (query.search) {
+      where.OR = [
+        { name: { contains: query.search, mode: 'insensitive' } },
+        { sku: { contains: query.search, mode: 'insensitive' } },
+      ];
+    }
+    if (query.storeId) where.storeId = query.storeId;
+    if (query.categoryId) where.categoryId = query.categoryId;
+    if (query.brandId) where.brandId = query.brandId;
+    if (query.isActive !== undefined) where.isActive = query.isActive === 'true';
+
+    const products = await this.prisma.product.findMany({
+      where,
+      include: {
+        store: { select: { name: true } },
+        category: { select: { name: true } },
+        brand: { select: { name: true } },
+      },
+      orderBy: { createdAt: 'desc' },
+      take: CSV_MAX_ROWS,
+    });
+
+    return toCsv(products, [
+      { header: 'Name', value: (p) => p.name },
+      { header: 'SKU', value: (p) => p.sku },
+      { header: 'Price', value: (p) => p.priceCents },
+      { header: 'SalePrice', value: (p) => p.salePriceCents ?? '' },
+      { header: 'Currency', value: (p) => p.currency },
+      { header: 'Stock', value: (p) => p.stock },
+      { header: 'LowStockThreshold', value: (p) => p.lowStockThreshold },
+      { header: 'Store', value: (p) => p.store?.name ?? '' },
+      { header: 'Category', value: (p) => p.category?.name ?? '' },
+      { header: 'Brand', value: (p) => p.brand?.name ?? '' },
+      { header: 'Active', value: (p) => (p.isActive ? 'yes' : 'no') },
+      { header: 'Rating', value: (p) => p.ratingAvg },
+    ]);
   }
 
   async create(dto: CreateProductDto) {
