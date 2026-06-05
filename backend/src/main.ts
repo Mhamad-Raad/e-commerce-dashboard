@@ -9,6 +9,10 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const config = app.get(ConfigService);
 
+  // Trust the first proxy hop so rate limiting keys on the real client IP
+  // (and secure cookies work) when deployed behind a reverse proxy.
+  app.getHttpAdapter().getInstance().set('trust proxy', 1);
+
   app.use(helmet());
   app.use(cookieParser());
   app.enableCors({

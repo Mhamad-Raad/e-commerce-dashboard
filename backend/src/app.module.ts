@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
+import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { AuthModule } from './auth/auth.module';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 import { BrandsModule } from './brands/brands.module';
@@ -25,6 +26,10 @@ import { UsersModule } from './users/users.module';
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
+    // Global rate limit: 200 requests / minute / IP — generous for a polling
+    // admin dashboard, but caps scraping/abuse. Auth routes are far stricter
+    // (see @Throttle on AuthController).
+    ThrottlerModule.forRoot([{ ttl: 60_000, limit: 200 }]),
     PrismaModule,
     AuthModule,
     UsersModule,
@@ -46,6 +51,12 @@ import { UsersModule } from './users/users.module';
     SettingsModule,
   ],
   providers: [
+    // Rate limiting runs before auth so it also protects unauthenticated routes
+    // (login/refresh).
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    },
     {
       provide: APP_GUARD,
       useClass: JwtAuthGuard,

@@ -627,6 +627,7 @@
     "sign_in": "Sign in",
     "signing_in": "Signing in…",
     "failed": "Login failed. Check your credentials.",
+    "too_many": "Too many attempts. Please wait a minute and try again.",
     "email_invalid": "Enter a valid email address.",
     "password_min": "Password must be at least 6 characters."
   },

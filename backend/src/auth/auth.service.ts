@@ -8,6 +8,10 @@ import { JwtPayload } from './strategies/jwt.strategy';
 
 @Injectable()
 export class AuthService {
+  // A throwaway hash so login always runs bcrypt even when the email is unknown,
+  // equalizing response time so attackers can't enumerate valid emails by timing.
+  private readonly dummyHash = bcrypt.hashSync('login-timing-placeholder', 12);
+
   constructor(
     private prisma: PrismaService,
     private jwt: JwtService,
@@ -16,10 +20,8 @@ export class AuthService {
 
   async login(email: string, password: string) {
     const user = await this.prisma.user.findUnique({ where: { email } });
-    if (!user) throw new UnauthorizedException('Invalid credentials');
-
-    const ok = await bcrypt.compare(password, user.passwordHash);
-    if (!ok) throw new UnauthorizedException('Invalid credentials');
+    const ok = await bcrypt.compare(password, user?.passwordHash ?? this.dummyHash);
+    if (!user || !ok) throw new UnauthorizedException('Invalid credentials');
 
     const tokens = await this.issueTokens(user.id, user.email, user.role);
     await this.storeRefreshHash(user.id, tokens.refreshToken);

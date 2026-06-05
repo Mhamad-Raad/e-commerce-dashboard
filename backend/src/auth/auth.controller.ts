@@ -9,6 +9,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { Throttle } from '@nestjs/throttler';
 import { Response } from 'express';
 import { CurrentUser, CurrentUserPayload } from './decorators/current-user.decorator';
 import { Public } from './decorators/public.decorator';
@@ -25,6 +26,8 @@ export class AuthController {
     private config: ConfigService,
   ) {}
 
+  // Tight brute-force guard: 5 login attempts / minute / IP.
+  @Throttle({ default: { limit: 5, ttl: 60_000 } })
   @Public()
   @Post('login')
   @HttpCode(HttpStatus.OK)
@@ -37,6 +40,7 @@ export class AuthController {
     return { accessToken: tokens.accessToken, user };
   }
 
+  @Throttle({ default: { limit: 20, ttl: 60_000 } })
   @Public()
   @UseGuards(JwtRefreshGuard)
   @Post('refresh')

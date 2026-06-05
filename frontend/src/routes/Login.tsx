@@ -11,7 +11,6 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { ThemeToggle } from '@/components/theme/ThemeToggle';
-import { extractErrorMessage } from '@/lib/format';
 
 const schema = z.object({
   email: z.string().email(),
@@ -45,7 +44,8 @@ export function Login() {
       await login(values.email, values.password);
       navigate('/', { replace: true });
     } catch (err) {
-      toast.error(extractErrorMessage(err) || t('login.failed'));
+      const status = (err as { response?: { status?: number } })?.response?.status;
+      toast.error(status === 429 ? t('login.too_many') : t('login.failed'));
     }
   };
 
