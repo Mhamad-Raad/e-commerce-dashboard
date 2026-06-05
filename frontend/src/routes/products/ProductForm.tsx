@@ -12,6 +12,7 @@ import type { ProductWritePayload } from '@/features/products/types';
 import { storesApi } from '@/features/stores/api';
 import { categoriesApi } from '@/features/categories/api';
 import { brandsApi } from '@/features/brands/api';
+import { settingsApi } from '@/features/settings/api';
 import { PageHeader } from '@/components/PageHeader';
 import { FormField } from '@/components/FormField';
 import { AsyncCombobox } from '@/components/AsyncCombobox';
@@ -98,6 +99,13 @@ export function ProductForm() {
     enabled: isEdit,
   });
 
+  // New products default their currency to the store-wide setting.
+  const settingsQuery = useQuery({
+    queryKey: ['settings'],
+    queryFn: () => settingsApi.get(),
+    enabled: !isEdit,
+  });
+
   const {
     register,
     handleSubmit,
@@ -106,6 +114,12 @@ export function ProductForm() {
     watch,
     formState: { errors, isSubmitting },
   } = useForm<FormValues>({ resolver: zodResolver(schema), defaultValues });
+
+  useEffect(() => {
+    if (!isEdit && settingsQuery.data) {
+      setValue('currency', settingsQuery.data.defaultCurrency);
+    }
+  }, [isEdit, settingsQuery.data, setValue]);
 
   useEffect(() => {
     if (productQuery.data) {
