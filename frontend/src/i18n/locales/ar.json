@@ -18,6 +18,7 @@
     "customers": "العملاء",
     "carts": "السلال",
     "orders": "الطلبات",
+    "refunds": "المرتجعات",
     "coupons": "الكوبونات",
     "inventory": "المخزون",
     "fee_groups": "مجموعات الرسوم",
@@ -269,7 +270,9 @@
       "note_updated": "تم تحديث الملاحظات",
       "payment_recorded": "تم تسجيل دفعة · {{amount}} ({{method}}، {{status}})",
       "payment_updated": "تم تحديث دفعة · {{amount}} ({{status}})",
-      "payment_removed": "تم حذف دفعة · {{amount}}"
+      "payment_removed": "تم حذف دفعة · {{amount}}",
+      "refund_requested": "طلب استرجاع · {{number}} ({{amount}})",
+      "refund_completed": "اكتمل الاسترجاع · {{number}} ({{amount}})"
     },
     "status": {
       "pending": "قيد الانتظار",
@@ -280,6 +283,57 @@
       "delivered": "تم التسليم",
       "cancelled": "ملغى",
       "refunded": "مسترد"
+    }
+  },
+  "refunds": {
+    "title": "المرتجعات",
+    "subtitle": "المرتجعات والاستردادات عبر كل الطلبات",
+    "new": "استرجاع جديد",
+    "request": "طلب استرجاع",
+    "create": "إنشاء استرجاع",
+    "number": "رقم الاسترجاع",
+    "order": "رقم الطلب",
+    "amount": "المبلغ",
+    "reason": "السبب",
+    "note": "ملاحظة",
+    "restock": "إعادة العناصر إلى المخزون",
+    "details": "تفاصيل الاسترجاع",
+    "resolved_at": "تمت المعالجة",
+    "search_placeholder": "ابحث برقم الاسترجاع أو الطلب",
+    "total_count": "{{count}} إجمالاً",
+    "all_statuses": "كل الحالات",
+    "select_items": "العناصر المراد استرجاعها",
+    "refundable_n": "{{count}} قابلة للاسترجاع",
+    "nothing_refundable": "لا يوجد ما يمكن استرجاعه في هذا الطلب.",
+    "none_for_order": "لا توجد مرتجعات لهذا الطلب بعد.",
+    "empty_title": "لا توجد مرتجعات بعد",
+    "empty_desc": "ستظهر طلبات الاسترجاع هنا.",
+    "created_toast": "تم إنشاء الاسترجاع",
+    "status_updated_toast": "تم تحديث الاسترجاع",
+    "deleted_toast": "تم حذف الاسترجاع",
+    "delete_title": "حذف الاسترجاع",
+    "delete_message": "حذف الاسترجاع \"{{number}}\"؟ لا يمكن التراجع.",
+    "status": {
+      "requested": "مطلوب",
+      "approved": "مقبول",
+      "rejected": "مرفوض",
+      "completed": "مكتمل",
+      "cancelled": "ملغى"
+    },
+    "actions": {
+      "approved": "قبول",
+      "rejected": "رفض",
+      "completed": "إكمال",
+      "cancelled": "إلغاء"
+    },
+    "reasons": {
+      "damaged": "تالف",
+      "defective": "معيب",
+      "wrong_item": "عنصر خاطئ",
+      "not_as_described": "مخالف للوصف",
+      "arrived_late": "وصل متأخراً",
+      "changed_mind": "تغيّر الرأي",
+      "other": "أخرى"
     }
   },
   "addresses": {

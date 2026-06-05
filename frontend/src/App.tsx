@@ -81,6 +81,12 @@ const Inventory = lazy(() =>
 const FeeGroupsList = lazy(() =>
   import('./routes/feegroups/FeeGroupsList').then((m) => ({ default: m.FeeGroupsList })),
 );
+const RefundsList = lazy(() =>
+  import('./routes/refunds/RefundsList').then((m) => ({ default: m.RefundsList })),
+);
+const RefundDetail = lazy(() =>
+  import('./routes/refunds/RefundDetail').then((m) => ({ default: m.RefundDetail })),
+);
 const Settings = lazy(() =>
   import('./routes/settings/Settings').then((m) => ({ default: m.Settings })),
 );
@@ -133,6 +139,8 @@ export default function App() {
           <Route path="/orders/:id" element={<OrderDetail />} />
           <Route path="/coupons" element={<CouponsList />} />
           <Route path="/inventory" element={<Inventory />} />
+          <Route path="/refunds" element={<RefundsList />} />
+          <Route path="/refunds/:id" element={<RefundDetail />} />
           <Route path="/fee-groups" element={<FeeGroupsList />} />
           <Route path="/reports" element={<Reports />} />
           <Route path="/settings" element={<Settings />} />

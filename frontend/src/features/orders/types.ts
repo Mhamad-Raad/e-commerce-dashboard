@@ -91,6 +91,8 @@ export const ORDER_EVENT_TYPES = [
   'PAYMENT_RECORDED',
   'PAYMENT_UPDATED',
   'PAYMENT_REMOVED',
+  'REFUND_REQUESTED',
+  'REFUND_COMPLETED',
 ] as const;
 
 export type OrderEventType = (typeof ORDER_EVENT_TYPES)[number];

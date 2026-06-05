@@ -18,6 +18,7 @@
     "customers": "Customers",
     "carts": "Carts",
     "orders": "Orders",
+    "refunds": "Refunds",
     "coupons": "Coupons",
     "inventory": "Inventory",
     "fee_groups": "Fee groups",
@@ -269,7 +270,9 @@
       "note_updated": "Notes updated",
       "payment_recorded": "Payment recorded · {{amount}} ({{method}}, {{status}})",
       "payment_updated": "Payment updated · {{amount}} ({{status}})",
-      "payment_removed": "Payment removed · {{amount}}"
+      "payment_removed": "Payment removed · {{amount}}",
+      "refund_requested": "Refund requested · {{number}} ({{amount}})",
+      "refund_completed": "Refund completed · {{number}} ({{amount}})"
     },
     "status": {
       "pending": "Pending",
@@ -280,6 +283,57 @@
       "delivered": "Delivered",
       "cancelled": "Cancelled",
       "refunded": "Refunded"
+    }
+  },
+  "refunds": {
+    "title": "Refunds",
+    "subtitle": "Returns & refunds across all orders",
+    "new": "New refund",
+    "request": "Request refund",
+    "create": "Create refund",
+    "number": "Refund #",
+    "order": "Order #",
+    "amount": "Amount",
+    "reason": "Reason",
+    "note": "Note",
+    "restock": "Return items to stock",
+    "details": "Refund details",
+    "resolved_at": "Resolved",
+    "search_placeholder": "Search by refund or order #",
+    "total_count": "{{count}} total",
+    "all_statuses": "All statuses",
+    "select_items": "Items to refund",
+    "refundable_n": "{{count}} refundable",
+    "nothing_refundable": "Nothing left to refund on this order.",
+    "none_for_order": "No refunds for this order yet.",
+    "empty_title": "No refunds yet",
+    "empty_desc": "Refund requests will appear here.",
+    "created_toast": "Refund created",
+    "status_updated_toast": "Refund updated",
+    "deleted_toast": "Refund deleted",
+    "delete_title": "Delete refund",
+    "delete_message": "Delete refund \"{{number}}\"? This can't be undone.",
+    "status": {
+      "requested": "Requested",
+      "approved": "Approved",
+      "rejected": "Rejected",
+      "completed": "Completed",
+      "cancelled": "Cancelled"
+    },
+    "actions": {
+      "approved": "Approve",
+      "rejected": "Reject",
+      "completed": "Complete",
+      "cancelled": "Cancel"
+    },
+    "reasons": {
+      "damaged": "Damaged",
+      "defective": "Defective",
+      "wrong_item": "Wrong item",
+      "not_as_described": "Not as described",
+      "arrived_late": "Arrived late",
+      "changed_mind": "Changed mind",
+      "other": "Other"
     }
   },
   "addresses": {

@@ -17,6 +17,10 @@ import { MapPin } from 'lucide-react';
 import { humanizeGeo } from '@/lib/iraqGeo';
 import { OrderPayments } from './OrderPayments';
 import { OrderTimeline } from './OrderTimeline';
+import { RefundDialog } from '@/routes/refunds/RefundDialog';
+import { refundsApi } from '@/features/refunds/api';
+import { refundStatusTone } from '@/features/refunds/types';
+import { ReceiptText } from 'lucide-react';
 import {
   Table,
   TableBody,
@@ -41,10 +45,17 @@ export function OrderDetail() {
   const queryClient = useQueryClient();
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [trackingInput, setTrackingInput] = useState('');
+  const [refundOpen, setRefundOpen] = useState(false);
 
   const orderQuery = useQuery({
     queryKey: ['order', id],
     queryFn: () => ordersApi.get(id!),
+    enabled: !!id,
+  });
+
+  const refundsQuery = useQuery({
+    queryKey: ['refunds', { orderId: id }],
+    queryFn: () => refundsApi.list({ orderId: id! }),
     enabled: !!id,
   });
 
@@ -281,7 +292,53 @@ export function OrderDetail() {
         </CardContent>
       </Card>
 
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0">
+          <CardTitle className="flex items-center gap-2 text-sm">
+            <ReceiptText className="h-4 w-4" />
+            {t('refunds.title')}
+          </CardTitle>
+          {order.status !== 'CANCELLED' && (
+            <Button size="sm" variant="outline" onClick={() => setRefundOpen(true)}>
+              {t('refunds.request')}
+            </Button>
+          )}
+        </CardHeader>
+        <CardContent className="pt-0">
+          {refundsQuery.data && refundsQuery.data.items.length > 0 ? (
+            <ul className="divide-y">
+              {refundsQuery.data.items.map((r) => (
+                <li key={r.id}>
+                  <Link
+                    to={`/refunds/${r.id}`}
+                    className="flex items-center justify-between gap-3 py-2.5 text-sm hover:underline"
+                  >
+                    <span className="font-mono text-xs">{r.number}</span>
+                    <span className="flex items-center gap-3">
+                      <span className="font-medium">{formatMoney(r.amountCents, r.currency)}</span>
+                      <StatusBadge
+                        label={t(`refunds.status.${r.status.toLowerCase()}`)}
+                        tone={refundStatusTone(r.status)}
+                      />
+                    </span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-sm text-muted-foreground">{t('refunds.none_for_order')}</p>
+          )}
+        </CardContent>
+      </Card>
+
       <OrderTimeline order={order} />
+
+      <RefundDialog
+        open={refundOpen}
+        orderId={order.id}
+        onOpenChange={setRefundOpen}
+        onCreated={(r) => navigate(`/refunds/${r.id}`)}
+      />
 
       <ConfirmDialog
         open={confirmDelete}

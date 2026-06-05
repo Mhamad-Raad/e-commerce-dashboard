@@ -7,6 +7,8 @@ import {
   PackageCheck,
   PackagePlus,
   RefreshCcw,
+  ReceiptText,
+  RotateCcw,
   StickyNote,
   Truck,
   Undo2,
@@ -28,6 +30,8 @@ const icons: Record<OrderEventType, LucideIcon> = {
   PAYMENT_RECORDED: Banknote,
   PAYMENT_UPDATED: CreditCard,
   PAYMENT_REMOVED: CreditCard,
+  REFUND_REQUESTED: ReceiptText,
+  REFUND_COMPLETED: RotateCcw,
 };
 
 interface Props {
@@ -75,6 +79,16 @@ export function OrderTimeline({ order }: Props) {
         return t('orders.events.payment_updated', { amount: money(meta.amountCents), status: payStatus(meta.status) });
       case 'PAYMENT_REMOVED':
         return t('orders.events.payment_removed', { amount: money(meta.amountCents) });
+      case 'REFUND_REQUESTED':
+        return t('orders.events.refund_requested', {
+          number: String(meta.number ?? ''),
+          amount: money(meta.amountCents),
+        });
+      case 'REFUND_COMPLETED':
+        return t('orders.events.refund_completed', {
+          number: String(meta.number ?? ''),
+          amount: money(meta.amountCents),
+        });
     }
   };
 
