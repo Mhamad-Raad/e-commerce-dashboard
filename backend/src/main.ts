@@ -9,9 +9,13 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const config = app.get(ConfigService);
 
-  // Trust the first proxy hop so rate limiting keys on the real client IP
-  // (and secure cookies work) when deployed behind a reverse proxy.
-  app.getHttpAdapter().getInstance().set('trust proxy', 1);
+  // Only trust the first proxy hop when actually deployed behind one (set
+  // TRUST_PROXY=true). Trusting it otherwise would let clients spoof
+  // X-Forwarded-For and bypass IP rate limiting; not trusting it behind a real
+  // proxy would lump every client under the proxy IP.
+  if (config.get<string>('TRUST_PROXY') === 'true') {
+    app.getHttpAdapter().getInstance().set('trust proxy', 1);
+  }
 
   app.use(helmet());
   app.use(cookieParser());
