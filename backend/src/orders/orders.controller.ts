@@ -29,6 +29,11 @@ export class OrdersController {
     return this.orders.findById(id);
   }
 
+  @Get(':id/events')
+  events(@Param('id') id: string) {
+    return this.orders.listEvents(id);
+  }
+
   @Post()
   create(@Body() dto: CreateOrderDto) {
     return this.orders.create(dto);

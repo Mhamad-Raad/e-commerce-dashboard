@@ -1,11 +1,15 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { PaymentStatus, Prisma } from '@prisma/client';
+import { OrderEventType, PaymentStatus, Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreatePaymentDto, UpdatePaymentDto } from './dto/payment.dto';
+import { OrderEventsService } from './order-events.service';
 
 @Injectable()
 export class PaymentsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private events: OrderEventsService,
+  ) {}
 
   private async ensureOrder(orderId: string) {
     const order = await this.prisma.order.findUnique({
@@ -45,7 +49,13 @@ export class PaymentsService {
       note: dto.note,
       paidAt: this.resolvePaidAt(dto.status, dto.paidAt) ?? null,
     };
-    return this.prisma.payment.create({ data });
+    const payment = await this.prisma.payment.create({ data });
+    await this.events.record(this.prisma, orderId, OrderEventType.PAYMENT_RECORDED, {
+      amountCents: payment.amountCents,
+      method: payment.method,
+      status: payment.status,
+    });
+    return payment;
   }
 
   async update(orderId: string, id: string, dto: UpdatePaymentDto) {
@@ -59,12 +69,22 @@ export class PaymentsService {
     };
     const paidAt = this.resolvePaidAt(dto.status, dto.paidAt);
     if (paidAt !== undefined) data.paidAt = paidAt;
-    return this.prisma.payment.update({ where: { id }, data });
+    const payment = await this.prisma.payment.update({ where: { id }, data });
+    await this.events.record(this.prisma, orderId, OrderEventType.PAYMENT_UPDATED, {
+      amountCents: payment.amountCents,
+      method: payment.method,
+      status: payment.status,
+    });
+    return payment;
   }
 
   async remove(orderId: string, id: string) {
-    await this.findOwned(orderId, id);
+    const payment = await this.findOwned(orderId, id);
     await this.prisma.payment.delete({ where: { id } });
+    await this.events.record(this.prisma, orderId, OrderEventType.PAYMENT_REMOVED, {
+      amountCents: payment.amountCents,
+      method: payment.method,
+    });
     return { success: true };
   }
 

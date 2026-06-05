@@ -49,6 +49,18 @@ enum PaymentStatus {
   REFUNDED
 }
 
+// Entries in an order's append-only audit timeline.
+enum OrderEventType {
+  CREATED
+  STATUS_CHANGED
+  STOCK_RESTORED
+  TRACKING_UPDATED
+  NOTE_UPDATED
+  PAYMENT_RECORDED
+  PAYMENT_UPDATED
+  PAYMENT_REMOVED
+}
+
 // Why a stock level changed. ORDER decrements on order placement;
 // ORDER_CANCELLED reverses that when an order is cancelled/refunded/deleted;
 // RESTOCK is a positive supplier top-up; ADJUSTMENT is a manual correction.
@@ -504,10 +516,25 @@ model Order {
   items          OrderItem[]
   payments       Payment[]
   stockMovements StockMovement[]
+  events         OrderEvent[]
 
   @@index([customerId])
   @@index([status])
   @@index([placedAt])
+}
+
+model OrderEvent {
+  id        String         @id @default(cuid())
+  orderId   String
+  order     Order          @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  type      OrderEventType
+  // Structured detail rendered (and localized) by the dashboard, e.g.
+  // { from, to } for a status change or { amountCents, method } for a payment.
+  meta      Json?
+  createdAt DateTime       @default(now())
+
+  @@index([orderId])
+  @@index([createdAt])
 }
 
 model Payment {

@@ -3,12 +3,13 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { OrderStatus, Prisma } from '@prisma/client';
+import { OrderEventType, OrderStatus, Prisma } from '@prisma/client';
 import { couponApplicabilityError, couponDiscountCents } from '../common/coupon';
 import { buildPaginated, paginate } from '../common/pagination';
 import { effectivePriceCents } from '../common/pricing';
 import { InventoryService } from '../inventory/inventory.service';
 import { PrismaService } from '../prisma/prisma.service';
+import { OrderEventsService } from './order-events.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { ListOrdersQueryDto } from './dto/list-orders.query.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
@@ -36,7 +37,12 @@ export class OrdersService {
   constructor(
     private prisma: PrismaService,
     private inventory: InventoryService,
+    private events: OrderEventsService,
   ) {}
+
+  listEvents(orderId: string) {
+    return this.findById(orderId).then(() => this.events.list(orderId));
+  }
 
   async list(query: ListOrdersQueryDto) {
     const page = query.page ?? 1;
@@ -217,6 +223,11 @@ export class OrdersService {
           throw new BadRequestException('Coupon redemption limit reached');
         }
       }
+      await this.events.record(tx, created.id, OrderEventType.CREATED, {
+        totalCents,
+        currency,
+        itemCount: lineItems.length,
+      });
       return created;
     });
 
@@ -232,8 +243,26 @@ export class OrdersService {
 
     await this.prisma.$transaction(async (tx) => {
       await tx.order.update({ where: { id }, data: dto });
+
+      if (dto.status !== undefined && dto.status !== existing.status) {
+        await this.events.record(tx, id, OrderEventType.STATUS_CHANGED, {
+          from: existing.status,
+          to: dto.status,
+        });
+      }
       // Cancelling/refunding returns the reserved stock to inventory.
-      if (entersReversal) await this.inventory.restoreOrderStock(tx, id);
+      if (entersReversal) {
+        await this.inventory.restoreOrderStock(tx, id);
+        await this.events.record(tx, id, OrderEventType.STOCK_RESTORED);
+      }
+      if (dto.trackingNumber !== undefined && dto.trackingNumber !== existing.trackingNumber) {
+        await this.events.record(tx, id, OrderEventType.TRACKING_UPDATED, {
+          tracking: dto.trackingNumber,
+        });
+      }
+      if (dto.notes !== undefined && dto.notes !== existing.notes) {
+        await this.events.record(tx, id, OrderEventType.NOTE_UPDATED);
+      }
     });
     return this.findById(id);
   }
