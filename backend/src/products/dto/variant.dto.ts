@@ -36,6 +36,11 @@ export class CreateVariantDto {
   stock!: number;
 
   @IsOptional()
+  @IsInt()
+  @Min(0)
+  lowStockThreshold?: number;
+
+  @IsOptional()
   @IsUrl({ require_tld: false })
   imageUrl?: string;
 
@@ -77,6 +82,11 @@ export class UpdateVariantDto {
   @IsInt()
   @Min(0)
   stock?: number;
+
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  lowStockThreshold?: number;
 
   @IsOptional()
   @IsUrl({ require_tld: false })

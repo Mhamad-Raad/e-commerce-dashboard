@@ -9,6 +9,7 @@ import { CategoriesModule } from './categories/categories.module';
 import { CouponsModule } from './coupons/coupons.module';
 import { CustomersModule } from './customers/customers.module';
 import { HomepageModule } from './homepage/homepage.module';
+import { InventoryModule } from './inventory/inventory.module';
 import { OrdersModule } from './orders/orders.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { ProductsModule } from './products/products.module';
@@ -32,6 +33,7 @@ import { UsersModule } from './users/users.module';
     OrdersModule,
     CouponsModule,
     HomepageModule,
+    InventoryModule,
     ReportsModule,
     ReviewsModule,
   ],

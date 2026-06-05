@@ -61,6 +61,11 @@ export class CreateProductDto {
   stock!: number;
 
   @IsOptional()
+  @IsInt()
+  @Min(0)
+  lowStockThreshold?: number;
+
+  @IsOptional()
   @IsUrl({ require_tld: false })
   imageUrl?: string;
 

@@ -3,10 +3,11 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
+import { OrderStatus, Prisma } from '@prisma/client';
 import { couponApplicabilityError, couponDiscountCents } from '../common/coupon';
 import { buildPaginated, paginate } from '../common/pagination';
 import { effectivePriceCents } from '../common/pricing';
+import { InventoryService } from '../inventory/inventory.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { ListOrdersQueryDto } from './dto/list-orders.query.dto';
@@ -18,6 +19,12 @@ const orderInclude = {
   payments: { orderBy: { createdAt: 'asc' as const } },
 };
 
+// CANCELLED/REFUNDED reverse the order's stock when first entered; once an order
+// is DELIVERED or already reversed, its stock is considered consumed and is not
+// restored if the order is later deleted.
+const STOCK_REVERSING_STATUSES: OrderStatus[] = ['CANCELLED', 'REFUNDED'];
+const STOCK_CONSUMED_STATUSES: OrderStatus[] = ['DELIVERED', 'CANCELLED', 'REFUNDED'];
+
 const generateOrderNumber = () => {
   const ts = Date.now().toString(36).toUpperCase();
   const rand = Math.random().toString(36).slice(2, 6).toUpperCase();
@@ -26,7 +33,10 @@ const generateOrderNumber = () => {
 
 @Injectable()
 export class OrdersService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private inventory: InventoryService,
+  ) {}
 
   async list(query: ListOrdersQueryDto) {
     const page = query.page ?? 1;
@@ -182,6 +192,18 @@ export class OrdersService {
         },
         include: orderInclude,
       });
+      // Reserve stock for every line; throws (rolling back the whole order) if
+      // any product/variant is short.
+      await this.inventory.applyOrderDecrements(
+        tx,
+        created.id,
+        lineItems.map((i) => ({
+          productId: i.productId,
+          variantId: i.variantId,
+          quantity: i.quantity,
+          label: i.variantName ? `${i.name} (${i.variantName})` : i.name,
+        })),
+      );
       // Count the redemption when an order actually uses the coupon. The
       // increment takes a row lock so concurrent orders serialize here; we then
       // verify the new count is within the limit and roll back if it isn't —
@@ -202,14 +224,30 @@ export class OrdersService {
   }
 
   async update(id: string, dto: UpdateOrderDto) {
-    await this.findById(id);
-    await this.prisma.order.update({ where: { id }, data: dto });
+    const existing = await this.findById(id);
+    const entersReversal =
+      dto.status !== undefined &&
+      STOCK_REVERSING_STATUSES.includes(dto.status) &&
+      !STOCK_REVERSING_STATUSES.includes(existing.status);
+
+    await this.prisma.$transaction(async (tx) => {
+      await tx.order.update({ where: { id }, data: dto });
+      // Cancelling/refunding returns the reserved stock to inventory.
+      if (entersReversal) await this.inventory.restoreOrderStock(tx, id);
+    });
     return this.findById(id);
   }
 
   async remove(id: string) {
-    await this.findById(id);
-    await this.prisma.order.delete({ where: { id } });
+    const existing = await this.findById(id);
+    await this.prisma.$transaction(async (tx) => {
+      // Return stock if this order was still holding it (e.g. a pending order
+      // deleted in error). Delivered/cancelled/refunded stock is left as-is.
+      if (!STOCK_CONSUMED_STATUSES.includes(existing.status)) {
+        await this.inventory.restoreOrderStock(tx, id);
+      }
+      await tx.order.delete({ where: { id } });
+    });
     return { success: true };
   }
 }
