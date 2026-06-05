@@ -53,6 +53,7 @@ enum PaymentStatus {
 enum OrderEventType {
   CREATED
   STATUS_CHANGED
+  STOCK_RESERVED
   STOCK_RESTORED
   TRACKING_UPDATED
   NOTE_UPDATED
@@ -540,6 +541,10 @@ model Order {
   currency       String      @default("IQD")
   notes          String?
   trackingNumber String?
+  // Whether this order currently holds reserved stock. Set true once stock is
+  // decremented; flipped false when cancelled/refunded returns it. Drives safe
+  // re-reservation if the order is later re-opened.
+  stockReserved  Boolean     @default(false)
   status         OrderStatus @default(PENDING)
   placedAt       DateTime    @default(now())
   updatedAt      DateTime    @updatedAt

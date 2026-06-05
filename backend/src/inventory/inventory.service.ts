@@ -118,17 +118,20 @@ export class InventoryService {
     return p?.stock ?? 0;
   }
 
-  /** Decrement every line of a newly-created order. Throws on any shortfall. */
-  async applyOrderDecrements(
-    tx: Prisma.TransactionClient,
-    orderId: string,
-    lines: { productId: string; variantId?: string | null; quantity: number; label: string }[],
-  ) {
-    for (const line of lines) {
+  /**
+   * Decrement stock for every line of an order (reservation). Throws on any
+   * shortfall — used both when an order is created and when a cancelled order is
+   * re-opened. The caller is responsible for tracking the reserved state
+   * (Order.stockReserved) so this is never double-applied.
+   */
+  async reserveOrderStock(tx: Prisma.TransactionClient, orderId: string) {
+    const items = await tx.orderItem.findMany({ where: { orderId } });
+    for (const it of items) {
+      const label = it.variantName ? `${it.name} (${it.variantName})` : it.name;
       await this.applyChange(
         tx,
-        { productId: line.productId, variantId: line.variantId, label: line.label },
-        -line.quantity,
+        { productId: it.productId, variantId: it.variantId, label },
+        -it.quantity,
         StockMovementReason.ORDER,
         { orderId },
       );
@@ -136,26 +139,16 @@ export class InventoryService {
   }
 
   /**
-   * Reverse the stock an order is holding. Idempotent: if the order has already
-   * been reversed (an ORDER_CANCELLED movement exists), it does nothing.
+   * Return an order's reserved stock to inventory. Mirror of reserveOrderStock;
+   * idempotency is the caller's responsibility via Order.stockReserved.
    */
-  async restoreOrderStock(tx: Prisma.TransactionClient, orderId: string) {
-    const movements = await tx.stockMovement.findMany({
-      where: { orderId },
-    });
-    const alreadyReversed = movements.some(
-      (m) => m.reason === StockMovementReason.ORDER_CANCELLED,
-    );
-    if (alreadyReversed) return;
-
-    const decrements = movements.filter(
-      (m) => m.reason === StockMovementReason.ORDER && m.delta < 0,
-    );
-    for (const m of decrements) {
+  async releaseOrderStock(tx: Prisma.TransactionClient, orderId: string) {
+    const items = await tx.orderItem.findMany({ where: { orderId } });
+    for (const it of items) {
       await this.applyChange(
         tx,
-        { productId: m.productId, variantId: m.variantId },
-        -m.delta,
+        { productId: it.productId, variantId: it.variantId },
+        it.quantity,
         StockMovementReason.ORDER_CANCELLED,
         { orderId },
       );

@@ -21,11 +21,11 @@ const orderInclude = {
   payments: { orderBy: { createdAt: 'asc' as const } },
 };
 
-// CANCELLED/REFUNDED reverse the order's stock when first entered; once an order
-// is DELIVERED or already reversed, its stock is considered consumed and is not
-// restored if the order is later deleted.
+// Statuses in which an order is NOT holding stock: entering one releases the
+// reservation, leaving one re-reserves it. The actual "currently reserved" truth
+// lives on Order.stockReserved.
 const STOCK_REVERSING_STATUSES: OrderStatus[] = ['CANCELLED', 'REFUNDED'];
-const STOCK_CONSUMED_STATUSES: OrderStatus[] = ['DELIVERED', 'CANCELLED', 'REFUNDED'];
+const isReversing = (status: OrderStatus) => STOCK_REVERSING_STATUSES.includes(status);
 
 const generateOrderNumber = () => {
   const ts = Date.now().toString(36).toUpperCase();
@@ -83,12 +83,14 @@ export class OrdersService {
     return order;
   }
 
-  async create(dto: CreateOrderDto) {
-    const customer = await this.prisma.customer.findUnique({
-      where: { id: dto.customerId },
-    });
-    if (!customer) throw new NotFoundException(`Customer ${dto.customerId} not found`);
-
+  /**
+   * Compute an order's line items + money breakdown from the request, without
+   * persisting anything. Shared by create() and preview() so the quote staff see
+   * before submitting is exactly what gets charged (fee groups + tax included).
+   * With softCoupon, an invalid/expired coupon is ignored rather than throwing —
+   * used for live previews so a stale code doesn't blank the whole quote.
+   */
+  private async buildQuote(dto: CreateOrderDto, opts: { softCoupon?: boolean } = {}) {
     const productIds = dto.items.map((i) => i.productId);
     const products = await this.prisma.product.findMany({
       where: { id: { in: productIds } },
@@ -102,9 +104,7 @@ export class OrdersService {
       .map((i) => i.variantId)
       .filter((id): id is string => Boolean(id));
     const variants = variantIds.length
-      ? await this.prisma.productVariant.findMany({
-          where: { id: { in: variantIds } },
-        })
+      ? await this.prisma.productVariant.findMany({ where: { id: { in: variantIds } } })
       : [];
     const variantMap = new Map(variants.map((v) => [v.id, v]));
 
@@ -135,10 +135,7 @@ export class OrdersService {
       };
     });
 
-    const subtotalCents = lineItems.reduce(
-      (sum, i) => sum + i.priceCents * i.quantity,
-      0,
-    );
+    const subtotalCents = lineItems.reduce((sum, i) => sum + i.priceCents * i.quantity, 0);
     const currency = dto.currency ?? products[0]?.currency ?? 'IQD';
 
     // Resolve fee groups assigned to the order's stores/brands; staff may still
@@ -163,16 +160,58 @@ export class OrdersService {
         where: { code: dto.couponCode.toUpperCase() },
       });
       const error = couponApplicabilityError(coupon, subtotalCents, new Date());
-      if (error || !coupon) throw new BadRequestException(error ?? 'Invalid coupon');
-      discountCents = couponDiscountCents(coupon, subtotalCents);
-      couponCode = coupon.code;
-      couponId = coupon.id;
+      if (error || !coupon) {
+        if (!opts.softCoupon) throw new BadRequestException(error ?? 'Invalid coupon');
+      } else {
+        discountCents = couponDiscountCents(coupon, subtotalCents);
+        couponCode = coupon.code;
+        couponId = coupon.id;
+      }
     }
 
     const totalCents = Math.max(
       0,
       subtotalCents - discountCents + taxCents + shippingCents + feesCents,
     );
+
+    return {
+      lineItems,
+      subtotalCents,
+      currency,
+      discountCents,
+      couponCode,
+      couponId,
+      taxCents,
+      shippingCents,
+      feesCents,
+      feesLabel,
+      totalCents,
+    };
+  }
+
+  /** Dry-run the money breakdown (fees + tax + discount) for the order form. */
+  async preview(dto: CreateOrderDto) {
+    const q = await this.buildQuote(dto, { softCoupon: true });
+    return {
+      subtotalCents: q.subtotalCents,
+      discountCents: q.discountCents,
+      couponCode: q.couponCode,
+      taxCents: q.taxCents,
+      shippingCents: q.shippingCents,
+      feesCents: q.feesCents,
+      feesLabel: q.feesLabel,
+      totalCents: q.totalCents,
+      currency: q.currency,
+    };
+  }
+
+  async create(dto: CreateOrderDto) {
+    const customer = await this.prisma.customer.findUnique({
+      where: { id: dto.customerId },
+    });
+    if (!customer) throw new NotFoundException(`Customer ${dto.customerId} not found`);
+
+    const quote = await this.buildQuote(dto);
 
     // Optionally snapshot a customer address as the shipping address.
     let shipping: Partial<Prisma.OrderUncheckedCreateInput> = {};
@@ -201,40 +240,32 @@ export class OrdersService {
         data: {
           number: generateOrderNumber(),
           customerId: dto.customerId,
-          subtotalCents,
-          discountCents,
-          couponCode,
-          taxCents,
-          shippingCents,
-          feesCents,
-          feesLabel,
-          totalCents,
-          currency,
+          subtotalCents: quote.subtotalCents,
+          discountCents: quote.discountCents,
+          couponCode: quote.couponCode,
+          taxCents: quote.taxCents,
+          shippingCents: quote.shippingCents,
+          feesCents: quote.feesCents,
+          feesLabel: quote.feesLabel,
+          totalCents: quote.totalCents,
+          currency: quote.currency,
           notes: dto.notes,
+          stockReserved: true,
           ...shipping,
-          items: { create: lineItems },
+          items: { create: quote.lineItems },
         },
         include: orderInclude,
       });
       // Reserve stock for every line; throws (rolling back the whole order) if
       // any product/variant is short.
-      await this.inventory.applyOrderDecrements(
-        tx,
-        created.id,
-        lineItems.map((i) => ({
-          productId: i.productId,
-          variantId: i.variantId,
-          quantity: i.quantity,
-          label: i.variantName ? `${i.name} (${i.variantName})` : i.name,
-        })),
-      );
+      await this.inventory.reserveOrderStock(tx, created.id);
       // Count the redemption when an order actually uses the coupon. The
       // increment takes a row lock so concurrent orders serialize here; we then
       // verify the new count is within the limit and roll back if it isn't —
       // closing the check-then-increment race in the pre-transaction validation.
-      if (couponId) {
+      if (quote.couponId) {
         const updated = await tx.coupon.update({
-          where: { id: couponId },
+          where: { id: quote.couponId },
           data: { redeemedCount: { increment: 1 } },
         });
         if (updated.maxRedemptions != null && updated.redeemedCount > updated.maxRedemptions) {
@@ -242,9 +273,9 @@ export class OrdersService {
         }
       }
       await this.events.record(tx, created.id, OrderEventType.CREATED, {
-        totalCents,
-        currency,
-        itemCount: lineItems.length,
+        totalCents: quote.totalCents,
+        currency: quote.currency,
+        itemCount: quote.lineItems.length,
       });
       return created;
     });
@@ -255,9 +286,9 @@ export class OrdersService {
   async update(id: string, dto: UpdateOrderDto) {
     const existing = await this.findById(id);
     const entersReversal =
-      dto.status !== undefined &&
-      STOCK_REVERSING_STATUSES.includes(dto.status) &&
-      !STOCK_REVERSING_STATUSES.includes(existing.status);
+      dto.status !== undefined && isReversing(dto.status) && !isReversing(existing.status);
+    const leavesReversal =
+      dto.status !== undefined && !isReversing(dto.status) && isReversing(existing.status);
 
     await this.prisma.$transaction(async (tx) => {
       await tx.order.update({ where: { id }, data: dto });
@@ -268,10 +299,17 @@ export class OrdersService {
           to: dto.status,
         });
       }
-      // Cancelling/refunding returns the reserved stock to inventory.
-      if (entersReversal) {
-        await this.inventory.restoreOrderStock(tx, id);
+      // Cancelling/refunding returns reserved stock; re-opening re-reserves it
+      // (and fails the whole update if it was sold elsewhere in the meantime).
+      // Order.stockReserved guards against double release/reserve.
+      if (entersReversal && existing.stockReserved) {
+        await this.inventory.releaseOrderStock(tx, id);
+        await tx.order.update({ where: { id }, data: { stockReserved: false } });
         await this.events.record(tx, id, OrderEventType.STOCK_RESTORED);
+      } else if (leavesReversal && !existing.stockReserved) {
+        await this.inventory.reserveOrderStock(tx, id);
+        await tx.order.update({ where: { id }, data: { stockReserved: true } });
+        await this.events.record(tx, id, OrderEventType.STOCK_RESERVED);
       }
       if (dto.trackingNumber !== undefined && dto.trackingNumber !== existing.trackingNumber) {
         await this.events.record(tx, id, OrderEventType.TRACKING_UPDATED, {
@@ -288,10 +326,9 @@ export class OrdersService {
   async remove(id: string) {
     const existing = await this.findById(id);
     await this.prisma.$transaction(async (tx) => {
-      // Return stock if this order was still holding it (e.g. a pending order
-      // deleted in error). Delivered/cancelled/refunded stock is left as-is.
-      if (!STOCK_CONSUMED_STATUSES.includes(existing.status)) {
-        await this.inventory.restoreOrderStock(tx, id);
+      // Return stock only if this order is still holding a reservation.
+      if (existing.stockReserved) {
+        await this.inventory.releaseOrderStock(tx, id);
       }
       await tx.order.delete({ where: { id } });
     });

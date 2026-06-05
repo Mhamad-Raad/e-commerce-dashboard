@@ -34,6 +34,12 @@ export class OrdersController {
     return this.orders.listEvents(id);
   }
 
+  @Post('preview')
+  @HttpCode(HttpStatus.OK)
+  preview(@Body() dto: CreateOrderDto) {
+    return this.orders.preview(dto);
+  }
+
   @Post()
   create(@Body() dto: CreateOrderDto) {
     return this.orders.create(dto);
