@@ -15,6 +15,31 @@ export class ReportsController {
     return this.reports.timeseries({ start, end });
   }
 
+  @Get('sales-by-brand')
+  salesByBrand(@Query('start') start?: string, @Query('end') end?: string) {
+    return this.reports.salesByBrand({ start, end });
+  }
+
+  @Get('sales-by-store')
+  salesByStore(@Query('start') start?: string, @Query('end') end?: string) {
+    return this.reports.salesByStore({ start, end });
+  }
+
+  @Get('sales-by-governorate')
+  salesByGovernorate(@Query('start') start?: string, @Query('end') end?: string) {
+    return this.reports.salesByGovernorate({ start, end });
+  }
+
+  @Get('charges')
+  charges(@Query('start') start?: string, @Query('end') end?: string) {
+    return this.reports.charges({ start, end });
+  }
+
+  @Get('refund-stats')
+  refundStats(@Query('start') start?: string, @Query('end') end?: string) {
+    return this.reports.refundStats({ start, end });
+  }
+
   @Get('top-products')
   topProducts(
     @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number,

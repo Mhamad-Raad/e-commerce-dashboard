@@ -39,3 +39,29 @@ export interface RecentOrder {
   placedAt: string;
   customer: { id: string; name: string; email: string };
 }
+
+export interface DimensionSales {
+  name: string;
+  revenueCents: number;
+  units: number;
+}
+
+export interface GovernorateSales {
+  governorate: string | null;
+  revenueCents: number;
+  orders: number;
+}
+
+export interface ChargesBreakdown {
+  subtotalCents: number;
+  discountCents: number;
+  taxCents: number;
+  shippingCents: number;
+  feesCents: number;
+  totalCents: number;
+}
+
+export interface RefundStats {
+  byStatus: Array<{ status: string; count: number; amountCents: number }>;
+  completedCents: number;
+}

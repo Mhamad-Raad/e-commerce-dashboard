@@ -141,6 +141,109 @@ export class ReportsService {
       .filter((x): x is NonNullable<typeof x> => x !== null);
   }
 
+  /** Merchandise revenue + units grouped by brand (top 12). */
+  async salesByBrand(range?: DateRange) {
+    const { start, end } = this.resolveRange(range);
+    const rows = await this.prisma.$queryRaw<{ name: string; revenue: bigint; units: bigint }[]>(Prisma.sql`
+      SELECT COALESCE(b.name, '—') AS name,
+             SUM(oi.quantity * oi."priceCents")::bigint AS revenue,
+             SUM(oi.quantity)::bigint AS units
+      FROM "OrderItem" oi
+      JOIN "Order" o ON o.id = oi."orderId"
+      JOIN "Product" p ON p.id = oi."productId"
+      LEFT JOIN "Brand" b ON b.id = p."brandId"
+      WHERE o.status NOT IN ('CANCELLED', 'REFUNDED')
+        AND o."placedAt" BETWEEN ${start} AND ${end}
+      GROUP BY b.name
+      ORDER BY revenue DESC
+      LIMIT 12
+    `);
+    return rows.map((r) => ({ name: r.name, revenueCents: Number(r.revenue), units: Number(r.units) }));
+  }
+
+  /** Merchandise revenue + units grouped by store (top 12). */
+  async salesByStore(range?: DateRange) {
+    const { start, end } = this.resolveRange(range);
+    const rows = await this.prisma.$queryRaw<{ name: string; revenue: bigint; units: bigint }[]>(Prisma.sql`
+      SELECT s.name AS name,
+             SUM(oi.quantity * oi."priceCents")::bigint AS revenue,
+             SUM(oi.quantity)::bigint AS units
+      FROM "OrderItem" oi
+      JOIN "Order" o ON o.id = oi."orderId"
+      JOIN "Product" p ON p.id = oi."productId"
+      JOIN "Store" s ON s.id = p."storeId"
+      WHERE o.status NOT IN ('CANCELLED', 'REFUNDED')
+        AND o."placedAt" BETWEEN ${start} AND ${end}
+      GROUP BY s.name
+      ORDER BY revenue DESC
+      LIMIT 12
+    `);
+    return rows.map((r) => ({ name: r.name, revenueCents: Number(r.revenue), units: Number(r.units) }));
+  }
+
+  /** Net revenue + order count grouped by shipping governorate. */
+  async salesByGovernorate(range?: DateRange) {
+    const { start, end } = this.resolveRange(range);
+    const rows = await this.prisma.$queryRaw<{ governorate: string | null; revenue: bigint; orders: bigint }[]>(Prisma.sql`
+      SELECT o."shipGovernorate"::text AS governorate,
+             SUM(o."totalCents" - o."taxCents" - o."feesCents")::bigint AS revenue,
+             COUNT(o.id)::bigint AS orders
+      FROM "Order" o
+      WHERE o.status NOT IN ('CANCELLED', 'REFUNDED')
+        AND o."placedAt" BETWEEN ${start} AND ${end}
+      GROUP BY o."shipGovernorate"
+      ORDER BY revenue DESC
+    `);
+    return rows.map((r) => ({
+      governorate: r.governorate,
+      revenueCents: Number(r.revenue),
+      orders: Number(r.orders),
+    }));
+  }
+
+  /** Component totals (what makes up order value) over the range. */
+  async charges(range?: DateRange) {
+    const { start, end } = this.resolveRange(range);
+    const agg = await this.prisma.order.aggregate({
+      _sum: {
+        subtotalCents: true,
+        discountCents: true,
+        taxCents: true,
+        shippingCents: true,
+        feesCents: true,
+        totalCents: true,
+      },
+      where: { status: { notIn: EXCLUDED_FROM_REVENUE }, placedAt: { gte: start, lte: end } },
+    });
+    const s = agg._sum;
+    return {
+      subtotalCents: s.subtotalCents ?? 0,
+      discountCents: s.discountCents ?? 0,
+      taxCents: s.taxCents ?? 0,
+      shippingCents: s.shippingCents ?? 0,
+      feesCents: s.feesCents ?? 0,
+      totalCents: s.totalCents ?? 0,
+    };
+  }
+
+  /** Refund counts + amounts grouped by status over the range. */
+  async refundStats(range?: DateRange) {
+    const { start, end } = this.resolveRange(range);
+    const grouped = await this.prisma.refund.groupBy({
+      by: ['status'],
+      _count: { _all: true },
+      _sum: { amountCents: true },
+      where: { createdAt: { gte: start, lte: end } },
+    });
+    const byStatus = grouped.map((g) => ({
+      status: g.status,
+      count: g._count._all,
+      amountCents: g._sum.amountCents ?? 0,
+    }));
+    const completedCents = byStatus.find((b) => b.status === 'COMPLETED')?.amountCents ?? 0;
+    return { byStatus, completedCents };
+  }
+
   async recentOrders(limit = 10) {
     return this.prisma.order.findMany({
       take: limit,

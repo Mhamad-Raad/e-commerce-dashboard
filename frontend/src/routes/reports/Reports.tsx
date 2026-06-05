@@ -22,6 +22,8 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { formatDate, formatMoney } from '@/lib/format';
+import { humanizeGeo } from '@/lib/iraqGeo';
+import { refundStatusTone } from '@/features/refunds/types';
 import { OrdersTimeseriesChart } from './OrdersTimeseriesChart';
 
 const PRESETS = [7, 30, 60, 90];
@@ -70,6 +72,26 @@ export function Reports() {
   const recent = useQuery({
     queryKey: ['reports', 'recent-orders'],
     queryFn: () => reportsApi.recentOrders(RECENT_WINDOW),
+  });
+  const byBrand = useQuery({
+    queryKey: ['reports', 'by-brand', range],
+    queryFn: () => reportsApi.salesByBrand(range),
+  });
+  const byStore = useQuery({
+    queryKey: ['reports', 'by-store', range],
+    queryFn: () => reportsApi.salesByStore(range),
+  });
+  const byGov = useQuery({
+    queryKey: ['reports', 'by-gov', range],
+    queryFn: () => reportsApi.salesByGovernorate(range),
+  });
+  const charges = useQuery({
+    queryKey: ['reports', 'charges', range],
+    queryFn: () => reportsApi.charges(range),
+  });
+  const refundStats = useQuery({
+    queryKey: ['reports', 'refund-stats', range],
+    queryFn: () => reportsApi.refundStats(range),
   });
 
   const statusLabel = (s: OrderStatus) => t(`orders.status.${s.toLowerCase()}`);
@@ -216,6 +238,111 @@ export function Reports() {
         </Card>
       </div>
 
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-sm">{t('reports.by_brand')}</CardTitle>
+          </CardHeader>
+          <CardContent className="pt-0">
+            <BarList
+              loading={byBrand.isLoading}
+              empty={t('reports.no_sales')}
+              items={(byBrand.data ?? []).map((b) => ({ label: b.name, value: b.revenueCents }))}
+            />
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-sm">{t('reports.by_store')}</CardTitle>
+          </CardHeader>
+          <CardContent className="pt-0">
+            <BarList
+              loading={byStore.isLoading}
+              empty={t('reports.no_sales')}
+              items={(byStore.data ?? []).map((s) => ({ label: s.name, value: s.revenueCents }))}
+            />
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-sm">{t('reports.by_governorate')}</CardTitle>
+          </CardHeader>
+          <CardContent className="pt-0">
+            <BarList
+              loading={byGov.isLoading}
+              empty={t('reports.no_sales')}
+              items={(byGov.data ?? []).map((g) => ({
+                label: g.governorate ? humanizeGeo(g.governorate) : t('reports.unknown_region'),
+                value: g.revenueCents,
+              }))}
+            />
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-sm">{t('reports.charges')}</CardTitle>
+          </CardHeader>
+          <CardContent className="pt-0">
+            {charges.isLoading || !charges.data ? (
+              <Skeleton className="h-32 w-full" />
+            ) : (
+              <dl className="space-y-1.5 text-sm">
+                <ChargeRow label={t('orders.subtotal')} value={formatMoney(charges.data.subtotalCents)} />
+                {charges.data.discountCents > 0 && (
+                  <ChargeRow label={t('coupons.discount')} value={`−${formatMoney(charges.data.discountCents)}`} />
+                )}
+                <ChargeRow label={t('orders.tax')} value={formatMoney(charges.data.taxCents)} />
+                <ChargeRow label={t('orders.shipping')} value={formatMoney(charges.data.shippingCents)} />
+                <ChargeRow label={t('orders.fees')} value={formatMoney(charges.data.feesCents)} />
+                <div className="mt-1 flex justify-between border-t pt-2 font-semibold">
+                  <dt>{t('orders.total')}</dt>
+                  <dd>{formatMoney(charges.data.totalCents)}</dd>
+                </div>
+              </dl>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-sm">{t('reports.refunds')}</CardTitle>
+        </CardHeader>
+        <CardContent className="pt-0">
+          {refundStats.isLoading ? (
+            <Skeleton className="h-24 w-full" />
+          ) : refundStats.data && refundStats.data.byStatus.length > 0 ? (
+            <div className="space-y-3">
+              <div className="text-sm text-muted-foreground">
+                {t('reports.refunds_completed')}:{' '}
+                <span className="font-semibold text-foreground">
+                  {formatMoney(refundStats.data.completedCents)}
+                </span>
+              </div>
+              <ul className="space-y-2">
+                {refundStats.data.byStatus.map((r) => (
+                  <li key={r.status} className="flex items-center justify-between text-sm">
+                    <StatusBadge
+                      label={t(`refunds.status.${r.status.toLowerCase()}`)}
+                      tone={refundStatusTone(r.status as Parameters<typeof refundStatusTone>[0])}
+                    />
+                    <span>
+                      <span className="font-medium">{r.count}</span>
+                      <span className="ms-2 text-muted-foreground">{formatMoney(r.amountCents)}</span>
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : (
+            <p className="text-sm text-muted-foreground">{t('reports.no_refunds')}</p>
+          )}
+        </CardContent>
+      </Card>
+
       <Card>
         <CardHeader>
           <CardTitle className="text-sm">{t('reports.recent_orders')}</CardTitle>
@@ -273,6 +400,44 @@ export function Reports() {
         </CardContent>
       </Card>
     </div>
+  );
+}
+
+function ChargeRow({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex justify-between text-muted-foreground">
+      <dt>{label}</dt>
+      <dd>{value}</dd>
+    </div>
+  );
+}
+
+function BarList({
+  items,
+  loading,
+  empty,
+}: {
+  items: { label: string; value: number }[];
+  loading?: boolean;
+  empty: string;
+}) {
+  if (loading) return <Skeleton className="h-32 w-full" />;
+  if (items.length === 0) return <p className="text-sm text-muted-foreground">{empty}</p>;
+  const max = Math.max(...items.map((i) => i.value), 1);
+  return (
+    <ul className="space-y-2.5">
+      {items.map((i, idx) => (
+        <li key={`${i.label}-${idx}`} className="text-sm">
+          <div className="flex justify-between gap-2">
+            <span className="truncate">{i.label}</span>
+            <span className="font-medium">{formatMoney(i.value)}</span>
+          </div>
+          <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-muted">
+            <div className="h-full rounded-full bg-primary" style={{ width: `${(i.value / max) * 100}%` }} />
+          </div>
+        </li>
+      ))}
+    </ul>
   );
 }
 
