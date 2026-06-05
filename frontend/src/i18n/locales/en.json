@@ -253,6 +253,19 @@
     "delete_message": "Delete order \"{{number}}\"? This can't be undone.",
     "deleted_toast": "Order deleted",
     "status_updated_toast": "Order status updated",
+    "timeline": "Timeline",
+    "timeline_empty": "No activity recorded yet.",
+    "events": {
+      "created": "Order placed · {{count}} item(s), {{total}}",
+      "status_changed": "Status changed from {{from}} to {{to}}",
+      "stock_restored": "Stock returned to inventory",
+      "tracking_updated": "Tracking set to {{tracking}}",
+      "tracking_cleared": "Tracking number cleared",
+      "note_updated": "Notes updated",
+      "payment_recorded": "Payment recorded · {{amount}} ({{method}}, {{status}})",
+      "payment_updated": "Payment updated · {{amount}} ({{status}})",
+      "payment_removed": "Payment removed · {{amount}}"
+    },
     "status": {
       "pending": "Pending",
       "paid": "Paid",

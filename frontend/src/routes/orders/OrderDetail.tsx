@@ -16,6 +16,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { MapPin } from 'lucide-react';
 import { humanizeGeo } from '@/lib/iraqGeo';
 import { OrderPayments } from './OrderPayments';
+import { OrderTimeline } from './OrderTimeline';
 import {
   Table,
   TableBody,
@@ -273,6 +274,8 @@ export function OrderDetail() {
           </div>
         </CardContent>
       </Card>
+
+      <OrderTimeline order={order} />
 
       <ConfirmDialog
         open={confirmDelete}

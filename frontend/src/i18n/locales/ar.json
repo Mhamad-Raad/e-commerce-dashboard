@@ -253,6 +253,19 @@
     "delete_message": "حذف الطلب \"{{number}}\"؟ لا يمكن التراجع عن ذلك.",
     "deleted_toast": "تم حذف الطلب",
     "status_updated_toast": "تم تحديث حالة الطلب",
+    "timeline": "السجل الزمني",
+    "timeline_empty": "لا يوجد نشاط مُسجّل بعد.",
+    "events": {
+      "created": "تم إنشاء الطلب · {{count}} عنصر، {{total}}",
+      "status_changed": "تغيّرت الحالة من {{from}} إلى {{to}}",
+      "stock_restored": "أُعيد المخزون إلى المستودع",
+      "tracking_updated": "تم ضبط التتبع على {{tracking}}",
+      "tracking_cleared": "تم مسح رقم التتبع",
+      "note_updated": "تم تحديث الملاحظات",
+      "payment_recorded": "تم تسجيل دفعة · {{amount}} ({{method}}، {{status}})",
+      "payment_updated": "تم تحديث دفعة · {{amount}} ({{status}})",
+      "payment_removed": "تم حذف دفعة · {{amount}}"
+    },
     "status": {
       "pending": "قيد الانتظار",
       "paid": "مدفوع",

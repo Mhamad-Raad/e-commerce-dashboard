@@ -78,3 +78,24 @@ export interface CreateOrderPayload {
   addressId?: string;
   couponCode?: string;
 }
+
+export const ORDER_EVENT_TYPES = [
+  'CREATED',
+  'STATUS_CHANGED',
+  'STOCK_RESTORED',
+  'TRACKING_UPDATED',
+  'NOTE_UPDATED',
+  'PAYMENT_RECORDED',
+  'PAYMENT_UPDATED',
+  'PAYMENT_REMOVED',
+] as const;
+
+export type OrderEventType = (typeof ORDER_EVENT_TYPES)[number];
+
+export interface OrderEvent {
+  id: string;
+  orderId: string;
+  type: OrderEventType;
+  meta: Record<string, unknown> | null;
+  createdAt: string;
+}

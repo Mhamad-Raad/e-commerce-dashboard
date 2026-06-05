@@ -2,6 +2,7 @@ import { api } from '../../lib/api';
 import type {
   CreateOrderPayload,
   Order,
+  OrderEvent,
   OrderListResponse,
   OrderStatus,
 } from './types';
@@ -21,6 +22,10 @@ export const ordersApi = {
   },
   get: async (id: string): Promise<Order> => {
     const res = await api.get<Order>(`/orders/${id}`);
+    return res.data;
+  },
+  events: async (id: string): Promise<OrderEvent[]> => {
+    const res = await api.get<OrderEvent[]>(`/orders/${id}/events`);
     return res.data;
   },
   create: async (payload: CreateOrderPayload): Promise<Order> => {
