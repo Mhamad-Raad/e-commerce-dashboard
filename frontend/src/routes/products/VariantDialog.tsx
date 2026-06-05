@@ -27,6 +27,7 @@ const schema = z.object({
     .or(z.literal(''))
     .refine((v) => !v || (!Number.isNaN(Number(v)) && Number(v) >= 0), { message: 'Invalid sale price' }),
   stock: z.string().refine((v) => Number.isInteger(Number(v)) && Number(v) >= 0),
+  lowStockThreshold: z.string().refine((v) => Number.isInteger(Number(v)) && Number(v) >= 0),
   imageUrl: z.string().url().optional().or(z.literal('')),
   sortOrder: z.string().refine((v) => Number.isInteger(Number(v)) && Number(v) >= 0),
   isActive: z.boolean(),
@@ -63,7 +64,7 @@ export function VariantDialog({
     formState: { errors },
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
-    defaultValues: { name: '', sku: '', price: '', salePrice: '', stock: '0', imageUrl: '', sortOrder: '0', isActive: true },
+    defaultValues: { name: '', sku: '', price: '', salePrice: '', stock: '0', lowStockThreshold: '5', imageUrl: '', sortOrder: '0', isActive: true },
   });
 
   useEffect(() => {
@@ -75,6 +76,7 @@ export function VariantDialog({
         salePrice:
           variant?.salePriceCents != null ? fromMinor(variant.salePriceCents, currency).toString() : '',
         stock: String(variant?.stock ?? 0),
+        lowStockThreshold: String(variant?.lowStockThreshold ?? 5),
         imageUrl: variant?.imageUrl ?? '',
         sortOrder: String(variant?.sortOrder ?? 0),
         isActive: variant?.isActive ?? true,
@@ -89,6 +91,7 @@ export function VariantDialog({
       priceCents: toMinor(Number(values.price), currency),
       salePriceCents: values.salePrice ? toMinor(Number(values.salePrice), currency) : null,
       stock: Number(values.stock),
+      lowStockThreshold: Number(values.lowStockThreshold),
       imageUrl: values.imageUrl?.trim() || undefined,
       sortOrder: Number(values.sortOrder),
       isActive: values.isActive,
@@ -121,6 +124,9 @@ export function VariantDialog({
             </FormField>
             <FormField label={t('products.stock')} error={errors.stock?.message}>
               <Input inputMode="numeric" {...register('stock')} />
+            </FormField>
+            <FormField label={t('products.low_stock_threshold')} error={errors.lowStockThreshold?.message}>
+              <Input inputMode="numeric" {...register('lowStockThreshold')} />
             </FormField>
             <FormField label={t('variants.sort_order')} error={errors.sortOrder?.message}>
               <Input inputMode="numeric" {...register('sortOrder')} />

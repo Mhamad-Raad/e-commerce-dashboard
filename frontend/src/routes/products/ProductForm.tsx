@@ -36,6 +36,13 @@ const schema = z.object({
     }),
   currency: z.string().length(3),
   stock: z.string().min(1).refine((v) => Number.isInteger(Number(v)) && Number(v) >= 0),
+  lowStockThreshold: z
+    .string()
+    .optional()
+    .or(z.literal(''))
+    .refine((v) => !v || (Number.isInteger(Number(v)) && Number(v) >= 0), {
+      message: 'Invalid threshold',
+    }),
   ratingAvg: z
     .string()
     .optional()
@@ -67,6 +74,7 @@ const defaultValues: FormValues = {
   salePrice: '',
   currency: 'IQD',
   stock: '0',
+  lowStockThreshold: '5',
   ratingAvg: '0',
   ratingCount: '0',
   storeId: '',
@@ -109,6 +117,7 @@ export function ProductForm() {
         salePrice: p.salePriceCents != null ? fromMinor(p.salePriceCents, p.currency).toString() : '',
         currency: p.currency,
         stock: p.stock.toString(),
+        lowStockThreshold: String(p.lowStockThreshold ?? 5),
         ratingAvg: String(p.ratingAvg ?? 0),
         ratingCount: String(p.ratingCount ?? 0),
         storeId: p.storeId,
@@ -130,6 +139,7 @@ export function ProductForm() {
         salePriceCents: values.salePrice ? toMinor(Number(values.salePrice), values.currency) : null,
         currency: values.currency.toUpperCase(),
         stock: Number(values.stock),
+        lowStockThreshold: values.lowStockThreshold !== '' ? Number(values.lowStockThreshold) : 5,
         ratingAvg: values.ratingAvg !== '' ? Number(values.ratingAvg) : 0,
         ratingCount: values.ratingCount !== '' ? Number(values.ratingCount) : 0,
         storeId: values.storeId,
@@ -198,6 +208,13 @@ export function ProductForm() {
               </FormField>
               <FormField label={t('products.stock')} error={errors.stock?.message}>
                 <Input inputMode="numeric" {...register('stock')} />
+              </FormField>
+              <FormField
+                label={t('products.low_stock_threshold')}
+                error={errors.lowStockThreshold?.message}
+                hint={t('products.low_stock_threshold_hint')}
+              >
+                <Input inputMode="numeric" {...register('lowStockThreshold')} />
               </FormField>
               <FormField
                 label={t('products.rating')}

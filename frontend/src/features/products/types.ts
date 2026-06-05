@@ -21,6 +21,7 @@ export interface ProductVariant {
   priceCents: number;
   salePriceCents: number | null;
   stock: number;
+  lowStockThreshold: number;
   imageUrl: string | null;
   isActive: boolean;
   sortOrder: number;
@@ -37,6 +38,7 @@ export interface Product {
   salePriceCents: number | null;
   currency: string;
   stock: number;
+  lowStockThreshold: number;
   imageUrl: string | null;
   storeId: string;
   store?: ProductStoreRef | null;
@@ -59,6 +61,7 @@ export interface VariantWritePayload {
   priceCents: number;
   salePriceCents?: number | null;
   stock: number;
+  lowStockThreshold?: number;
   imageUrl?: string;
   sortOrder?: number;
   isActive?: boolean;
@@ -79,6 +82,7 @@ export interface ProductWritePayload {
   salePriceCents?: number | null;
   currency?: string;
   stock: number;
+  lowStockThreshold?: number;
   imageUrl?: string;
   storeId: string;
   categoryId?: string;
