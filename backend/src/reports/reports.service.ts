@@ -38,7 +38,9 @@ export class ReportsService {
 
     const [revenueAgg, ordersByStatus, customerCount, productCount] = await Promise.all([
       this.prisma.order.aggregate({
-        _sum: { totalCents: true },
+        // Revenue is merchandise + shipping the business keeps; tax and
+        // fee-group charges (e.g. transportation) are pass-through, not revenue.
+        _sum: { totalCents: true, taxCents: true, feesCents: true },
         _count: { _all: true },
         where: { status: { notIn: EXCLUDED_FROM_REVENUE }, placedAt },
       }),
@@ -51,7 +53,10 @@ export class ReportsService {
       this.prisma.product.count({ where: { isActive: true } }),
     ]);
 
-    const revenueCents = revenueAgg._sum.totalCents ?? 0;
+    const revenueCents =
+      (revenueAgg._sum.totalCents ?? 0) -
+      (revenueAgg._sum.taxCents ?? 0) -
+      (revenueAgg._sum.feesCents ?? 0);
     const orderCount = revenueAgg._count._all;
     const aovCents = orderCount > 0 ? Math.round(revenueCents / orderCount) : 0;
 
@@ -79,7 +84,7 @@ export class ReportsService {
              COUNT(o.id)::bigint AS orders,
              COALESCE(SUM(
                CASE WHEN o.status NOT IN ('CANCELLED', 'REFUNDED')
-                    THEN o."totalCents" ELSE 0 END
+                    THEN o."totalCents" - o."taxCents" - o."feesCents" ELSE 0 END
              ), 0)::bigint AS revenue
       FROM generate_series(${start}::date, ${end}::date, interval '1 day') AS gs(day)
       LEFT JOIN "Order" o ON o."placedAt"::date = gs.day::date

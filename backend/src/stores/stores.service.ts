@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ConflictException,
   Injectable,
   NotFoundException,
@@ -99,11 +100,13 @@ export class StoresService {
   }
 
   private translateError(err: unknown, name?: string) {
-    if (
-      err instanceof Prisma.PrismaClientKnownRequestError &&
-      err.code === 'P2002'
-    ) {
-      return new ConflictException(`Store "${name}" already exists`);
+    if (err instanceof Prisma.PrismaClientKnownRequestError) {
+      if (err.code === 'P2002') {
+        return new ConflictException(`Store "${name}" already exists`);
+      }
+      if (err.code === 'P2003') {
+        return new BadRequestException('The selected fee group does not exist');
+      }
     }
     return err;
   }
