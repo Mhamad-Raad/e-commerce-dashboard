@@ -11,6 +11,7 @@ import { CategoriesModule } from './categories/categories.module';
 import { CouponsModule } from './coupons/coupons.module';
 import { CustomersModule } from './customers/customers.module';
 import { FeeGroupsModule } from './feegroups/feegroups.module';
+import { HealthController } from './health/health.controller';
 import { HomepageModule } from './homepage/homepage.module';
 import { InventoryModule } from './inventory/inventory.module';
 import { NotificationsModule } from './notifications/notifications.module';
@@ -52,6 +53,7 @@ import { UsersModule } from './users/users.module';
     ReviewsModule,
     SettingsModule,
   ],
+  controllers: [HealthController],
   providers: [
     // Rate limiting runs before auth so it also protects unauthenticated routes
     // (login/refresh).

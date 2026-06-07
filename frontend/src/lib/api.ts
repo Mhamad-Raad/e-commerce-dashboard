@@ -1,7 +1,12 @@
 import axios, { AxiosError, AxiosRequestConfig } from 'axios';
 
+// Dev: leave VITE_API_URL unset → '/api' is proxied to the backend by Vite.
+// Prod (split origins, e.g. Pages + Cloud Run): set VITE_API_URL to the API's
+// absolute base, e.g. https://<backend>.run.app/api
+const API_BASE = import.meta.env.VITE_API_URL ?? '/api';
+
 export const api = axios.create({
-  baseURL: '/api',
+  baseURL: API_BASE,
   withCredentials: true,
 });
 
@@ -25,7 +30,7 @@ let refreshPromise: Promise<string | null> | null = null;
 const refreshAccessToken = async (): Promise<string | null> => {
   if (!refreshPromise) {
     refreshPromise = axios
-      .post<{ accessToken: string }>('/api/auth/refresh', null, { withCredentials: true })
+      .post<{ accessToken: string }>(`${API_BASE}/auth/refresh`, null, { withCredentials: true })
       .then((res) => {
         accessToken = res.data.accessToken;
         return accessToken;

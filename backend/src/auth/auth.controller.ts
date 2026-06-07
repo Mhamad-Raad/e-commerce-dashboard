@@ -61,7 +61,8 @@ export class AuthController {
     @Res({ passthrough: true }) res: Response,
   ) {
     await this.auth.logout(user.id);
-    res.clearCookie(REFRESH_COOKIE, { path: '/api/auth' });
+    const { maxAge: _maxAge, ...clearOpts } = this.refreshCookieOptions();
+    res.clearCookie(REFRESH_COOKIE, clearOpts);
     return { success: true };
   }
 
@@ -71,13 +72,29 @@ export class AuthController {
   }
 
   private setRefreshCookie(res: Response, token: string) {
+    res.cookie(REFRESH_COOKIE, token, this.refreshCookieOptions());
+  }
+
+  // When the SPA and API are served from different sites (e.g. Cloudflare Pages
+  // + Cloud Run), the browser only attaches the refresh cookie to the
+  // cross-site /auth/refresh call if it is SameSite=None; Secure. SameSite=None
+  // mandates Secure, which mandates HTTPS — fine in prod, but unusable over
+  // plain-HTTP localhost, so dev stays on Lax. Overridable via COOKIE_SAMESITE
+  // for same-domain deploys that can keep Lax.
+  private refreshCookieOptions() {
     const isProd = this.config.get<string>('NODE_ENV') === 'production';
-    res.cookie(REFRESH_COOKIE, token, {
+    const sameSite =
+      (this.config.get<string>('COOKIE_SAMESITE') as
+        | 'lax'
+        | 'strict'
+        | 'none'
+        | undefined) ?? (isProd ? 'none' : 'lax');
+    return {
       httpOnly: true,
       secure: isProd,
-      sameSite: 'lax',
+      sameSite,
       path: '/api/auth',
       maxAge: 7 * 24 * 60 * 60 * 1000,
-    });
+    } as const;
   }
 }

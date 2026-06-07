@@ -1,0 +1,38 @@
+services:
+  - type: web
+    name: ecommerce-dashboard-api
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /health
+    # Auto-deploy on every push to the default branch.
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      # Cross-site SPA (Cloudflare Pages) + API (Render): the refresh cookie
+      # must be SameSite=None; Secure to be sent on the refresh call.
+      - key: COOKIE_SAMESITE
+        value: none
+      # Render serves behind a proxy — trust one hop so rate limiting sees the
+      # real client IP via X-Forwarded-For.
+      - key: TRUST_PROXY
+        value: "true"
+      - key: JWT_ACCESS_TTL
+        value: 15m
+      - key: JWT_REFRESH_TTL
+        value: 7d
+      # Secrets — set these in the Render dashboard (sync:false = not in git).
+      #   DATABASE_URL        -> the Neon connection string
+      #   JWT_ACCESS_SECRET   -> a long random string
+      #   JWT_REFRESH_SECRET  -> a different long random string
+      #   CORS_ORIGIN         -> the deployed Cloudflare Pages URL
+      - key: DATABASE_URL
+        sync: false
+      - key: JWT_ACCESS_SECRET
+        sync: false
+      - key: JWT_REFRESH_SECRET
+        sync: false
+      - key: CORS_ORIGIN
+        sync: false

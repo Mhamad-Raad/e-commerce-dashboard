@@ -30,7 +30,8 @@ async function bootstrap() {
       transform: true,
     }),
   );
-  app.setGlobalPrefix('api');
+  // Everything is under /api except the platform health probe at /health.
+  app.setGlobalPrefix('api', { exclude: ['health'] });
 
   const port = Number(config.get<string>('PORT') ?? 3000);
   await app.listen(port);
