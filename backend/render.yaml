@@ -9,10 +9,13 @@ services:
     # Auto-deploy on every push to the default branch.
     autoDeploy: true
     envVars:
+      # This is a dev/staging environment, not the live customer site.
       - key: NODE_ENV
-        value: production
+        value: development
       # Cross-site SPA (Cloudflare Pages) + API (Render): the refresh cookie
-      # must be SameSite=None; Secure to be sent on the refresh call.
+      # must be SameSite=None to be sent on the cross-site refresh call, which
+      # in turn forces Secure on automatically (see auth.controller). Cookie
+      # security does NOT depend on NODE_ENV.
       - key: COOKIE_SAMESITE
         value: none
       # Render serves behind a proxy — trust one hop so rate limiting sees the

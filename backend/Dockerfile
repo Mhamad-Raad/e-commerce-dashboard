@@ -22,7 +22,8 @@ FROM node:20-slim AS runner
 
 RUN apt-get update -y && apt-get install -y openssl && rm -rf /var/lib/apt/lists/*
 
-ENV NODE_ENV=production
+# NODE_ENV is intentionally NOT hardcoded — set it per environment on the host
+# (Render etc.). Cookie security no longer depends on it (see auth.controller).
 WORKDIR /app
 
 # Bring over the already-installed deps (with the generated Prisma client and
