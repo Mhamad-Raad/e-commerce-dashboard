@@ -65,6 +65,22 @@ export class CreateProductDto {
   @Min(0)
   lowStockThreshold?: number;
 
+  // Optional override of the store's estimated-delivery window, in days.
+  // Send null to clear an override and fall back to the store default.
+  @IsOptional()
+  @ValidateIf((_, value) => value !== null)
+  @IsInt()
+  @Min(0)
+  @Max(365)
+  minLeadDays?: number | null;
+
+  @IsOptional()
+  @ValidateIf((_, value) => value !== null)
+  @IsInt()
+  @Min(0)
+  @Max(365)
+  maxLeadDays?: number | null;
+
   @IsOptional()
   @IsUrl({ require_tld: false })
   imageUrl?: string;

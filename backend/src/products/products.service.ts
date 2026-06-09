@@ -94,6 +94,7 @@ export class ProductsService {
   }
 
   async create(dto: CreateProductDto) {
+    this.assertLeadOverride(dto.minLeadDays, dto.maxLeadDays);
     try {
       return await this.prisma.product.create({
         data: dto,
@@ -105,7 +106,12 @@ export class ProductsService {
   }
 
   async update(id: string, dto: UpdateProductDto) {
-    await this.findById(id);
+    const existing = await this.findById(id);
+    // A field left out of the payload keeps its current value.
+    this.assertLeadOverride(
+      dto.minLeadDays !== undefined ? dto.minLeadDays : existing.minLeadDays,
+      dto.maxLeadDays !== undefined ? dto.maxLeadDays : existing.maxLeadDays,
+    );
     try {
       return await this.prisma.product.update({
         where: { id },
@@ -114,6 +120,27 @@ export class ProductsService {
       });
     } catch (err) {
       throw this.translateError(err, dto.sku);
+    }
+  }
+
+  // The per-product delivery window is an all-or-nothing override: provide both
+  // bounds (and min <= max) to override the store's default, or leave both blank
+  // to inherit it.
+  private assertLeadOverride(
+    min: number | null | undefined,
+    max: number | null | undefined,
+  ) {
+    const hasMin = min != null;
+    const hasMax = max != null;
+    if (hasMin !== hasMax) {
+      throw new BadRequestException(
+        'Set both minimum and maximum delivery days, or leave both blank to inherit the store default',
+      );
+    }
+    if (hasMin && hasMax && (min as number) > (max as number)) {
+      throw new BadRequestException(
+        'Minimum delivery days cannot be greater than maximum delivery days',
+      );
     }
   }
 

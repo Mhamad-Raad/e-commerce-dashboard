@@ -18,6 +18,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { formatDate, extractErrorMessage } from '@/lib/format';
+import { resolveLeadWindow, arrivalDateRange } from '@/lib/delivery';
 
 export function ProductDetail() {
   const { id } = useParams<{ id: string }>();
@@ -137,6 +138,27 @@ export function ProductDetail() {
                 <span className="text-muted-foreground">{t('common.none')}</span>
               )}
             </DetailRow>
+            {(() => {
+              const window = resolveLeadWindow(product);
+              if (!window) return null;
+              const eta = arrivalDateRange(window.min, window.max);
+              return (
+                <DetailRow label={t('products.eta')}>
+                  <span>
+                    {t('products.eta_days', { min: window.min, max: window.max })}
+                    <span className="text-muted-foreground">
+                      {' '}
+                      · {t('products.eta_arrives', { from: eta.from, to: eta.to })}
+                    </span>
+                    {window.inherited && (
+                      <span className="ms-2 text-xs text-muted-foreground">
+                        ({t('products.eta_inherited')})
+                      </span>
+                    )}
+                  </span>
+                </DetailRow>
+              );
+            })()}
             <DetailRow label={t('products.store')}>
               {product.store ? (
                 <Link to={`/stores/${product.store.id}`} className="text-primary hover:underline">

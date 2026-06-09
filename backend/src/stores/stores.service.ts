@@ -60,6 +60,8 @@ export class StoresService {
   }
 
   async create(dto: CreateStoreDto) {
+    // Resolve against the schema defaults so a one-sided value is still checked.
+    this.assertLeadWindow(dto.minLeadDays ?? 3, dto.maxLeadDays ?? 7);
     try {
       return await this.prisma.store.create({
         data: { ...dto, slug: slugify(dto.name) },
@@ -70,7 +72,11 @@ export class StoresService {
   }
 
   async update(id: string, dto: UpdateStoreDto) {
-    await this.findById(id);
+    const existing = await this.findById(id);
+    this.assertLeadWindow(
+      dto.minLeadDays ?? existing.minLeadDays,
+      dto.maxLeadDays ?? existing.maxLeadDays,
+    );
     try {
       return await this.prisma.store.update({
         where: { id },
@@ -96,6 +102,14 @@ export class StoresService {
         );
       }
       throw err;
+    }
+  }
+
+  private assertLeadWindow(min: number, max: number) {
+    if (min > max) {
+      throw new BadRequestException(
+        'Minimum delivery days cannot be greater than maximum delivery days',
+      );
     }
   }
 

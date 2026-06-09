@@ -32,7 +32,22 @@ const schema = z.object({
   city: z.string().max(120).optional().or(z.literal('')),
   country: z.string().max(120).optional().or(z.literal('')),
   feeGroupId: z.string().optional().or(z.literal('')),
+  minLeadDays: z
+    .string()
+    .min(1)
+    .refine((v) => Number.isInteger(Number(v)) && Number(v) >= 0 && Number(v) <= 365, {
+      message: 'Enter 0–365 days',
+    }),
+  maxLeadDays: z
+    .string()
+    .min(1)
+    .refine((v) => Number.isInteger(Number(v)) && Number(v) >= 0 && Number(v) <= 365, {
+      message: 'Enter 0–365 days',
+    }),
   isActive: z.boolean(),
+}).refine((v) => Number(v.minLeadDays) <= Number(v.maxLeadDays), {
+  message: 'Min must be ≤ max',
+  path: ['maxLeadDays'],
 });
 
 type FormValues = z.infer<typeof schema>;
@@ -48,6 +63,8 @@ const defaultValues: FormValues = {
   city: '',
   country: '',
   feeGroupId: '',
+  minLeadDays: '3',
+  maxLeadDays: '7',
   isActive: true,
 };
 
@@ -87,6 +104,8 @@ export function StoreForm() {
         city: s.city ?? '',
         country: s.country ?? '',
         feeGroupId: s.feeGroupId ?? '',
+        minLeadDays: String(s.minLeadDays ?? 3),
+        maxLeadDays: String(s.maxLeadDays ?? 7),
         isActive: s.isActive,
       });
     }
@@ -106,6 +125,8 @@ export function StoreForm() {
         city: clean(values.city),
         country: clean(values.country),
         feeGroupId: values.feeGroupId || null,
+        minLeadDays: Number(values.minLeadDays),
+        maxLeadDays: Number(values.maxLeadDays),
         isActive: values.isActive,
       };
       return isEdit ? storesApi.update(id!, payload) : storesApi.create(payload);
@@ -200,6 +221,16 @@ export function StoreForm() {
                   />
                 </FormField>
               </div>
+              <div className="md:col-span-2">
+                <p className="text-sm font-medium">{t('stores.lead_time')}</p>
+                <p className="text-xs text-muted-foreground">{t('stores.lead_time_hint')}</p>
+              </div>
+              <FormField label={t('stores.lead_min')} error={errors.minLeadDays?.message}>
+                <Input inputMode="numeric" {...register('minLeadDays')} />
+              </FormField>
+              <FormField label={t('stores.lead_max')} error={errors.maxLeadDays?.message}>
+                <Input inputMode="numeric" {...register('maxLeadDays')} />
+              </FormField>
             </div>
 
             <label className="flex items-center gap-2 text-sm">

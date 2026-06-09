@@ -312,6 +312,11 @@ model Store {
   isActive    Boolean  @default(true)
   feeGroupId  String?
   feeGroup    FeeGroup? @relation(fields: [feeGroupId], references: [id], onDelete: SetNull)
+  // Default estimated-delivery window (in days) for this store's products. The
+  // storefront turns these into a date range at order time (placedAt + N days).
+  // A product can override them; null override -> inherit these defaults.
+  minLeadDays Int      @default(3)
+  maxLeadDays Int      @default(7)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -376,6 +381,10 @@ model Product {
   ratingCount    Int       @default(0)
   // Alert when stock falls to/below this level (for products sold without variants).
   lowStockThreshold Int    @default(5)
+  // Per-product override of the store's estimated-delivery window (in days).
+  // null on either field -> fall back to the store's default for that bound.
+  minLeadDays    Int?
+  maxLeadDays    Int?
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
 

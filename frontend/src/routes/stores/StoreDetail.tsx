@@ -137,6 +137,9 @@ export function StoreDetail() {
             <DetailRow label={t('stores.email')}>{store.email || t('common.none')}</DetailRow>
             <DetailRow label={t('stores.phone')}>{store.phone || t('common.none')}</DetailRow>
             <DetailRow label={t('stores.address')}>{store.address || t('common.none')}</DetailRow>
+            <DetailRow label={t('stores.eta')}>
+              {t('stores.eta_days', { min: store.minLeadDays, max: store.maxLeadDays })}
+            </DetailRow>
             <DetailRow label={t('common.status')}>
               <StatusBadge
                 label={store.isActive ? t('common.active') : t('common.hidden')}

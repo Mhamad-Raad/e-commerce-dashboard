@@ -12,6 +12,9 @@ export interface Store {
   country: string | null;
   feeGroupId: string | null;
   feeGroup?: { id: string; name: string } | null;
+  // Default estimated-delivery window (days) for this store's products.
+  minLeadDays: number;
+  maxLeadDays: number;
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
@@ -52,5 +55,7 @@ export interface StoreWritePayload {
   city?: string;
   country?: string;
   feeGroupId?: string | null;
+  minLeadDays?: number;
+  maxLeadDays?: number;
   isActive?: boolean;
 }

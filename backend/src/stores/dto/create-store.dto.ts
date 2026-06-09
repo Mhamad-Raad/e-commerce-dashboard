@@ -1,10 +1,13 @@
 import {
   IsBoolean,
   IsEmail,
+  IsInt,
   IsOptional,
   IsString,
   IsUrl,
   Length,
+  Max,
+  Min,
 } from 'class-validator';
 
 export class CreateStoreDto {
@@ -53,6 +56,19 @@ export class CreateStoreDto {
   @IsString()
   @Length(1, 40)
   feeGroupId?: string | null;
+
+  // Default estimated-delivery window for this store's products, in days.
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  @Max(365)
+  minLeadDays?: number;
+
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  @Max(365)
+  maxLeadDays?: number;
 
   @IsOptional()
   @IsBoolean()

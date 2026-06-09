@@ -1,6 +1,10 @@
 export interface ProductStoreRef {
   id: string;
   name: string;
+  // Store's default delivery window — present on the full product (store: true)
+  // so the dashboard can resolve a product's effective estimated arrival.
+  minLeadDays?: number;
+  maxLeadDays?: number;
 }
 
 export interface ProductCategoryRef {
@@ -39,6 +43,9 @@ export interface Product {
   currency: string;
   stock: number;
   lowStockThreshold: number;
+  // Per-product delivery-window override (in days); null on either = inherit store.
+  minLeadDays: number | null;
+  maxLeadDays: number | null;
   imageUrl: string | null;
   storeId: string;
   store?: ProductStoreRef | null;
@@ -83,6 +90,8 @@ export interface ProductWritePayload {
   currency?: string;
   stock: number;
   lowStockThreshold?: number;
+  minLeadDays?: number | null;
+  maxLeadDays?: number | null;
   imageUrl?: string;
   storeId: string;
   categoryId?: string;

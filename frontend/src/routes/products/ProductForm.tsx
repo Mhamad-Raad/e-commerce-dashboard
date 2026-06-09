@@ -58,13 +58,36 @@ const schema = z.object({
     .refine((v) => !v || (Number.isInteger(Number(v)) && Number(v) >= 0), {
       message: 'Invalid count',
     }),
+  minLeadDays: z
+    .string()
+    .optional()
+    .or(z.literal(''))
+    .refine((v) => !v || (Number.isInteger(Number(v)) && Number(v) >= 0 && Number(v) <= 365), {
+      message: 'Enter 0–365 days',
+    }),
+  maxLeadDays: z
+    .string()
+    .optional()
+    .or(z.literal(''))
+    .refine((v) => !v || (Number.isInteger(Number(v)) && Number(v) >= 0 && Number(v) <= 365), {
+      message: 'Enter 0–365 days',
+    }),
   storeId: z.string().min(1),
   categoryId: z.string().optional().or(z.literal('')),
   brandId: z.string().optional().or(z.literal('')),
   imageUrl: z.string().url().optional().or(z.literal('')),
   description: z.string().max(5000).optional().or(z.literal('')),
   isActive: z.boolean(),
-});
+})
+  // Delivery override is all-or-nothing: both blank (inherit) or both set.
+  .refine((v) => (v.minLeadDays === '') === (v.maxLeadDays === ''), {
+    message: 'Set both, or leave both blank to use the store default',
+    path: ['maxLeadDays'],
+  })
+  .refine((v) => !v.minLeadDays || !v.maxLeadDays || Number(v.minLeadDays) <= Number(v.maxLeadDays), {
+    message: 'Min must be ≤ max',
+    path: ['maxLeadDays'],
+  });
 
 type FormValues = z.infer<typeof schema>;
 
@@ -78,6 +101,8 @@ const defaultValues: FormValues = {
   lowStockThreshold: '5',
   ratingAvg: '0',
   ratingCount: '0',
+  minLeadDays: '',
+  maxLeadDays: '',
   storeId: '',
   categoryId: '',
   brandId: '',
@@ -134,6 +159,8 @@ export function ProductForm() {
         lowStockThreshold: String(p.lowStockThreshold ?? 5),
         ratingAvg: String(p.ratingAvg ?? 0),
         ratingCount: String(p.ratingCount ?? 0),
+        minLeadDays: p.minLeadDays != null ? String(p.minLeadDays) : '',
+        maxLeadDays: p.maxLeadDays != null ? String(p.maxLeadDays) : '',
         storeId: p.storeId,
         categoryId: p.categoryId ?? '',
         brandId: p.brandId ?? '',
@@ -156,6 +183,9 @@ export function ProductForm() {
         lowStockThreshold: values.lowStockThreshold !== '' ? Number(values.lowStockThreshold) : 5,
         ratingAvg: values.ratingAvg !== '' ? Number(values.ratingAvg) : 0,
         ratingCount: values.ratingCount !== '' ? Number(values.ratingCount) : 0,
+        // Both blank -> send null to clear any override and inherit the store window.
+        minLeadDays: values.minLeadDays !== '' ? Number(values.minLeadDays) : null,
+        maxLeadDays: values.maxLeadDays !== '' ? Number(values.maxLeadDays) : null,
         storeId: values.storeId,
         categoryId: values.categoryId || undefined,
         brandId: values.brandId || undefined,
@@ -239,6 +269,31 @@ export function ProductForm() {
               </FormField>
               <FormField label={t('products.rating_count')} error={errors.ratingCount?.message}>
                 <Input inputMode="numeric" {...register('ratingCount')} />
+              </FormField>
+              <div className="md:col-span-2">
+                <p className="text-sm font-medium">{t('products.lead_time')}</p>
+                <p className="text-xs text-muted-foreground">
+                  {productQuery.data?.store?.minLeadDays != null
+                    ? t('products.lead_time_inherit_hint', {
+                        min: productQuery.data.store.minLeadDays,
+                        max: productQuery.data.store.maxLeadDays,
+                      })
+                    : t('products.lead_time_hint')}
+                </p>
+              </div>
+              <FormField label={t('products.lead_min')} error={errors.minLeadDays?.message}>
+                <Input
+                  inputMode="numeric"
+                  placeholder={t('products.lead_inherit_placeholder')}
+                  {...register('minLeadDays')}
+                />
+              </FormField>
+              <FormField label={t('products.lead_max')} error={errors.maxLeadDays?.message}>
+                <Input
+                  inputMode="numeric"
+                  placeholder={t('products.lead_inherit_placeholder')}
+                  {...register('maxLeadDays')}
+                />
               </FormField>
               <FormField label={t('products.store')} error={errors.storeId?.message}>
                 <AsyncCombobox
