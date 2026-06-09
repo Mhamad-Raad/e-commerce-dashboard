@@ -12,11 +12,6 @@ export interface ProductCategoryRef {
   name: string;
 }
 
-export interface ProductBrandRef {
-  id: string;
-  name: string;
-}
-
 export interface ProductVariant {
   id: string;
   productId: string;
@@ -51,8 +46,6 @@ export interface Product {
   store?: ProductStoreRef | null;
   categoryId: string | null;
   category?: ProductCategoryRef | null;
-  brandId: string | null;
-  brand?: ProductBrandRef | null;
   isActive: boolean;
   ratingAvg: number;
   ratingCount: number;
@@ -95,7 +88,6 @@ export interface ProductWritePayload {
   imageUrl?: string;
   storeId: string;
   categoryId?: string;
-  brandId?: string;
   isActive?: boolean;
   ratingAvg?: number;
   ratingCount?: number;

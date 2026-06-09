@@ -26,7 +26,6 @@ export class ProductsService {
     }
     if (query.storeId) where.storeId = query.storeId;
     if (query.categoryId) where.categoryId = query.categoryId;
-    if (query.brandId) where.brandId = query.brandId;
     if (query.isActive !== undefined) where.isActive = query.isActive === 'true';
     return where;
   }
@@ -40,7 +39,7 @@ export class ProductsService {
       this.prisma.product.findMany({
         where,
         orderBy: { createdAt: 'desc' },
-        include: { store: true, category: true, brand: true, _count: { select: { variants: true } } },
+        include: { store: true, category: true, _count: { select: { variants: true } } },
         ...paginate(page, pageSize),
       }),
       this.prisma.product.count({ where }),
@@ -55,7 +54,6 @@ export class ProductsService {
       include: {
         store: true,
         category: true,
-        brand: true,
         variants: { orderBy: [{ sortOrder: 'asc' }, { createdAt: 'asc' }] },
       },
     });
@@ -71,7 +69,6 @@ export class ProductsService {
       include: {
         store: { select: { name: true } },
         category: { select: { name: true } },
-        brand: { select: { name: true } },
       },
       orderBy: { createdAt: 'desc' },
       take: CSV_MAX_ROWS,
@@ -87,7 +84,6 @@ export class ProductsService {
       { header: 'LowStockThreshold', value: (p) => p.lowStockThreshold },
       { header: 'Store', value: (p) => p.store?.name ?? '' },
       { header: 'Category', value: (p) => p.category?.name ?? '' },
-      { header: 'Brand', value: (p) => p.brand?.name ?? '' },
       { header: 'Active', value: (p) => (p.isActive ? 'yes' : 'no') },
       { header: 'Rating', value: (p) => p.ratingAvg },
     ]);
@@ -98,7 +94,7 @@ export class ProductsService {
     try {
       return await this.prisma.product.create({
         data: dto,
-        include: { store: true, category: true, brand: true },
+        include: { store: true, category: true },
       });
     } catch (err) {
       throw this.translateError(err, dto.sku);
@@ -116,7 +112,7 @@ export class ProductsService {
       return await this.prisma.product.update({
         where: { id },
         data: dto,
-        include: { store: true, category: true, brand: true },
+        include: { store: true, category: true },
       });
     } catch (err) {
       throw this.translateError(err, dto.sku);
@@ -169,7 +165,7 @@ export class ProductsService {
       }
       if (err.code === 'P2003' || err.code === 'P2025') {
         return new BadRequestException(
-          'The selected store, category, or brand does not exist',
+          'The selected store or category does not exist',
         );
       }
     }

@@ -81,7 +81,6 @@ export function FeeGroupsList() {
       cell: (g) =>
         t('fee_groups.assigned_count', {
           stores: g._count?.stores ?? 0,
-          brands: g._count?.brands ?? 0,
         }),
     },
     {

@@ -11,10 +11,6 @@ export class ListProductsQueryDto extends PaginationQueryDto {
   categoryId?: string;
 
   @IsOptional()
-  @IsString()
-  brandId?: string;
-
-  @IsOptional()
   @IsBooleanString()
   isActive?: string;
 }

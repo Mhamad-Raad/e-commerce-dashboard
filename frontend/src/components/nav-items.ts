@@ -2,7 +2,6 @@ import {
   LayoutDashboard,
   Package,
   Tags,
-  Award,
   Store,
   Users,
   ShoppingCart,
@@ -46,7 +45,6 @@ export const navGroups: NavGroup[] = [
     items: [
       { to: '/products', labelKey: 'nav.products', icon: Package },
       { to: '/categories', labelKey: 'nav.categories', icon: Tags },
-      { to: '/brands', labelKey: 'nav.brands', icon: Award },
       { to: '/customers', labelKey: 'nav.customers', icon: Users },
       { to: '/carts', labelKey: 'nav.carts', icon: ShoppingCart },
       { to: '/orders', labelKey: 'nav.orders', icon: ClipboardList },

@@ -24,12 +24,6 @@ const CategoriesList = lazy(() =>
 const CategoryForm = lazy(() =>
   import('./routes/categories/CategoryForm').then((m) => ({ default: m.CategoryForm })),
 );
-const BrandsList = lazy(() =>
-  import('./routes/brands/BrandsList').then((m) => ({ default: m.BrandsList })),
-);
-const BrandForm = lazy(() =>
-  import('./routes/brands/BrandForm').then((m) => ({ default: m.BrandForm })),
-);
 const StoresList = lazy(() =>
   import('./routes/stores/StoresList').then((m) => ({ default: m.StoresList })),
 );
@@ -132,9 +126,6 @@ export default function App() {
           <Route path="/categories" element={<CategoriesList />} />
           <Route path="/categories/new" element={<CategoryForm />} />
           <Route path="/categories/:id/edit" element={<CategoryForm />} />
-          <Route path="/brands" element={<BrandsList />} />
-          <Route path="/brands/new" element={<BrandForm />} />
-          <Route path="/brands/:id/edit" element={<BrandForm />} />
           <Route path="/stores" element={<StoresList />} />
           <Route path="/stores/new" element={<StoreForm />} />
           <Route path="/stores/:id" element={<StoreDetail />} />

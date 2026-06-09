@@ -95,11 +95,6 @@ export class CreateProductDto {
   categoryId?: string;
 
   @IsOptional()
-  @IsString()
-  @Length(1, 40)
-  brandId?: string;
-
-  @IsOptional()
   @IsBoolean()
   isActive?: boolean;
 }

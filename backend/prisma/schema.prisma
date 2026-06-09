@@ -276,9 +276,9 @@ model User {
   updatedAt    DateTime @updatedAt
 }
 
-// A reusable tax + flat-fee rule the dashboard manages and assigns to stores
-// and/or brands. Resolved at checkout to add a labelled order-level fee
-// (e.g. "Transportation") plus optional tax, instead of staff typing them.
+// A reusable tax + flat-fee rule the dashboard manages and assigns to stores.
+// Resolved at checkout to add a labelled order-level fee (e.g. "Transportation")
+// plus optional tax, instead of staff typing them.
 model FeeGroup {
   id         String   @id @default(cuid())
   name       String
@@ -292,7 +292,6 @@ model FeeGroup {
   updatedAt  DateTime @updatedAt
 
   stores Store[]
-  brands Brand[]
 
   @@index([isActive])
 }
@@ -343,23 +342,6 @@ model Category {
   @@index([isActive])
 }
 
-model Brand {
-  id          String   @id @default(cuid())
-  name        String   @unique
-  slug        String   @unique
-  description String?
-  logoUrl     String?
-  isActive    Boolean  @default(true)
-  feeGroupId  String?
-  feeGroup    FeeGroup? @relation(fields: [feeGroupId], references: [id], onDelete: SetNull)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  products Product[]
-
-  @@index([isActive])
-}
-
 model Product {
   id             String    @id @default(cuid())
   name           String
@@ -374,8 +356,6 @@ model Product {
   store          Store     @relation(fields: [storeId], references: [id], onDelete: Restrict)
   categoryId     String?
   category       Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
-  brandId        String?
-  brand          Brand?    @relation(fields: [brandId], references: [id], onDelete: SetNull)
   isActive       Boolean   @default(true)
   ratingAvg      Float     @default(0)
   ratingCount    Int       @default(0)
@@ -397,7 +377,6 @@ model Product {
 
   @@index([storeId])
   @@index([categoryId])
-  @@index([brandId])
   @@index([isActive])
   @@index([createdAt])
 }

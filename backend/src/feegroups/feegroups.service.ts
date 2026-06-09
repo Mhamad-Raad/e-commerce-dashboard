@@ -30,7 +30,7 @@ export class FeeGroupsService {
       this.prisma.feeGroup.findMany({
         where,
         orderBy: { name: 'asc' },
-        include: { _count: { select: { stores: true, brands: true } } },
+        include: { _count: { select: { stores: true } } },
         ...paginate(page, pageSize),
       }),
       this.prisma.feeGroup.count({ where }),
@@ -41,7 +41,7 @@ export class FeeGroupsService {
   async findById(id: string) {
     const group = await this.prisma.feeGroup.findUnique({
       where: { id },
-      include: { _count: { select: { stores: true, brands: true } } },
+      include: { _count: { select: { stores: true } } },
     });
     if (!group) throw new NotFoundException(`Fee group ${id} not found`);
     return group;
@@ -58,21 +58,20 @@ export class FeeGroupsService {
 
   async remove(id: string) {
     await this.findById(id);
-    // Store/Brand assignments clear via FK SetNull; existing orders keep their
+    // Store assignments clear via FK SetNull; existing orders keep their
     // snapshotted fees.
     await this.prisma.feeGroup.delete({ where: { id } });
     return { success: true };
   }
 
   /**
-   * Resolve the fees for an order from the fee groups assigned to its stores
-   * and brands. Each distinct active group applies once: its flat fee is summed
-   * into feesCents and its tax rate is applied to the subtotal. Labels of
-   * fee-bearing groups are joined for display.
+   * Resolve the fees for an order from the fee groups assigned to its stores.
+   * Each distinct active group applies once: its flat fee is summed into
+   * feesCents and its tax rate is applied to the subtotal. Labels of fee-bearing
+   * groups are joined for display.
    */
   async resolveForOrder(
     storeIds: string[],
-    brandIds: string[],
     subtotalCents: number,
   ): Promise<ResolvedFees> {
     const groupIds = new Set<string>();
@@ -83,13 +82,6 @@ export class FeeGroupsService {
         select: { feeGroupId: true },
       });
       stores.forEach((s) => s.feeGroupId && groupIds.add(s.feeGroupId));
-    }
-    if (brandIds.length) {
-      const brands = await this.prisma.brand.findMany({
-        where: { id: { in: brandIds }, feeGroupId: { not: null } },
-        select: { feeGroupId: true },
-      });
-      brands.forEach((b) => b.feeGroupId && groupIds.add(b.feeGroupId));
     }
     if (groupIds.size === 0) return { feesCents: 0, taxCents: 0, feesLabel: null };
 

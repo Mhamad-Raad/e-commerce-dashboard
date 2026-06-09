@@ -175,13 +175,10 @@ export class OrdersService {
     const subtotalCents = lineItems.reduce((sum, i) => sum + i.priceCents * i.quantity, 0);
     const currency = dto.currency ?? products[0]?.currency ?? 'IQD';
 
-    // Resolve fee groups assigned to the order's stores/brands; staff may still
+    // Resolve fee groups assigned to the order's stores; staff may still
     // override any individual amount via the DTO.
     const storeIds = [...new Set(products.map((p) => p.storeId))];
-    const brandIds = [
-      ...new Set(products.map((p) => p.brandId).filter((id): id is string => Boolean(id))),
-    ];
-    const resolved = await this.feeGroups.resolveForOrder(storeIds, brandIds, subtotalCents);
+    const resolved = await this.feeGroups.resolveForOrder(storeIds, subtotalCents);
 
     const taxCents = dto.taxCents ?? resolved.taxCents;
     const shippingCents = dto.shippingCents ?? 0;

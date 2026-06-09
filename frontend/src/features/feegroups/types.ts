@@ -7,7 +7,7 @@ export interface FeeGroup {
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
-  _count?: { stores: number; brands: number };
+  _count?: { stores: number };
 }
 
 export interface FeeGroupListResponse {

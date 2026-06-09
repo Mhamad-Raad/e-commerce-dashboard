@@ -73,10 +73,6 @@ export function Reports() {
     queryKey: ['reports', 'recent-orders'],
     queryFn: () => reportsApi.recentOrders(RECENT_WINDOW),
   });
-  const byBrand = useQuery({
-    queryKey: ['reports', 'by-brand', range],
-    queryFn: () => reportsApi.salesByBrand(range),
-  });
   const byStore = useQuery({
     queryKey: ['reports', 'by-store', range],
     queryFn: () => reportsApi.salesByStore(range),
@@ -241,19 +237,6 @@ export function Reports() {
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <Card>
           <CardHeader>
-            <CardTitle className="text-sm">{t('reports.by_brand')}</CardTitle>
-            <CardDescription>{t('reports.basis_merchandise')}</CardDescription>
-          </CardHeader>
-          <CardContent className="pt-0">
-            <BarList
-              loading={byBrand.isLoading}
-              empty={t('reports.no_sales')}
-              items={(byBrand.data ?? []).map((b) => ({ label: b.name, value: b.revenueCents }))}
-            />
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
             <CardTitle className="text-sm">{t('reports.by_store')}</CardTitle>
             <CardDescription>{t('reports.basis_merchandise')}</CardDescription>
           </CardHeader>
@@ -265,9 +248,6 @@ export function Reports() {
             />
           </CardContent>
         </Card>
-      </div>
-
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <Card>
           <CardHeader>
             <CardTitle className="text-sm">{t('reports.by_governorate')}</CardTitle>
@@ -284,6 +264,9 @@ export function Reports() {
             />
           </CardContent>
         </Card>
+      </div>
+
+      <div className="grid grid-cols-1 gap-6">
         <Card>
           <CardHeader>
             <CardTitle className="text-sm">{t('reports.charges')}</CardTitle>

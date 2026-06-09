@@ -15,11 +15,6 @@ export class ReportsController {
     return this.reports.timeseries({ start, end });
   }
 
-  @Get('sales-by-brand')
-  salesByBrand(@Query('start') start?: string, @Query('end') end?: string) {
-    return this.reports.salesByBrand({ start, end });
-  }
-
   @Get('sales-by-store')
   salesByStore(@Query('start') start?: string, @Query('end') end?: string) {
     return this.reports.salesByStore({ start, end });

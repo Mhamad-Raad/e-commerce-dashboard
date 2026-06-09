@@ -141,26 +141,6 @@ export class ReportsService {
       .filter((x): x is NonNullable<typeof x> => x !== null);
   }
 
-  /** Merchandise revenue + units grouped by brand (top 12). */
-  async salesByBrand(range?: DateRange) {
-    const { start, end } = this.resolveRange(range);
-    const rows = await this.prisma.$queryRaw<{ name: string; revenue: bigint; units: bigint }[]>(Prisma.sql`
-      SELECT COALESCE(b.name, '—') AS name,
-             SUM(oi.quantity * oi."priceCents")::bigint AS revenue,
-             SUM(oi.quantity)::bigint AS units
-      FROM "OrderItem" oi
-      JOIN "Order" o ON o.id = oi."orderId"
-      JOIN "Product" p ON p.id = oi."productId"
-      LEFT JOIN "Brand" b ON b.id = p."brandId"
-      WHERE o.status NOT IN ('CANCELLED', 'REFUNDED')
-        AND o."placedAt" BETWEEN ${start} AND ${end}
-      GROUP BY b.name
-      ORDER BY revenue DESC
-      LIMIT 12
-    `);
-    return rows.map((r) => ({ name: r.name, revenueCents: Number(r.revenue), units: Number(r.units) }));
-  }
-
   /** Merchandise revenue + units grouped by store (top 12). */
   async salesByStore(range?: DateRange) {
     const { start, end } = this.resolveRange(range);

@@ -30,10 +30,6 @@ export const reportsApi = {
     const res = await api.get<RecentOrder[]>('/reports/recent-orders', { params: { limit } });
     return res.data;
   },
-  salesByBrand: async (range: DateRangeParams = {}): Promise<DimensionSales[]> => {
-    const res = await api.get<DimensionSales[]>('/reports/sales-by-brand', { params: range });
-    return res.data;
-  },
   salesByStore: async (range: DateRangeParams = {}): Promise<DimensionSales[]> => {
     const res = await api.get<DimensionSales[]>('/reports/sales-by-store', { params: range });
     return res.data;
