@@ -223,14 +223,4 @@ export class ReportsService {
     const completedCents = byStatus.find((b) => b.status === 'COMPLETED')?.amountCents ?? 0;
     return { byStatus, completedCents };
   }
-
-  async recentOrders(limit = 10) {
-    return this.prisma.order.findMany({
-      take: limit,
-      orderBy: { placedAt: 'desc' },
-      include: {
-        customer: { select: { id: true, name: true, email: true } },
-      },
-    });
-  }
 }

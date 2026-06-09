@@ -43,11 +43,4 @@ export class ReportsController {
   ) {
     return this.reports.topProducts(limit, { start, end });
   }
-
-  @Get('recent-orders')
-  recentOrders(
-    @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number,
-  ) {
-    return this.reports.recentOrders(limit);
-  }
 }

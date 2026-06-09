@@ -30,16 +30,6 @@ export interface TopProduct {
   units: number;
 }
 
-export interface RecentOrder {
-  id: string;
-  number: string;
-  totalCents: number;
-  currency: string;
-  status: OrderStatus;
-  placedAt: string;
-  customer: { id: string; name: string; email: string };
-}
-
 export interface DimensionSales {
   name: string;
   revenueCents: number;

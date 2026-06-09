@@ -4,7 +4,6 @@ import type {
   DateRangeParams,
   DimensionSales,
   GovernorateSales,
-  RecentOrder,
   RefundStats,
   ReportsSummary,
   TimeseriesPoint,
@@ -24,10 +23,6 @@ export const reportsApi = {
     const res = await api.get<TopProduct[]>('/reports/top-products', {
       params: { limit, ...range },
     });
-    return res.data;
-  },
-  recentOrders: async (limit = 10): Promise<RecentOrder[]> => {
-    const res = await api.get<RecentOrder[]>('/reports/recent-orders', { params: { limit } });
     return res.data;
   },
   salesByStore: async (range: DateRangeParams = {}): Promise<DimensionSales[]> => {

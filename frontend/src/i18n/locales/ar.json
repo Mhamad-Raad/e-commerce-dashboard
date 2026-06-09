@@ -574,7 +574,6 @@
     "active_customers": "العملاء النشطون",
     "orders_by_status": "الطلبات حسب الحالة",
     "top_products": "أفضل المنتجات",
-    "recent_orders": "أحدث الطلبات",
     "units_sold": "الوحدات المباعة",
     "units": "{{count}} وحدة",
     "no_sales": "لا توجد بيانات مبيعات بعد.",

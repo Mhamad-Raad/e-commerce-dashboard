@@ -1,5 +1,4 @@
-import { useState } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { BarChart3 } from 'lucide-react';
@@ -8,7 +7,6 @@ import { orderStatusTone } from '@/features/orders/api';
 import type { OrderStatus } from '@/features/orders/types';
 import { PageHeader } from '@/components/PageHeader';
 import { StatusBadge } from '@/components/StatusBadge';
-import { TablePagination } from '@/components/TablePagination';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -21,14 +19,13 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { formatDate, formatMoney } from '@/lib/format';
+import { formatMoney } from '@/lib/format';
 import { humanizeGeo } from '@/lib/iraqGeo';
 import { refundStatusTone } from '@/features/refunds/types';
 import { OrdersTimeseriesChart } from './OrdersTimeseriesChart';
 
 const PRESETS = [7, 30, 60, 90];
 const DAY_MS = 24 * 60 * 60 * 1000;
-const RECENT_WINDOW = 50;
 
 const todayISO = () => new Date(Date.now()).toISOString().slice(0, 10);
 const daysAgoISO = (n: number) => new Date(Date.now() - (n - 1) * DAY_MS).toISOString().slice(0, 10);
@@ -69,10 +66,6 @@ export function Reports() {
     queryKey: ['reports', 'top-products', range],
     queryFn: () => reportsApi.topProducts(10, range),
   });
-  const recent = useQuery({
-    queryKey: ['reports', 'recent-orders'],
-    queryFn: () => reportsApi.recentOrders(RECENT_WINDOW),
-  });
   const byStore = useQuery({
     queryKey: ['reports', 'by-store', range],
     queryFn: () => reportsApi.salesByStore(range),
@@ -91,12 +84,6 @@ export function Reports() {
   });
 
   const statusLabel = (s: OrderStatus) => t(`orders.status.${s.toLowerCase()}`);
-
-  // Client-side pagination for the recent-orders widget.
-  const [recentPage, setRecentPage] = useState(1);
-  const [recentSize, setRecentSize] = useState(10);
-  const recentRows = recent.data ?? [];
-  const recentSlice = recentRows.slice((recentPage - 1) * recentSize, recentPage * recentSize);
 
   return (
     <div className="space-y-6">
@@ -325,63 +312,6 @@ export function Reports() {
             </div>
           ) : (
             <p className="text-sm text-muted-foreground">{t('reports.no_refunds')}</p>
-          )}
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-sm">{t('reports.recent_orders')}</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4 pt-0">
-          {recent.isLoading ? (
-            <Skeleton className="h-32 w-full" />
-          ) : recentRows.length > 0 ? (
-            <>
-              <Table>
-                <TableHeader>
-                  <TableRow className="hover:bg-transparent">
-                    <TableHead>{t('orders.number')}</TableHead>
-                    <TableHead>{t('orders.customer')}</TableHead>
-                    <TableHead>{t('orders.total')}</TableHead>
-                    <TableHead>{t('common.status')}</TableHead>
-                    <TableHead>{t('orders.placed')}</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {recentSlice.map((o) => (
-                    <TableRow key={o.id} className="hover:bg-transparent">
-                      <TableCell className="font-mono text-xs">
-                        <Link to={`/orders/${o.id}`} className="hover:underline">
-                          {o.number}
-                        </Link>
-                      </TableCell>
-                      <TableCell>
-                        <div className="font-medium">{o.customer.name}</div>
-                        <div className="text-xs text-muted-foreground">{o.customer.email}</div>
-                      </TableCell>
-                      <TableCell className="font-medium">{formatMoney(o.totalCents, o.currency)}</TableCell>
-                      <TableCell>
-                        <StatusBadge label={statusLabel(o.status)} tone={orderStatusTone(o.status)} />
-                      </TableCell>
-                      <TableCell className="text-muted-foreground">{formatDate(o.placedAt)}</TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-              <TablePagination
-                page={recentPage}
-                pageSize={recentSize}
-                total={recentRows.length}
-                onPageChange={setRecentPage}
-                onPageSizeChange={(s) => {
-                  setRecentSize(s);
-                  setRecentPage(1);
-                }}
-              />
-            </>
-          ) : (
-            <p className="text-sm text-muted-foreground">{t('reports.no_orders')}</p>
           )}
         </CardContent>
       </Card>

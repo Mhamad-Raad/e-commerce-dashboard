@@ -574,7 +574,6 @@
     "active_customers": "Active customers",
     "orders_by_status": "Orders by status",
     "top_products": "Top products",
-    "recent_orders": "Recent orders",
     "units_sold": "Units sold",
     "units": "{{count}} units",
     "no_sales": "No sales data yet.",
