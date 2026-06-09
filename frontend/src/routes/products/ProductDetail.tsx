@@ -139,18 +139,18 @@ export function ProductDetail() {
               )}
             </DetailRow>
             {(() => {
-              const window = resolveLeadWindow(product);
-              if (!window) return null;
-              const eta = arrivalDateRange(window.min, window.max);
+              const leadWindow = resolveLeadWindow(product);
+              if (!leadWindow) return null;
+              const eta = arrivalDateRange(leadWindow.min, leadWindow.max);
               return (
                 <DetailRow label={t('products.eta')}>
                   <span>
-                    {t('products.eta_days', { min: window.min, max: window.max })}
+                    {t('products.eta_days', { min: leadWindow.min, max: leadWindow.max })}
                     <span className="text-muted-foreground">
                       {' '}
                       · {t('products.eta_arrives', { from: eta.from, to: eta.to })}
                     </span>
-                    {window.inherited && (
+                    {leadWindow.inherited && (
                       <span className="ms-2 text-xs text-muted-foreground">
                         ({t('products.eta_inherited')})
                       </span>
