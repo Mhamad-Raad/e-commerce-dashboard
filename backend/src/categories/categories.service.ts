@@ -7,13 +7,17 @@ import { Prisma } from '@prisma/client';
 import { buildPaginated, paginate } from '../common/pagination';
 import { slugify } from '../common/slugify';
 import { PrismaService } from '../prisma/prisma.service';
+import { UploadsService } from '../uploads/uploads.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { ListCategoriesQueryDto } from './dto/list-categories.query.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 
 @Injectable()
 export class CategoriesService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private uploads: UploadsService,
+  ) {}
 
   async list(query: ListCategoriesQueryDto) {
     const page = query.page ?? 1;
@@ -58,20 +62,31 @@ export class CategoriesService {
   }
 
   async update(id: string, dto: UpdateCategoryDto) {
-    await this.findById(id);
+    const existing = await this.findById(id);
+    let updated;
     try {
-      return await this.prisma.category.update({
+      updated = await this.prisma.category.update({
         where: { id },
         data: { ...dto, ...(dto.name ? { slug: slugify(dto.name) } : {}) },
       });
     } catch (err) {
       throw this.translateError(err, dto.name);
     }
+    // Image changed → clean up the old R2 object (best-effort, non-fatal).
+    if (
+      dto.imageUrl !== undefined &&
+      existing.imageUrl &&
+      existing.imageUrl !== updated.imageUrl
+    ) {
+      await this.uploads.deleteByUrl(existing.imageUrl);
+    }
+    return updated;
   }
 
   async remove(id: string) {
-    await this.findById(id);
+    const existing = await this.findById(id);
     await this.prisma.category.delete({ where: { id } });
+    await this.uploads.deleteByUrl(existing.imageUrl);
     return { success: true };
   }
 

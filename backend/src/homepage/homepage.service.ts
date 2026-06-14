@@ -4,12 +4,16 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { UploadsService } from '../uploads/uploads.service';
 import { CreateBannerDto } from './dto/create-banner.dto';
 import { UpdateBannerDto } from './dto/update-banner.dto';
 
 @Injectable()
 export class HomepageService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private uploads: UploadsService,
+  ) {}
 
   /** Composed payload that drives the storefront landing page. */
   async getHomepage() {
@@ -49,19 +53,25 @@ export class HomepageService {
   }
 
   async updateBanner(id: string, dto: UpdateBannerDto) {
-    await this.ensureBanner(id);
-    return this.prisma.heroBanner.update({ where: { id }, data: dto });
+    const existing = await this.ensureBanner(id);
+    const updated = await this.prisma.heroBanner.update({ where: { id }, data: dto });
+    if (dto.imageUrl !== undefined && existing.imageUrl !== updated.imageUrl) {
+      await this.uploads.deleteByUrl(existing.imageUrl);
+    }
+    return updated;
   }
 
   async removeBanner(id: string) {
-    await this.ensureBanner(id);
+    const existing = await this.ensureBanner(id);
     await this.prisma.heroBanner.delete({ where: { id } });
+    await this.uploads.deleteByUrl(existing.imageUrl);
     return { success: true };
   }
 
   private async ensureBanner(id: string) {
     const banner = await this.prisma.heroBanner.findUnique({ where: { id } });
     if (!banner) throw new NotFoundException(`Banner ${id} not found`);
+    return banner;
   }
 
   // ---- Featured sets (ordered replace) ----

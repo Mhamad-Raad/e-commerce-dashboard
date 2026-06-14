@@ -8,13 +8,17 @@ import { Prisma } from '@prisma/client';
 import { CSV_MAX_ROWS, toCsv } from '../common/csv';
 import { buildPaginated, paginate } from '../common/pagination';
 import { PrismaService } from '../prisma/prisma.service';
+import { UploadsService } from '../uploads/uploads.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { ListProductsQueryDto } from './dto/list-products.query.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 
 @Injectable()
 export class ProductsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private uploads: UploadsService,
+  ) {}
 
   private listWhere(query: ListProductsQueryDto): Prisma.ProductWhereInput {
     const where: Prisma.ProductWhereInput = {};
@@ -108,8 +112,9 @@ export class ProductsService {
       dto.minLeadDays !== undefined ? dto.minLeadDays : existing.minLeadDays,
       dto.maxLeadDays !== undefined ? dto.maxLeadDays : existing.maxLeadDays,
     );
+    let updated;
     try {
-      return await this.prisma.product.update({
+      updated = await this.prisma.product.update({
         where: { id },
         data: dto,
         include: { store: true, category: true },
@@ -117,6 +122,14 @@ export class ProductsService {
     } catch (err) {
       throw this.translateError(err, dto.sku);
     }
+    if (
+      dto.imageUrl !== undefined &&
+      existing.imageUrl &&
+      existing.imageUrl !== updated.imageUrl
+    ) {
+      await this.uploads.deleteByUrl(existing.imageUrl);
+    }
+    return updated;
   }
 
   // The per-product delivery window is an all-or-nothing override: provide both
@@ -141,9 +154,14 @@ export class ProductsService {
   }
 
   async remove(id: string) {
-    await this.findById(id);
+    const existing = await this.findById(id);
     try {
       await this.prisma.product.delete({ where: { id } });
+      // Clean up the product image plus any variant images (best-effort).
+      await this.uploads.deleteByUrl(existing.imageUrl);
+      for (const variant of existing.variants) {
+        await this.uploads.deleteByUrl(variant.imageUrl);
+      }
       return { success: true };
     } catch (err) {
       if (

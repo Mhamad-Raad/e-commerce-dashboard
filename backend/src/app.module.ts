@@ -22,6 +22,7 @@ import { ReportsModule } from './reports/reports.module';
 import { ReviewsModule } from './reviews/reviews.module';
 import { SettingsModule } from './settings/settings.module';
 import { StoresModule } from './stores/stores.module';
+import { UploadsModule } from './uploads/uploads.module';
 import { UsersModule } from './users/users.module';
 
 @Module({
@@ -50,6 +51,7 @@ import { UsersModule } from './users/users.module';
     ReportsModule,
     ReviewsModule,
     SettingsModule,
+    UploadsModule,
   ],
   controllers: [HealthController],
   providers: [

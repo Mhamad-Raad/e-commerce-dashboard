@@ -8,13 +8,17 @@ import { Prisma } from '@prisma/client';
 import { buildPaginated, paginate } from '../common/pagination';
 import { slugify } from '../common/slugify';
 import { PrismaService } from '../prisma/prisma.service';
+import { UploadsService } from '../uploads/uploads.service';
 import { CreateStoreDto } from './dto/create-store.dto';
 import { ListStoresQueryDto } from './dto/list-stores.query.dto';
 import { UpdateStoreDto } from './dto/update-store.dto';
 
 @Injectable()
 export class StoresService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private uploads: UploadsService,
+  ) {}
 
   async list(query: ListStoresQueryDto) {
     const page = query.page ?? 1;
@@ -77,20 +81,31 @@ export class StoresService {
       dto.minLeadDays ?? existing.minLeadDays,
       dto.maxLeadDays ?? existing.maxLeadDays,
     );
+    let updated;
     try {
-      return await this.prisma.store.update({
+      updated = await this.prisma.store.update({
         where: { id },
         data: { ...dto, ...(dto.name ? { slug: slugify(dto.name) } : {}) },
       });
     } catch (err) {
       throw this.translateError(err, dto.name);
     }
+    // A store carries two images — clean up whichever one was replaced.
+    if (dto.logoUrl !== undefined && existing.logoUrl && existing.logoUrl !== updated.logoUrl) {
+      await this.uploads.deleteByUrl(existing.logoUrl);
+    }
+    if (dto.bannerUrl !== undefined && existing.bannerUrl && existing.bannerUrl !== updated.bannerUrl) {
+      await this.uploads.deleteByUrl(existing.bannerUrl);
+    }
+    return updated;
   }
 
   async remove(id: string) {
-    await this.findById(id);
+    const existing = await this.findById(id);
     try {
       await this.prisma.store.delete({ where: { id } });
+      await this.uploads.deleteByUrl(existing.logoUrl);
+      await this.uploads.deleteByUrl(existing.bannerUrl);
       return { success: true };
     } catch (err) {
       if (

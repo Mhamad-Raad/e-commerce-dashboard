@@ -6,11 +6,15 @@ import {
 } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
+import { UploadsService } from '../uploads/uploads.service';
 import { CreateVariantDto, UpdateVariantDto } from './dto/variant.dto';
 
 @Injectable()
 export class VariantsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private uploads: UploadsService,
+  ) {}
 
   private async ensureProduct(productId: string) {
     const product = await this.prisma.product.findUnique({
@@ -40,20 +44,30 @@ export class VariantsService {
   }
 
   async update(productId: string, id: string, dto: UpdateVariantDto) {
-    await this.findOwned(productId, id);
+    const existing = await this.findOwned(productId, id);
+    let updated;
     try {
-      return await this.prisma.productVariant.update({
+      updated = await this.prisma.productVariant.update({
         where: { id },
         data: dto,
       });
     } catch (err) {
       throw this.translateError(err, dto.sku);
     }
+    if (
+      dto.imageUrl !== undefined &&
+      existing.imageUrl &&
+      existing.imageUrl !== updated.imageUrl
+    ) {
+      await this.uploads.deleteByUrl(existing.imageUrl);
+    }
+    return updated;
   }
 
   async remove(productId: string, id: string) {
-    await this.findOwned(productId, id);
+    const existing = await this.findOwned(productId, id);
     await this.prisma.productVariant.delete({ where: { id } });
+    await this.uploads.deleteByUrl(existing.imageUrl);
     return { success: true };
   }
 
