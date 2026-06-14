@@ -42,6 +42,7 @@ export interface Product {
   minLeadDays: number | null;
   maxLeadDays: number | null;
   imageUrl: string | null;
+  images: string[];
   storeId: string;
   store?: ProductStoreRef | null;
   categoryId: string | null;
@@ -85,7 +86,8 @@ export interface ProductWritePayload {
   lowStockThreshold?: number;
   minLeadDays?: number | null;
   maxLeadDays?: number | null;
-  imageUrl?: string | null;
+  imageUrl: string; // cover, required
+  images?: string[];
   storeId: string;
   categoryId?: string;
   isActive?: boolean;

@@ -74,7 +74,10 @@
     "remove": "إزالة الصورة",
     "url_placeholder": "أو الصق رابط صورة",
     "invalid_type": "يُسمح فقط بصور JPEG و PNG و WebP.",
-    "too_large": "يجب ألا يتجاوز حجم الصورة 5 ميغابايت."
+    "too_large": "يجب ألا يتجاوز حجم الصورة 5 ميغابايت.",
+    "add_images": "إضافة صور",
+    "max_reached": "يمكنك رفع حتى {{max}} صورة.",
+    "gallery_hint": "{{count}} من {{max}} صورة · اسحب لإعادة الترتيب"
   },
   "products": {
     "title": "المنتجات",
@@ -82,6 +85,9 @@
     "search_placeholder": "ابحث بالاسم أو رمز SKU",
     "total_count": "{{count}} إجمالاً",
     "image": "الصورة",
+    "cover_image": "صورة الغلاف",
+    "cover_image_hint": "الصورة الرئيسية التي تظهر في القوائم. مطلوبة.",
+    "gallery": "صور إضافية",
     "name": "الاسم",
     "sku": "رمز SKU",
     "price": "السعر",

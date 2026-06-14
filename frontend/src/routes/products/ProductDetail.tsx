@@ -107,13 +107,21 @@ export function ProductDetail() {
               className="aspect-square w-full rounded-lg"
               iconClassName="h-10 w-10"
             />
-            {/* Gallery-ready: thumbnail strip. Multi-image upload slots in here later. */}
-            <div className="mt-3 flex gap-2">
+            {/* Cover (highlighted) + gallery thumbnails. */}
+            <div className="mt-3 flex flex-wrap gap-2">
               <ProductImage
                 src={product.imageUrl}
                 alt={product.name}
                 className="h-16 w-16 rounded-md ring-2 ring-primary"
               />
+              {product.images.map((url, i) => (
+                <ProductImage
+                  key={`${url}-${i}`}
+                  src={url}
+                  alt={`${product.name} ${i + 1}`}
+                  className="h-16 w-16 rounded-md ring-1 ring-border"
+                />
+              ))}
             </div>
           </CardContent>
         </Card>

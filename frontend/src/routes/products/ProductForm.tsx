@@ -15,6 +15,7 @@ import { settingsApi } from '@/features/settings/api';
 import { PageHeader } from '@/components/PageHeader';
 import { FormField } from '@/components/FormField';
 import { ImageUpload } from '@/components/ImageUpload';
+import { MultiImageUpload } from '@/components/MultiImageUpload';
 import { AsyncCombobox } from '@/components/AsyncCombobox';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -74,7 +75,8 @@ const schema = z.object({
     }),
   storeId: z.string().min(1),
   categoryId: z.string().optional().or(z.literal('')),
-  imageUrl: z.string().url().optional().or(z.literal('')),
+  imageUrl: z.string().min(1, { message: 'Cover image is required' }).url(),
+  images: z.array(z.string().url()),
   description: z.string().max(5000).optional().or(z.literal('')),
   isActive: z.boolean(),
 })
@@ -105,6 +107,7 @@ const defaultValues: FormValues = {
   storeId: '',
   categoryId: '',
   imageUrl: '',
+  images: [],
   description: '',
   isActive: true,
 };
@@ -162,6 +165,7 @@ export function ProductForm() {
         storeId: p.storeId,
         categoryId: p.categoryId ?? '',
         imageUrl: p.imageUrl ?? '',
+        images: p.images ?? [],
         description: p.description ?? '',
         isActive: p.isActive,
       });
@@ -185,7 +189,8 @@ export function ProductForm() {
         maxLeadDays: values.maxLeadDays !== '' ? Number(values.maxLeadDays) : null,
         storeId: values.storeId,
         categoryId: values.categoryId || undefined,
-        imageUrl: values.imageUrl?.trim() || null,
+        imageUrl: values.imageUrl.trim(),
+        images: values.images,
         description: values.description?.trim() || undefined,
         isActive: values.isActive,
       };
@@ -324,10 +329,23 @@ export function ProductForm() {
                 />
               </FormField>
               <div className="md:col-span-2">
-                <FormField label={t('products.image')} error={errors.imageUrl?.message}>
+                <FormField
+                  label={t('products.cover_image')}
+                  error={errors.imageUrl?.message}
+                  hint={t('products.cover_image_hint')}
+                >
                   <ImageUpload
                     value={watch('imageUrl') ?? ''}
                     onChange={(url) => setValue('imageUrl', url, { shouldDirty: true })}
+                    folder="products"
+                  />
+                </FormField>
+              </div>
+              <div className="md:col-span-2">
+                <FormField label={t('products.gallery')} error={errors.images?.message}>
+                  <MultiImageUpload
+                    value={watch('images') ?? []}
+                    onChange={(urls) => setValue('images', urls, { shouldDirty: true })}
                     folder="products"
                   />
                 </FormField>

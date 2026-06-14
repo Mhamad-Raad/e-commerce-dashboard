@@ -351,7 +351,11 @@ model Product {
   salePriceCents Int?
   currency       String    @default("IQD")
   stock          Int       @default(0)
+  // Cover image (the main image shown in lists/cards). Required at the API layer
+  // (kept nullable in the DB so pre-existing rows aren't invalidated).
   imageUrl       String?
+  // Optional additional gallery images, ordered. The cover is NOT included here.
+  images         String[]  @default([])
   storeId        String
   store          Store     @relation(fields: [storeId], references: [id], onDelete: Restrict)
   categoryId     String?

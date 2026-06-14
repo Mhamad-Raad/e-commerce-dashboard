@@ -1,4 +1,6 @@
 import {
+  ArrayMaxSize,
+  IsArray,
   IsBoolean,
   IsInt,
   IsNumber,
@@ -81,9 +83,17 @@ export class CreateProductDto {
   @Max(365)
   maxLeadDays?: number | null;
 
-  @IsOptional()
+  // Cover image — required. (UpdateProductDto makes it optional via PartialType,
+  // but the dashboard form always sends it.)
   @IsUrl({ require_tld: false })
-  imageUrl?: string;
+  imageUrl!: string;
+
+  // Optional gallery (additional images beyond the cover), ordered.
+  @IsOptional()
+  @IsArray()
+  @ArrayMaxSize(12)
+  @IsUrl({ require_tld: false }, { each: true })
+  images?: string[];
 
   @IsString()
   @Length(1, 40)

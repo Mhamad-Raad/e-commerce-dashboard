@@ -74,7 +74,10 @@
     "remove": "Remove image",
     "url_placeholder": "Or paste an image URL",
     "invalid_type": "Only JPEG, PNG, and WebP images are allowed.",
-    "too_large": "Image must be 5 MB or smaller."
+    "too_large": "Image must be 5 MB or smaller.",
+    "add_images": "Add images",
+    "max_reached": "You can upload up to {{max}} images.",
+    "gallery_hint": "{{count}} of {{max}} images · drag to reorder"
   },
   "products": {
     "title": "Products",
@@ -82,6 +85,9 @@
     "search_placeholder": "Search by name or SKU",
     "total_count": "{{count}} total",
     "image": "Image",
+    "cover_image": "Cover image",
+    "cover_image_hint": "The main image shown in listings. Required.",
+    "gallery": "Additional images",
     "name": "Name",
     "sku": "SKU",
     "price": "Price",

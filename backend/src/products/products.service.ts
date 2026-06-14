@@ -122,14 +122,29 @@ export class ProductsService {
     } catch (err) {
       throw this.translateError(err, dto.sku);
     }
-    if (
-      dto.imageUrl !== undefined &&
-      existing.imageUrl &&
-      existing.imageUrl !== updated.imageUrl
-    ) {
-      await this.uploads.deleteByUrl(existing.imageUrl);
+    // If the cover or gallery changed, remove any R2 objects no longer referenced.
+    if (dto.imageUrl !== undefined || dto.images !== undefined) {
+      await this.cleanupRemovedImages(
+        [existing.imageUrl, ...existing.images],
+        [updated.imageUrl, ...updated.images],
+      );
     }
     return updated;
+  }
+
+  /**
+   * Delete (best-effort) every old image URL that is not in the kept set, so a
+   * replaced cover or a gallery image removed from the array doesn't orphan its
+   * R2 object. Dedup-safe: a URL reused as cover + gallery is never deleted.
+   */
+  private async cleanupRemovedImages(
+    oldUrls: (string | null)[],
+    keepUrls: (string | null)[],
+  ) {
+    const keep = new Set(keepUrls.filter((u): u is string => !!u));
+    for (const url of oldUrls) {
+      if (url && !keep.has(url)) await this.uploads.deleteByUrl(url);
+    }
   }
 
   // The per-product delivery window is an all-or-nothing override: provide both
@@ -157,11 +172,15 @@ export class ProductsService {
     const existing = await this.findById(id);
     try {
       await this.prisma.product.delete({ where: { id } });
-      // Clean up the product image plus any variant images (best-effort).
-      await this.uploads.deleteByUrl(existing.imageUrl);
-      for (const variant of existing.variants) {
-        await this.uploads.deleteByUrl(variant.imageUrl);
-      }
+      // Clean up the cover, the gallery, and every variant image (best-effort).
+      await this.cleanupRemovedImages(
+        [
+          existing.imageUrl,
+          ...existing.images,
+          ...existing.variants.map((v) => v.imageUrl),
+        ],
+        [],
+      );
       return { success: true };
     } catch (err) {
       if (
