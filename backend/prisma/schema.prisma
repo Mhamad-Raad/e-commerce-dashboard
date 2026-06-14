@@ -265,6 +265,43 @@ model Setting {
   updatedAt       DateTime @updatedAt
 }
 
+// Singleton config for the customer-facing AI shopping assistant. Lives dormant
+// until ANTHROPIC_API_KEY is set and the app wires up the chat endpoint.
+// Budgets are stored in USD cents (integer); a null limit/budget means "no cap".
+model AssistantConfig {
+  id       String  @id @default("singleton")
+  // Master kill switch for the whole feature.
+  enabled  Boolean @default(false)
+  provider String  @default("anthropic")
+  model    String  @default("claude-haiku-4-5")
+
+  // Per-user message caps (null = unlimited for that window).
+  maxMsgsPerMinute Int?
+  maxMsgsPerHour   Int?
+  maxMsgsPerDay    Int?
+  maxMsgsPerWeek   Int?
+  maxMsgsPerMonth  Int?
+
+  // Per-user token caps (null = unlimited for that window).
+  maxTokensPerDay   Int?
+  maxTokensPerWeek  Int?
+  maxTokensPerMonth Int?
+
+  // Global spend caps in USD cents (null = no cap). Any cap hit -> auto-lock.
+  budgetWeeklyCents  Int?
+  budgetMonthlyCents Int?
+  budgetTotalCents   Int?
+  // Warn (don't lock) once spend crosses this % of a cap.
+  warnThresholdPct   Int @default(80)
+
+  // Set true when a budget cap is reached; lockedReason explains which.
+  locked       Boolean @default(false)
+  lockedReason String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
 model User {
   id           String   @id @default(cuid())
   email        String   @unique
@@ -460,6 +497,8 @@ model Customer {
   country   String?
   avatarUrl String?
   isActive  Boolean  @default(true)
+  // Per-customer kill switch for the AI assistant (toggled from customer detail).
+  assistantEnabled Boolean @default(true)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 

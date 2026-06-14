@@ -13,6 +13,7 @@ import {
   Receipt,
   ReceiptText,
   Settings,
+  Bot,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -60,7 +61,10 @@ export const navGroups: NavGroup[] = [
   },
   {
     labelKey: 'nav.group_system',
-    items: [{ to: '/settings', labelKey: 'nav.settings', icon: Settings }],
+    items: [
+      { to: '/assistant', labelKey: 'nav.assistant', icon: Bot },
+      { to: '/settings', labelKey: 'nav.settings', icon: Settings },
+    ],
   },
 ];
 

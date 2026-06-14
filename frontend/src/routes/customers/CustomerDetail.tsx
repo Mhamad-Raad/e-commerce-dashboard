@@ -11,6 +11,7 @@ import { DetailRow } from '@/components/DetailRow';
 import { StatusBadge } from '@/components/StatusBadge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Skeleton } from '@/components/ui/skeleton';
 import { formatDate, extractErrorMessage, initials } from '@/lib/format';
@@ -35,6 +36,16 @@ export function CustomerDetail() {
       queryClient.invalidateQueries({ queryKey: ['customers'] });
       toast.success(t('customers.deleted_toast'));
       navigate('/customers');
+    },
+    onError: (err) => toast.error(extractErrorMessage(err)),
+  });
+
+  const assistantToggle = useMutation({
+    mutationFn: (assistantEnabled: boolean) =>
+      customersApi.update(id!, { assistantEnabled }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['customer', id] });
+      toast.success(t('customers.ai_toggle_toast'));
     },
     onError: (err) => toast.error(extractErrorMessage(err)),
   });
@@ -113,6 +124,18 @@ export function CustomerDetail() {
                 label={customer.isActive ? t('common.active') : t('common.inactive')}
                 tone={customer.isActive ? 'green' : 'slate'}
               />
+            </DetailRow>
+            <DetailRow label={t('customers.ai_assistant')}>
+              <label className="flex items-center gap-2 text-sm">
+                <Checkbox
+                  checked={customer.assistantEnabled}
+                  disabled={assistantToggle.isPending}
+                  onCheckedChange={(c) => assistantToggle.mutate(c === true)}
+                />
+                <span className="text-muted-foreground">
+                  {customer.assistantEnabled ? t('common.enabled') : t('common.disabled')}
+                </span>
+              </label>
             </DetailRow>
           </CardContent>
         </Card>

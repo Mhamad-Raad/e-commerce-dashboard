@@ -84,6 +84,9 @@ const RefundDetail = lazy(() =>
 const Settings = lazy(() =>
   import('./routes/settings/Settings').then((m) => ({ default: m.Settings })),
 );
+const AssistantSettings = lazy(() =>
+  import('./routes/assistant/AssistantSettings').then((m) => ({ default: m.AssistantSettings })),
+);
 const Receipts = lazy(() =>
   import('./routes/receipts/Receipts').then((m) => ({ default: m.Receipts })),
 );
@@ -146,6 +149,7 @@ export default function App() {
           <Route path="/refunds/:id" element={<RefundDetail />} />
           <Route path="/fee-groups" element={<FeeGroupsList />} />
           <Route path="/reports" element={<Reports />} />
+          <Route path="/assistant" element={<AssistantSettings />} />
           <Route path="/settings" element={<Settings />} />
         </Route>
       </Routes>

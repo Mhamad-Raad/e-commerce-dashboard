@@ -8,6 +8,7 @@ export interface Customer {
   country: string | null;
   avatarUrl: string | null;
   isActive: boolean;
+  assistantEnabled: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -28,4 +29,5 @@ export interface CustomerWritePayload {
   country?: string;
   avatarUrl?: string | null;
   isActive?: boolean;
+  assistantEnabled?: boolean;
 }

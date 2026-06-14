@@ -35,4 +35,9 @@ export class CreateCustomerDto {
   @IsOptional()
   @IsBoolean()
   isActive?: boolean;
+
+  // Per-customer AI assistant kill switch (toggled from the customer detail page).
+  @IsOptional()
+  @IsBoolean()
+  assistantEnabled?: boolean;
 }
