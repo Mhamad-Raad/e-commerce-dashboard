@@ -7,7 +7,8 @@ export type UploadFolder =
   | 'categories'
   | 'stores/logos'
   | 'stores/banners'
-  | 'homepage';
+  | 'homepage'
+  | 'customers';
 
 export const uploadsApi = {
   /** Upload one image; returns the public R2 URL to store on the entity. */

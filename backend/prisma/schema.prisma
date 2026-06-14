@@ -458,6 +458,7 @@ model Customer {
   address   String?
   city      String?
   country   String?
+  avatarUrl String?
   isActive  Boolean  @default(true)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

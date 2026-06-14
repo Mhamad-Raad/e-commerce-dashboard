@@ -233,6 +233,7 @@
     "country": "Country",
     "joined": "Joined",
     "contact": "Contact",
+    "avatar": "Profile picture",
     "details": "Customer details",
     "empty_title": "No customers yet",
     "empty_desc": "Add your first customer to get started.",

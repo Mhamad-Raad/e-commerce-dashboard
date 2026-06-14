@@ -1,4 +1,4 @@
-import { IsBoolean, IsEmail, IsOptional, IsString, Length } from 'class-validator';
+import { IsBoolean, IsEmail, IsOptional, IsString, IsUrl, Length } from 'class-validator';
 
 export class CreateCustomerDto {
   @IsEmail()
@@ -27,6 +27,10 @@ export class CreateCustomerDto {
   @IsString()
   @Length(0, 100)
   country?: string;
+
+  @IsOptional()
+  @IsUrl({ require_tld: false })
+  avatarUrl?: string;
 
   @IsOptional()
   @IsBoolean()

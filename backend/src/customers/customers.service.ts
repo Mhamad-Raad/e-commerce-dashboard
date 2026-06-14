@@ -3,13 +3,17 @@ import { Prisma } from '@prisma/client';
 import { CSV_MAX_ROWS, toCsv } from '../common/csv';
 import { buildPaginated, paginate } from '../common/pagination';
 import { PrismaService } from '../prisma/prisma.service';
+import { UploadsService } from '../uploads/uploads.service';
 import { CreateCustomerDto } from './dto/create-customer.dto';
 import { ListCustomersQueryDto } from './dto/list-customers.query.dto';
 import { UpdateCustomerDto } from './dto/update-customer.dto';
 
 @Injectable()
 export class CustomersService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private uploads: UploadsService,
+  ) {}
 
   private listWhere(query: ListCustomersQueryDto): Prisma.CustomerWhereInput {
     const where: Prisma.CustomerWhereInput = {};
@@ -83,21 +87,31 @@ export class CustomersService {
   }
 
   async update(id: string, dto: UpdateCustomerDto) {
-    await this.findById(id);
+    const existing = await this.findById(id);
+    let updated;
     try {
-      return await this.prisma.customer.update({ where: { id }, data: dto });
+      updated = await this.prisma.customer.update({ where: { id }, data: dto });
     } catch (err) {
       if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === 'P2002') {
         throw new ConflictException(`Email "${dto.email}" already exists`);
       }
       throw err;
     }
+    if (
+      dto.avatarUrl !== undefined &&
+      existing.avatarUrl &&
+      existing.avatarUrl !== updated.avatarUrl
+    ) {
+      await this.uploads.deleteByUrl(existing.avatarUrl);
+    }
+    return updated;
   }
 
   async remove(id: string) {
-    await this.findById(id);
+    const existing = await this.findById(id);
     try {
       await this.prisma.customer.delete({ where: { id } });
+      await this.uploads.deleteByUrl(existing.avatarUrl);
       return { success: true };
     } catch (err) {
       if (

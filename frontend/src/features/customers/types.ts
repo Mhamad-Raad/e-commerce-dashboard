@@ -6,6 +6,7 @@ export interface Customer {
   address: string | null;
   city: string | null;
   country: string | null;
+  avatarUrl: string | null;
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
@@ -25,5 +26,6 @@ export interface CustomerWritePayload {
   address?: string;
   city?: string;
   country?: string;
+  avatarUrl?: string | null;
   isActive?: boolean;
 }

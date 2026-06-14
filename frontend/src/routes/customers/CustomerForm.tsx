@@ -11,6 +11,7 @@ import { customersApi } from '@/features/customers/api';
 import type { CustomerWritePayload } from '@/features/customers/types';
 import { PageHeader } from '@/components/PageHeader';
 import { FormField } from '@/components/FormField';
+import { ImageUpload } from '@/components/ImageUpload';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -26,6 +27,7 @@ const schema = z.object({
   address: z.string().max(500).optional().or(z.literal('')),
   city: z.string().max(100).optional().or(z.literal('')),
   country: z.string().max(100).optional().or(z.literal('')),
+  avatarUrl: z.string().url().optional().or(z.literal('')),
   isActive: z.boolean(),
 });
 
@@ -38,6 +40,7 @@ const defaultValues: FormValues = {
   address: '',
   city: '',
   country: '',
+  avatarUrl: '',
   isActive: true,
 };
 
@@ -73,6 +76,7 @@ export function CustomerForm() {
         address: c.address ?? '',
         city: c.city ?? '',
         country: c.country ?? '',
+        avatarUrl: c.avatarUrl ?? '',
         isActive: c.isActive,
       });
     }
@@ -87,6 +91,7 @@ export function CustomerForm() {
         address: values.address?.trim() || undefined,
         city: values.city?.trim() || undefined,
         country: values.country?.trim() || undefined,
+        avatarUrl: values.avatarUrl?.trim() || null,
         isActive: values.isActive,
       };
       return isEdit ? customersApi.update(id!, payload) : customersApi.create(payload);
@@ -123,6 +128,13 @@ export function CustomerForm() {
       <Card>
         <CardContent className="pt-6">
           <form onSubmit={handleSubmit((v) => saveMutation.mutate(v))} className="space-y-5" noValidate>
+            <FormField label={t('customers.avatar')} error={errors.avatarUrl?.message}>
+              <ImageUpload
+                value={watch('avatarUrl') ?? ''}
+                onChange={(url) => setValue('avatarUrl', url, { shouldDirty: true })}
+                folder="customers"
+              />
+            </FormField>
             <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
               <FormField label={t('customers.name')} error={errors.name?.message}>
                 <Input autoComplete="name" {...register('name')} />

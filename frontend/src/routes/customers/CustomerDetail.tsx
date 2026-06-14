@@ -11,8 +11,9 @@ import { DetailRow } from '@/components/DetailRow';
 import { StatusBadge } from '@/components/StatusBadge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Skeleton } from '@/components/ui/skeleton';
-import { formatDate, extractErrorMessage } from '@/lib/format';
+import { formatDate, extractErrorMessage, initials } from '@/lib/format';
 import { CustomerAddresses } from './CustomerAddresses';
 
 export function CustomerDetail() {
@@ -96,7 +97,13 @@ export function CustomerDetail() {
       <div className="grid gap-5 md:grid-cols-2">
         <Card>
           <CardHeader>
-            <CardTitle>{t('customers.contact')}</CardTitle>
+            <div className="flex items-center gap-3">
+              <Avatar className="h-12 w-12">
+                {customer.avatarUrl && <AvatarImage src={customer.avatarUrl} alt="" />}
+                <AvatarFallback>{initials(customer.name)}</AvatarFallback>
+              </Avatar>
+              <CardTitle>{t('customers.contact')}</CardTitle>
+            </div>
           </CardHeader>
           <CardContent className="divide-y pt-0">
             <DetailRow label={t('customers.email')}>{customer.email}</DetailRow>

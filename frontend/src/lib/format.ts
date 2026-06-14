@@ -11,6 +11,15 @@ const MINOR_DIGITS: Record<string, number> = {
 export const minorDigits = (currency = 'IQD') =>
   MINOR_DIGITS[currency.toUpperCase()] ?? 2;
 
+/** First letters of up to two words — for avatar fallbacks. */
+export const initials = (name: string): string =>
+  name
+    .trim()
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((w) => w[0]?.toUpperCase() ?? '')
+    .join('');
+
 /** Convert a decimal amount (what the user types) into integer minor units. */
 export const toMinor = (amount: number, currency = 'IQD') =>
   Math.round(amount * 10 ** minorDigits(currency));

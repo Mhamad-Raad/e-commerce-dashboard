@@ -16,8 +16,9 @@ import { RowActions } from '@/components/RowActions';
 import { DataTable, type Column } from '@/components/DataTable';
 import { StatusBadge } from '@/components/StatusBadge';
 import { Button } from '@/components/ui/button';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useListParams } from '@/hooks/useListParams';
-import { formatDate, extractErrorMessage } from '@/lib/format';
+import { formatDate, extractErrorMessage, initials } from '@/lib/format';
 
 export function CustomersList() {
   const { t } = useTranslation();
@@ -46,7 +47,15 @@ export function CustomersList() {
     {
       key: 'name',
       header: t('customers.name'),
-      cell: (c) => <span className="font-medium">{c.name}</span>,
+      cell: (c) => (
+        <div className="flex items-center gap-2">
+          <Avatar className="h-8 w-8">
+            {c.avatarUrl && <AvatarImage src={c.avatarUrl} alt="" />}
+            <AvatarFallback>{initials(c.name)}</AvatarFallback>
+          </Avatar>
+          <span className="font-medium">{c.name}</span>
+        </div>
+      ),
     },
     { key: 'email', header: t('customers.email'), cell: (c) => c.email },
     {

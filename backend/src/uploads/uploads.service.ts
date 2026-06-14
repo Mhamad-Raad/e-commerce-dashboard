@@ -26,6 +26,7 @@ export const UPLOAD_FOLDERS = [
   'stores/logos',
   'stores/banners',
   'homepage',
+  'customers',
 ] as const;
 
 export type UploadFolder = (typeof UPLOAD_FOLDERS)[number];
