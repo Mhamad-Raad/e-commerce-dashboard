@@ -67,6 +67,15 @@
     "retry": "Try again",
     "export_csv": "Export CSV"
   },
+  "upload": {
+    "choose": "Choose image",
+    "uploading": "Uploading…",
+    "drop_hint": "Drag an image here or click to upload",
+    "remove": "Remove image",
+    "url_placeholder": "Or paste an image URL",
+    "invalid_type": "Only JPEG, PNG, and WebP images are allowed.",
+    "too_large": "Image must be 5 MB or smaller."
+  },
   "products": {
     "title": "Products",
     "new": "New product",

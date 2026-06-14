@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { z } from 'zod';
 import type { ProductVariant, VariantWritePayload } from '@/features/products/types';
 import { FormField } from '@/components/FormField';
+import { ImageUpload } from '@/components/ImageUpload';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -133,7 +134,11 @@ export function VariantDialog({
             </FormField>
           </div>
           <FormField label={t('products.image')} error={errors.imageUrl?.message}>
-            <Input {...register('imageUrl')} placeholder="https://…" />
+            <ImageUpload
+              value={watch('imageUrl') ?? ''}
+              onChange={(url) => setValue('imageUrl', url, { shouldDirty: true })}
+              folder="variants"
+            />
           </FormField>
           <label className="flex items-center gap-2 text-sm">
             <Checkbox checked={isActive} onCheckedChange={(c) => setValue('isActive', c === true)} />

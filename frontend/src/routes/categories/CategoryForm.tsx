@@ -11,6 +11,7 @@ import { categoriesApi } from '@/features/categories/api';
 import type { CategoryWritePayload } from '@/features/categories/types';
 import { PageHeader } from '@/components/PageHeader';
 import { FormField } from '@/components/FormField';
+import { ImageUpload } from '@/components/ImageUpload';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -115,7 +116,11 @@ export function CategoryForm() {
               <Input autoComplete="off" {...register('name')} />
             </FormField>
             <FormField label={t('categories.image')} error={errors.imageUrl?.message}>
-              <Input {...register('imageUrl')} placeholder="https://…" />
+              <ImageUpload
+                value={watch('imageUrl') ?? ''}
+                onChange={(url) => setValue('imageUrl', url, { shouldDirty: true })}
+                folder="categories"
+              />
             </FormField>
             <FormField label={t('categories.description')} error={errors.description?.message}>
               <Textarea rows={3} {...register('description')} />

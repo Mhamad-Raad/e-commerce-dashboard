@@ -14,6 +14,7 @@ import { categoriesApi } from '@/features/categories/api';
 import { settingsApi } from '@/features/settings/api';
 import { PageHeader } from '@/components/PageHeader';
 import { FormField } from '@/components/FormField';
+import { ImageUpload } from '@/components/ImageUpload';
 import { AsyncCombobox } from '@/components/AsyncCombobox';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -324,7 +325,11 @@ export function ProductForm() {
               </FormField>
               <div className="md:col-span-2">
                 <FormField label={t('products.image')} error={errors.imageUrl?.message}>
-                  <Input {...register('imageUrl')} placeholder="https://…" />
+                  <ImageUpload
+                    value={watch('imageUrl') ?? ''}
+                    onChange={(url) => setValue('imageUrl', url, { shouldDirty: true })}
+                    folder="products"
+                  />
                 </FormField>
               </div>
               <div className="md:col-span-2">

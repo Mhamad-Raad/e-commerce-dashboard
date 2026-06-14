@@ -67,6 +67,15 @@
     "retry": "إعادة المحاولة",
     "export_csv": "تصدير CSV"
   },
+  "upload": {
+    "choose": "اختر صورة",
+    "uploading": "جارٍ الرفع…",
+    "drop_hint": "اسحب صورة إلى هنا أو انقر للرفع",
+    "remove": "إزالة الصورة",
+    "url_placeholder": "أو الصق رابط صورة",
+    "invalid_type": "يُسمح فقط بصور JPEG و PNG و WebP.",
+    "too_large": "يجب ألا يتجاوز حجم الصورة 5 ميغابايت."
+  },
   "products": {
     "title": "المنتجات",
     "new": "منتج جديد",

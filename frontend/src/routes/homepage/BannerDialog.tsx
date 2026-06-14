@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { z } from 'zod';
 import type { BannerWritePayload, HeroBanner } from '@/features/homepage/types';
 import { FormField } from '@/components/FormField';
+import { ImageUpload } from '@/components/ImageUpload';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -91,7 +92,12 @@ export function BannerDialog({ open, banner, saving, onOpenChange, onSubmit }: B
             <Input autoComplete="off" {...register('subtitle')} />
           </FormField>
           <FormField label={t('homepage.banner_image')} error={errors.imageUrl?.message}>
-            <Input {...register('imageUrl')} placeholder="https://…" />
+            <ImageUpload
+              value={watch('imageUrl') ?? ''}
+              onChange={(url) => setValue('imageUrl', url, { shouldDirty: true })}
+              folder="homepage"
+              aspect="wide"
+            />
           </FormField>
           <FormField label={t('homepage.banner_link')} error={errors.linkUrl?.message}>
             <Input {...register('linkUrl')} placeholder="/category/…" />

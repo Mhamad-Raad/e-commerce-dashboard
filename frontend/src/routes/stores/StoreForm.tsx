@@ -12,6 +12,7 @@ import type { StoreWritePayload } from '@/features/stores/types';
 import { feeGroupsApi } from '@/features/feegroups/api';
 import { PageHeader } from '@/components/PageHeader';
 import { FormField } from '@/components/FormField';
+import { ImageUpload } from '@/components/ImageUpload';
 import { AsyncCombobox } from '@/components/AsyncCombobox';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -176,10 +177,19 @@ export function StoreForm() {
                 </FormField>
               </div>
               <FormField label={t('stores.logo')} error={errors.logoUrl?.message}>
-                <Input {...register('logoUrl')} placeholder="https://…" />
+                <ImageUpload
+                  value={watch('logoUrl') ?? ''}
+                  onChange={(url) => setValue('logoUrl', url, { shouldDirty: true })}
+                  folder="stores/logos"
+                />
               </FormField>
               <FormField label={t('stores.banner')} error={errors.bannerUrl?.message}>
-                <Input {...register('bannerUrl')} placeholder="https://…" />
+                <ImageUpload
+                  value={watch('bannerUrl') ?? ''}
+                  onChange={(url) => setValue('bannerUrl', url, { shouldDirty: true })}
+                  folder="stores/banners"
+                  aspect="wide"
+                />
               </FormField>
               <FormField label={t('stores.email')} error={errors.email?.message}>
                 <Input autoComplete="off" {...register('email')} />
