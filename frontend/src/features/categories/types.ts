@@ -20,6 +20,6 @@ export interface CategoryListResponse {
 export interface CategoryWritePayload {
   name: string;
   description?: string;
-  imageUrl?: string;
+  imageUrl?: string | null;
   isActive?: boolean;
 }

@@ -62,7 +62,7 @@ export interface VariantWritePayload {
   salePriceCents?: number | null;
   stock: number;
   lowStockThreshold?: number;
-  imageUrl?: string;
+  imageUrl?: string | null;
   sortOrder?: number;
   isActive?: boolean;
 }
@@ -85,7 +85,7 @@ export interface ProductWritePayload {
   lowStockThreshold?: number;
   minLeadDays?: number | null;
   maxLeadDays?: number | null;
-  imageUrl?: string;
+  imageUrl?: string | null;
   storeId: string;
   categoryId?: string;
   isActive?: boolean;

@@ -47,8 +47,8 @@ export interface StoreListResponse {
 export interface StoreWritePayload {
   name: string;
   description?: string;
-  logoUrl?: string;
-  bannerUrl?: string;
+  logoUrl?: string | null;
+  bannerUrl?: string | null;
   email?: string;
   phone?: string;
   address?: string;

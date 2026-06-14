@@ -14,9 +14,11 @@ export const uploadsApi = {
   upload: async (file: File, folder: UploadFolder): Promise<string> => {
     const form = new FormData();
     form.append('file', file);
+    // Don't set Content-Type — axios derives `multipart/form-data; boundary=…`
+    // from the FormData. Setting it by hand drops the boundary and the server
+    // can't parse the body.
     const res = await api.post<{ url: string }>('/uploads', form, {
       params: { folder },
-      headers: { 'Content-Type': 'multipart/form-data' },
     });
     return res.data.url;
   },

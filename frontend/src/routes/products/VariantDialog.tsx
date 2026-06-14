@@ -93,7 +93,7 @@ export function VariantDialog({
       salePriceCents: values.salePrice ? toMinor(Number(values.salePrice), currency) : null,
       stock: Number(values.stock),
       lowStockThreshold: Number(values.lowStockThreshold),
-      imageUrl: values.imageUrl?.trim() || undefined,
+      imageUrl: values.imageUrl?.trim() || null,
       sortOrder: Number(values.sortOrder),
       isActive: values.isActive,
     });

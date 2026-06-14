@@ -118,8 +118,8 @@ export function StoreForm() {
       const payload: StoreWritePayload = {
         name: values.name.trim(),
         description: clean(values.description),
-        logoUrl: clean(values.logoUrl),
-        bannerUrl: clean(values.bannerUrl),
+        logoUrl: values.logoUrl?.trim() || null,
+        bannerUrl: values.bannerUrl?.trim() || null,
         email: clean(values.email),
         phone: clean(values.phone),
         address: clean(values.address),

@@ -185,7 +185,7 @@ export function ProductForm() {
         maxLeadDays: values.maxLeadDays !== '' ? Number(values.maxLeadDays) : null,
         storeId: values.storeId,
         categoryId: values.categoryId || undefined,
-        imageUrl: values.imageUrl?.trim() || undefined,
+        imageUrl: values.imageUrl?.trim() || null,
         description: values.description?.trim() || undefined,
         isActive: values.isActive,
       };

@@ -74,7 +74,7 @@ export function CategoryForm() {
     mutationFn: (values: FormValues) => {
       const payload: CategoryWritePayload = {
         name: values.name.trim(),
-        imageUrl: values.imageUrl?.trim() || undefined,
+        imageUrl: values.imageUrl?.trim() || null,
         description: values.description?.trim() || undefined,
         isActive: values.isActive,
       };

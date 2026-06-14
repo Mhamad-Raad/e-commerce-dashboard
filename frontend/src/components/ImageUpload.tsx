@@ -1,4 +1,4 @@
-import { useId, useRef, useState, type DragEvent } from 'react';
+import { useRef, useState, type DragEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ImageIcon, Loader2, Upload, X } from 'lucide-react';
 import { toast } from 'sonner';
@@ -33,7 +33,6 @@ export function ImageUpload({
   disabled,
 }: ImageUploadProps) {
   const { t } = useTranslation();
-  const inputId = useId();
   const inputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
   const [dragOver, setDragOver] = useState(false);
@@ -130,7 +129,6 @@ export function ImageUpload({
       </div>
 
       <input
-        id={inputId}
         ref={inputRef}
         type="file"
         accept={ACCEPTED.join(',')}
