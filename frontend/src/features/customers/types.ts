@@ -1,3 +1,31 @@
+export interface CustomerCartItem {
+  id: string;
+  quantity: number;
+  priceCents: number;
+  variantName: string | null;
+  product: { id: string; name: string; imageUrl: string | null; currency: string } | null;
+}
+
+export interface CustomerCart {
+  id: string;
+  status: string;
+  discountCents: number;
+  updatedAt: string;
+  items: CustomerCartItem[];
+}
+
+export interface CustomerFavorite {
+  id: string;
+  createdAt: string;
+  product: {
+    id: string;
+    name: string;
+    imageUrl: string | null;
+    priceCents: number;
+    currency: string;
+  } | null;
+}
+
 export interface Customer {
   id: string;
   email: string;
@@ -11,6 +39,9 @@ export interface Customer {
   assistantEnabled: boolean;
   createdAt: string;
   updatedAt: string;
+  // Present only on the detail endpoint.
+  carts?: CustomerCart[];
+  favorites?: CustomerFavorite[];
 }
 
 export interface CustomerListResponse {

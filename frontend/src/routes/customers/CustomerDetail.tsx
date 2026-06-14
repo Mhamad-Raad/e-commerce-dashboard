@@ -14,7 +14,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Skeleton } from '@/components/ui/skeleton';
-import { formatDate, extractErrorMessage, initials } from '@/lib/format';
+import { PriceLabel } from '@/components/PriceLabel';
+import { ProductImage } from '@/features/products/ProductImage';
+import { formatDate, formatMoney, extractErrorMessage, initials } from '@/lib/format';
 import { CustomerAddresses } from './CustomerAddresses';
 
 export function CustomerDetail() {
@@ -75,6 +77,9 @@ export function CustomerDetail() {
       </div>
     );
   }
+
+  const cartItems = (customer.carts ?? []).flatMap((c) => c.items);
+  const favorites = customer.favorites ?? [];
 
   return (
     <div className="space-y-5">
@@ -158,6 +163,78 @@ export function CustomerDetail() {
       </div>
 
       <CustomerAddresses customerId={customer.id} />
+
+      <div className="grid gap-5 md:grid-cols-2">
+        <Card>
+          <CardHeader>
+            <CardTitle>{t('customers.cart')}</CardTitle>
+          </CardHeader>
+          <CardContent className="pt-0">
+            {cartItems.length === 0 ? (
+              <p className="text-sm text-muted-foreground">{t('customers.cart_empty')}</p>
+            ) : (
+              <div className="divide-y">
+                {cartItems.map((item) => (
+                  <div key={item.id} className="flex items-center gap-3 py-2">
+                    <ProductImage
+                      src={item.product?.imageUrl ?? null}
+                      alt={item.product?.name ?? ''}
+                      className="h-10 w-10 shrink-0 rounded-md"
+                    />
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-sm font-medium">
+                        {item.product?.name ?? t('common.none')}
+                      </p>
+                      {item.variantName && (
+                        <p className="text-xs text-muted-foreground">{item.variantName}</p>
+                      )}
+                    </div>
+                    <span className="text-sm text-muted-foreground">×{item.quantity}</span>
+                    <span className="text-sm font-medium">
+                      {formatMoney(item.priceCents * item.quantity, item.product?.currency ?? 'IQD')}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>{t('customers.favorites')}</CardTitle>
+          </CardHeader>
+          <CardContent className="pt-0">
+            {favorites.length === 0 ? (
+              <p className="text-sm text-muted-foreground">{t('customers.favorites_empty')}</p>
+            ) : (
+              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                {favorites.map((fav) => (
+                  <div key={fav.id} className="flex items-center gap-2 rounded-lg border p-2">
+                    <ProductImage
+                      src={fav.product?.imageUrl ?? null}
+                      alt={fav.product?.name ?? ''}
+                      className="h-10 w-10 shrink-0 rounded-md"
+                    />
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-medium">
+                        {fav.product?.name ?? t('common.none')}
+                      </p>
+                      {fav.product && (
+                        <PriceLabel
+                          priceCents={fav.product.priceCents}
+                          currency={fav.product.currency}
+                          className="text-xs text-muted-foreground"
+                        />
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
 
       <ConfirmDialog
         open={confirmOpen}

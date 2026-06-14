@@ -69,6 +69,35 @@ export class CustomersService {
       where: { id },
       include: {
         addresses: { orderBy: [{ isDefault: 'desc' }, { createdAt: 'asc' }] },
+        // Active cart(s) with line items, for the customer detail page.
+        carts: {
+          where: { status: 'OPEN' },
+          orderBy: { updatedAt: 'desc' },
+          include: {
+            items: {
+              include: {
+                product: {
+                  select: { id: true, name: true, imageUrl: true, currency: true },
+                },
+              },
+            },
+          },
+        },
+        // Wishlisted products (populated by the app once it ships favoriting).
+        favorites: {
+          orderBy: { createdAt: 'desc' },
+          include: {
+            product: {
+              select: {
+                id: true,
+                name: true,
+                imageUrl: true,
+                priceCents: true,
+                currency: true,
+              },
+            },
+          },
+        },
       },
     });
     if (!customer) throw new NotFoundException(`Customer ${id} not found`);

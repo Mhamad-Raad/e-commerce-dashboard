@@ -415,6 +415,7 @@ model Product {
   reviews        Review[]
   featured       FeaturedProduct?
   stockMovements StockMovement[]
+  favorites      Favorite[]
 
   @@index([storeId])
   @@index([categoryId])
@@ -506,9 +507,25 @@ model Customer {
   orders    Order[]
   addresses Address[]
   reviews   Review[]
+  favorites Favorite[]
 
   @@index([isActive])
   @@index([createdAt])
+}
+
+// A customer's saved/wishlisted product. Populated by the mobile app once it
+// ships a "favorite" action; surfaced read-only on the customer detail page.
+model Favorite {
+  id         String   @id @default(cuid())
+  customerId String
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  productId  String
+  product    Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now())
+
+  @@unique([customerId, productId])
+  @@index([customerId])
+  @@index([productId])
 }
 
 model Review {
