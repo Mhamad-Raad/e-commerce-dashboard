@@ -5,13 +5,14 @@ import {
   Logger,
   ServiceUnavailableException,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import {
   DeleteObjectCommand,
   PutObjectCommand,
   S3Client,
 } from '@aws-sdk/client-s3';
 import sharp from 'sharp';
-import { createR2Client, R2Config, readR2Config } from './r2.client';
+import { createR2Client, R2Config } from './r2.client';
 
 /**
  * Where each kind of image lives in the bucket. The client picks a folder; we
@@ -29,8 +30,8 @@ export const UPLOAD_FOLDERS = [
 
 export type UploadFolder = (typeof UPLOAD_FOLDERS)[number];
 
-const ACCEPTED_MIME = new Set(['image/jpeg', 'image/png', 'image/webp']);
-const MAX_BYTES = 5 * 1024 * 1024; // 5 MB
+export const ACCEPTED_MIME = new Set(['image/jpeg', 'image/png', 'image/webp']);
+export const MAX_UPLOAD_BYTES = 5 * 1024 * 1024; // 5 MB
 const MAX_EDGE = 1600; // longest side after resize
 
 @Injectable()
@@ -39,14 +40,35 @@ export class UploadsService {
   private readonly config: R2Config | null;
   private readonly client: S3Client | null;
 
-  constructor() {
-    this.config = readR2Config();
+  constructor(private readonly configService: ConfigService) {
+    this.config = this.readConfig();
     this.client = this.config ? createR2Client(this.config) : null;
     if (!this.config) {
       this.logger.warn(
         'R2 is not configured (missing R2_* env vars) — image uploads are disabled.',
       );
     }
+  }
+
+  private readConfig(): R2Config | null {
+    const get = (key: string) => this.configService.get<string>(key);
+    const endpoint = get('R2_ENDPOINT');
+    const bucket = get('R2_BUCKET');
+    const accessKeyId = get('R2_ACCESS_KEY_ID');
+    const secretAccessKey = get('R2_SECRET_ACCESS_KEY');
+    const publicUrl = get('R2_PUBLIC_URL');
+
+    if (!endpoint || !bucket || !accessKeyId || !secretAccessKey || !publicUrl) {
+      return null;
+    }
+    // Normalise: no trailing slash on the public base so we can join cleanly.
+    return {
+      endpoint,
+      bucket,
+      accessKeyId,
+      secretAccessKey,
+      publicUrl: publicUrl.replace(/\/+$/, ''),
+    };
   }
 
   isFolder(value: string): value is UploadFolder {
@@ -70,7 +92,7 @@ export class UploadsService {
     if (!ACCEPTED_MIME.has(file.mimetype)) {
       throw new BadRequestException('Only JPEG, PNG, and WebP images are allowed.');
     }
-    if (file.size > MAX_BYTES) {
+    if (file.size > MAX_UPLOAD_BYTES) {
       throw new BadRequestException('Image must be 5 MB or smaller.');
     }
 

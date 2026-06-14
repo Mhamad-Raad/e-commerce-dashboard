@@ -18,26 +18,6 @@ export interface R2Config {
   publicUrl: string;
 }
 
-export function readR2Config(): R2Config | null {
-  const endpoint = process.env.R2_ENDPOINT;
-  const bucket = process.env.R2_BUCKET;
-  const accessKeyId = process.env.R2_ACCESS_KEY_ID;
-  const secretAccessKey = process.env.R2_SECRET_ACCESS_KEY;
-  const publicUrl = process.env.R2_PUBLIC_URL;
-
-  if (!endpoint || !bucket || !accessKeyId || !secretAccessKey || !publicUrl) {
-    return null;
-  }
-  // Normalise: no trailing slash on the public base so we can join cleanly.
-  return {
-    endpoint,
-    bucket,
-    accessKeyId,
-    secretAccessKey,
-    publicUrl: publicUrl.replace(/\/+$/, ''),
-  };
-}
-
 export function createR2Client(config: R2Config): S3Client {
   return new S3Client({
     // R2 ignores region but the SDK requires one; "auto" is the documented value.
