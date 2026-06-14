@@ -153,9 +153,33 @@ export function AssistantSettings() {
     onError: (err) => toast.error(extractErrorMessage(err)),
   });
 
+  // Manual unlock after a budget cap trips. Kept separate from the form save so
+  // it works regardless of unsaved edits, and an ordinary save never silently
+  // unlocks (it doesn't send `locked`).
+  const unlockMutation = useMutation({
+    mutationFn: () => assistantApi.updateConfig({ locked: false }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['assistant-config'] });
+      toast.success(t('assistant.unlocked_toast'));
+    },
+    onError: (err) => toast.error(extractErrorMessage(err)),
+  });
+
   const enabled = watch('enabled');
   const model = watch('model');
   const config = configQuery.data;
+
+  // Render a numeric/money limit field — collapses ~11 near-identical blocks.
+  const numField = (
+    name: keyof FormValues,
+    label: string,
+    mode: 'numeric' | 'decimal',
+    placeholder: string,
+  ) => (
+    <FormField label={label} error={(errors[name] as { message?: string } | undefined)?.message}>
+      <Input inputMode={mode} placeholder={placeholder} {...register(name)} />
+    </FormField>
+  );
 
   return (
     <div className="mx-auto max-w-3xl space-y-5">
@@ -170,11 +194,20 @@ export function AssistantSettings() {
           {config?.locked && (
             <div className="flex items-start gap-2 rounded-lg border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive">
               <Lock className="mt-0.5 h-4 w-4 shrink-0" />
-              <div>
+              <div className="flex-1">
                 <p className="font-medium">{t('assistant.locked_title')}</p>
                 <p>{config.lockedReason || t('assistant.locked_generic')}</p>
                 <p className="mt-1 text-xs">{t('assistant.locked_hint')}</p>
               </div>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                disabled={unlockMutation.isPending}
+                onClick={() => unlockMutation.mutate()}
+              >
+                {t('assistant.unlock')}
+              </Button>
             </div>
           )}
 
@@ -219,35 +252,19 @@ export function AssistantSettings() {
               <div>
                 <p className="mb-2 text-sm font-medium">{t('assistant.message_limits')}</p>
                 <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
-                  <FormField label={t('assistant.per_minute')} error={errors.maxMsgsPerMinute?.message}>
-                    <Input inputMode="numeric" placeholder="∞" {...register('maxMsgsPerMinute')} />
-                  </FormField>
-                  <FormField label={t('assistant.per_hour')} error={errors.maxMsgsPerHour?.message}>
-                    <Input inputMode="numeric" placeholder="∞" {...register('maxMsgsPerHour')} />
-                  </FormField>
-                  <FormField label={t('assistant.per_day')} error={errors.maxMsgsPerDay?.message}>
-                    <Input inputMode="numeric" placeholder="∞" {...register('maxMsgsPerDay')} />
-                  </FormField>
-                  <FormField label={t('assistant.per_week')} error={errors.maxMsgsPerWeek?.message}>
-                    <Input inputMode="numeric" placeholder="∞" {...register('maxMsgsPerWeek')} />
-                  </FormField>
-                  <FormField label={t('assistant.per_month')} error={errors.maxMsgsPerMonth?.message}>
-                    <Input inputMode="numeric" placeholder="∞" {...register('maxMsgsPerMonth')} />
-                  </FormField>
+                  {numField('maxMsgsPerMinute', t('assistant.per_minute'), 'numeric', '∞')}
+                  {numField('maxMsgsPerHour', t('assistant.per_hour'), 'numeric', '∞')}
+                  {numField('maxMsgsPerDay', t('assistant.per_day'), 'numeric', '∞')}
+                  {numField('maxMsgsPerWeek', t('assistant.per_week'), 'numeric', '∞')}
+                  {numField('maxMsgsPerMonth', t('assistant.per_month'), 'numeric', '∞')}
                 </div>
               </div>
               <div>
                 <p className="mb-2 text-sm font-medium">{t('assistant.token_limits')}</p>
                 <div className="grid grid-cols-3 gap-3">
-                  <FormField label={t('assistant.per_day')} error={errors.maxTokensPerDay?.message}>
-                    <Input inputMode="numeric" placeholder="∞" {...register('maxTokensPerDay')} />
-                  </FormField>
-                  <FormField label={t('assistant.per_week')} error={errors.maxTokensPerWeek?.message}>
-                    <Input inputMode="numeric" placeholder="∞" {...register('maxTokensPerWeek')} />
-                  </FormField>
-                  <FormField label={t('assistant.per_month')} error={errors.maxTokensPerMonth?.message}>
-                    <Input inputMode="numeric" placeholder="∞" {...register('maxTokensPerMonth')} />
-                  </FormField>
+                  {numField('maxTokensPerDay', t('assistant.per_day'), 'numeric', '∞')}
+                  {numField('maxTokensPerWeek', t('assistant.per_week'), 'numeric', '∞')}
+                  {numField('maxTokensPerMonth', t('assistant.per_month'), 'numeric', '∞')}
                 </div>
               </div>
             </CardContent>
@@ -261,15 +278,9 @@ export function AssistantSettings() {
             <CardContent className="space-y-4 pt-0">
               <p className="text-xs text-muted-foreground">{t('assistant.budget_hint')}</p>
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-                <FormField label={t('assistant.budget_weekly')} error={errors.budgetWeekly?.message}>
-                  <Input inputMode="decimal" placeholder="$ ∞" {...register('budgetWeekly')} />
-                </FormField>
-                <FormField label={t('assistant.budget_monthly')} error={errors.budgetMonthly?.message}>
-                  <Input inputMode="decimal" placeholder="$ ∞" {...register('budgetMonthly')} />
-                </FormField>
-                <FormField label={t('assistant.budget_total')} error={errors.budgetTotal?.message}>
-                  <Input inputMode="decimal" placeholder="$ ∞" {...register('budgetTotal')} />
-                </FormField>
+                {numField('budgetWeekly', t('assistant.budget_weekly'), 'decimal', '$ ∞')}
+                {numField('budgetMonthly', t('assistant.budget_monthly'), 'decimal', '$ ∞')}
+                {numField('budgetTotal', t('assistant.budget_total'), 'decimal', '$ ∞')}
               </div>
               <FormField
                 label={t('assistant.warn_threshold')}

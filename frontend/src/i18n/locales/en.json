@@ -605,7 +605,9 @@
     "warn_threshold_hint": "Show a warning once spend crosses this share of a cap.",
     "locked_title": "Assistant locked",
     "locked_generic": "A budget cap was reached.",
-    "locked_hint": "Raise the cap or turn the lock off below, then save."
+    "locked_hint": "Raise the cap, then unlock.",
+    "unlock": "Unlock",
+    "unlocked_toast": "Assistant unlocked"
   },
   "settings": {
     "title": "Settings",

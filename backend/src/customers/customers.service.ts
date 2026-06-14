@@ -84,8 +84,10 @@ export class CustomersService {
           },
         },
         // Wishlisted products (populated by the app once it ships favoriting).
+        // Bounded: show the most recent — a customer could favorite many items.
         favorites: {
           orderBy: { createdAt: 'desc' },
+          take: 60,
           include: {
             product: {
               select: {
