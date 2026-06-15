@@ -1,0 +1,328 @@
+import {
+  ForbiddenException,
+  HttpException,
+  HttpStatus,
+  Inject,
+  Injectable,
+  NotFoundException,
+  ServiceUnavailableException,
+} from '@nestjs/common';
+import { AssistantConfig } from '@prisma/client';
+import { PrismaService } from '../prisma/prisma.service';
+import { AssistantService } from './assistant.service';
+import { CENTS_TO_MICROS, costMicros } from './pricing';
+import {
+  ASSISTANT_PROVIDER,
+  AssistantProvider,
+  AssistantTool,
+} from './provider/assistant-provider.interface';
+import { ChatDto } from './dto/chat.dto';
+
+const HISTORY_LIMIT = 20; // prior turns sent as context
+const MAX_OUTPUT_TOKENS = 1024;
+
+const WINDOW_MS = {
+  Minute: 60_000,
+  Hour: 3_600_000,
+  Day: 86_400_000,
+  Week: 7 * 86_400_000,
+  Month: 30 * 86_400_000,
+} as const;
+
+const TOOLS: AssistantTool[] = [
+  {
+    name: 'search_products',
+    description:
+      'Search the products WE sell. Call before recommending anything. Returns real, in-stock-aware items with prices and attributes.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        query: {
+          type: 'string',
+          description: 'Keywords: a concern, product type, ingredient, or name.',
+        },
+        limit: { type: 'integer', description: 'Max results (1-10).' },
+      },
+    },
+  },
+  {
+    name: 'search_stores',
+    description: 'Search the stores/brands we carry.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        query: { type: 'string' },
+        limit: { type: 'integer' },
+      },
+    },
+  },
+];
+
+@Injectable()
+export class AssistantChatService {
+  constructor(
+    private prisma: PrismaService,
+    private config: AssistantService,
+    @Inject(ASSISTANT_PROVIDER) private provider: AssistantProvider,
+  ) {}
+
+  async chat(dto: ChatDto) {
+    const cfg = await this.config.getConfig();
+    if (!cfg.enabled) throw new ForbiddenException('The assistant is currently disabled.');
+    if (cfg.locked) throw new ForbiddenException('The assistant is locked (budget reached).');
+    if (!this.provider.isConfigured()) {
+      throw new ServiceUnavailableException('AI assistant is not configured.');
+    }
+
+    const customer = await this.prisma.customer.findUnique({ where: { id: dto.customerId } });
+    if (!customer) throw new NotFoundException('Customer not found.');
+    if (!customer.assistantEnabled) {
+      throw new ForbiddenException('The assistant is disabled for this customer.');
+    }
+
+    await this.enforcePerUserLimits(dto.customerId, cfg);
+    await this.enforceBudget(cfg); // pre-check; throws + locks if already over
+
+    // Resolve (or create) the conversation, scoped to this customer.
+    const conversation = await this.resolveConversation(dto);
+
+    const history = await this.loadHistory(conversation.id);
+    const system = await this.buildSystemPrompt(dto.language);
+
+    const result = await this.provider.chat({
+      model: cfg.model,
+      system,
+      history,
+      userMessage: dto.message,
+      tools: TOOLS,
+      executeTool: (name, input) => this.executeTool(name, input),
+      maxOutputTokens: MAX_OUTPUT_TOKENS,
+    });
+
+    const cost = costMicros(cfg.model, result.inputTokens, result.outputTokens);
+
+    await this.prisma.$transaction([
+      this.prisma.message.create({
+        data: { conversationId: conversation.id, role: 'user', content: dto.message },
+      }),
+      this.prisma.message.create({
+        data: {
+          conversationId: conversation.id,
+          role: 'assistant',
+          content: result.text,
+          model: cfg.model,
+          inputTokens: result.inputTokens,
+          outputTokens: result.outputTokens,
+          costMicros: cost,
+        },
+      }),
+      this.prisma.conversation.update({
+        where: { id: conversation.id },
+        data: { updatedAt: new Date() },
+      }),
+    ]);
+
+    // Post-check: lock for next time if this turn pushed spend over a cap.
+    await this.lockIfOverBudget(cfg);
+
+    return { conversationId: conversation.id, message: result.text };
+  }
+
+  // ---- Admin viewing ----
+
+  listConversations(customerId: string) {
+    return this.prisma.conversation.findMany({
+      where: { customerId },
+      orderBy: { updatedAt: 'desc' },
+      include: { _count: { select: { messages: true } } },
+    });
+  }
+
+  async getConversation(id: string) {
+    const conversation = await this.prisma.conversation.findUnique({
+      where: { id },
+      include: { messages: { orderBy: { createdAt: 'asc' } } },
+    });
+    if (!conversation) throw new NotFoundException('Conversation not found.');
+    return conversation;
+  }
+
+  // ---- internals ----
+
+  private async resolveConversation(dto: ChatDto) {
+    if (dto.conversationId) {
+      const existing = await this.prisma.conversation.findUnique({
+        where: { id: dto.conversationId },
+      });
+      if (!existing || existing.customerId !== dto.customerId) {
+        throw new NotFoundException('Conversation not found.');
+      }
+      return existing;
+    }
+    return this.prisma.conversation.create({
+      data: {
+        customerId: dto.customerId,
+        title: dto.message.slice(0, 60),
+      },
+    });
+  }
+
+  private async loadHistory(conversationId: string) {
+    const rows = await this.prisma.message.findMany({
+      where: { conversationId },
+      orderBy: { createdAt: 'desc' },
+      take: HISTORY_LIMIT,
+    });
+    return rows
+      .reverse()
+      .map((m) => ({ role: m.role as 'user' | 'assistant', content: m.content }));
+  }
+
+  private async buildSystemPrompt(language?: string): Promise<string> {
+    const settings = await this.prisma.setting.findUnique({ where: { id: 'singleton' } });
+    const business = settings?.businessName || 'our store';
+    return [
+      `You are the shopping assistant for ${business}.`,
+      'ALWAYS call search_products before recommending anything, and only recommend items it returns — never invent products, prices, or availability.',
+      "If we don't carry the exact item the customer wants, suggest the closest in-stock alternative we do have, and say it's an alternative.",
+      'You can also point customers to a relevant store/brand via search_stores.',
+      'You give cosmetic and skincare guidance only. You are NOT a medical professional: for rashes, infections, allergies, or any persistent or worsening condition, advise seeing a dermatologist or doctor — never diagnose or prescribe.',
+      'Be concise: use as few words as possible while still being helpful.',
+      'Reply in the same language the customer writes in (English, Arabic, or Kurdish Sorani).' +
+        (language ? ` Prefer ${language}.` : ''),
+    ].join('\n');
+  }
+
+  private async executeTool(name: string, input: Record<string, unknown>): Promise<string> {
+    const query = typeof input.query === 'string' ? input.query : '';
+    const limit = Math.min(Math.max(Number(input.limit) || 5, 1), 10);
+
+    if (name === 'search_products') {
+      const products = await this.prisma.product.findMany({
+        where: {
+          isActive: true,
+          ...(query
+            ? {
+                OR: [
+                  { name: { contains: query, mode: 'insensitive' } },
+                  { description: { contains: query, mode: 'insensitive' } },
+                ],
+              }
+            : {}),
+        },
+        include: {
+          store: { select: { name: true } },
+          category: { select: { name: true } },
+        },
+        orderBy: { ratingAvg: 'desc' },
+        take: limit,
+      });
+      return JSON.stringify(
+        products.map((p) => ({
+          id: p.id,
+          name: p.name,
+          priceCents: p.priceCents,
+          currency: p.currency,
+          inStock: p.stock > 0,
+          store: p.store?.name ?? null,
+          category: p.category?.name ?? null,
+          attributes: p.attributes,
+          description: p.description?.slice(0, 200) ?? null,
+        })),
+      );
+    }
+
+    if (name === 'search_stores') {
+      const stores = await this.prisma.store.findMany({
+        where: {
+          isActive: true,
+          ...(query ? { name: { contains: query, mode: 'insensitive' } } : {}),
+        },
+        take: limit,
+      });
+      return JSON.stringify(
+        stores.map((s) => ({ id: s.id, name: s.name, description: s.description ?? null })),
+      );
+    }
+
+    return `Unknown tool: ${name}`;
+  }
+
+  /** Throw 429 if the customer has hit any configured message/token window cap. */
+  private async enforcePerUserLimits(customerId: string, cfg: AssistantConfig) {
+    const msgCaps: [number | null, keyof typeof WINDOW_MS][] = [
+      [cfg.maxMsgsPerMinute, 'Minute'],
+      [cfg.maxMsgsPerHour, 'Hour'],
+      [cfg.maxMsgsPerDay, 'Day'],
+      [cfg.maxMsgsPerWeek, 'Week'],
+      [cfg.maxMsgsPerMonth, 'Month'],
+    ];
+    for (const [cap, win] of msgCaps) {
+      if (cap == null) continue;
+      const since = new Date(Date.now() - WINDOW_MS[win]);
+      const count = await this.prisma.message.count({
+        where: { role: 'user', createdAt: { gte: since }, conversation: { customerId } },
+      });
+      if (count >= cap) throw this.tooMany();
+    }
+
+    const tokenCaps: [number | null, keyof typeof WINDOW_MS][] = [
+      [cfg.maxTokensPerDay, 'Day'],
+      [cfg.maxTokensPerWeek, 'Week'],
+      [cfg.maxTokensPerMonth, 'Month'],
+    ];
+    for (const [cap, win] of tokenCaps) {
+      if (cap == null) continue;
+      const since = new Date(Date.now() - WINDOW_MS[win]);
+      const agg = await this.prisma.message.aggregate({
+        _sum: { inputTokens: true, outputTokens: true },
+        where: { role: 'assistant', createdAt: { gte: since }, conversation: { customerId } },
+      });
+      const used = (agg._sum.inputTokens ?? 0) + (agg._sum.outputTokens ?? 0);
+      if (used >= cap) throw this.tooMany();
+    }
+  }
+
+  /** Pre-check: lock + throw if global spend already meets a cap. */
+  private async enforceBudget(cfg: AssistantConfig) {
+    const breach = await this.findBudgetBreach(cfg);
+    if (breach) {
+      await this.config.lock(breach);
+      throw new ForbiddenException('The assistant is locked (budget reached).');
+    }
+  }
+
+  /** Post-check: lock (no throw) so the next request is blocked. */
+  private async lockIfOverBudget(cfg: AssistantConfig) {
+    const breach = await this.findBudgetBreach(cfg);
+    if (breach) await this.config.lock(breach);
+  }
+
+  private async findBudgetBreach(cfg: AssistantConfig): Promise<string | null> {
+    const caps: [number | null, string, number | null][] = [
+      [cfg.budgetWeeklyCents, 'Weekly budget reached', WINDOW_MS.Week],
+      [cfg.budgetMonthlyCents, 'Monthly budget reached', WINDOW_MS.Month],
+      [cfg.budgetTotalCents, 'Total budget reached', null],
+    ];
+    for (const [capCents, reason, win] of caps) {
+      if (capCents == null) continue;
+      const agg = await this.prisma.message.aggregate({
+        _sum: { costMicros: true },
+        where: {
+          role: 'assistant',
+          ...(win ? { createdAt: { gte: new Date(Date.now() - win) } } : {}),
+        },
+      });
+      const spent = agg._sum.costMicros ?? 0;
+      if (spent >= capCents * CENTS_TO_MICROS) return reason;
+    }
+    return null;
+  }
+
+  private tooMany() {
+    return new HttpException(
+      'You have reached your usage limit. Please try again later.',
+      HttpStatus.TOO_MANY_REQUESTS,
+    );
+  }
+}

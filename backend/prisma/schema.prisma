@@ -511,13 +511,49 @@ model Customer {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  carts     Cart[]
-  orders    Order[]
-  addresses Address[]
-  reviews   Review[]
-  favorites Favorite[]
+  carts         Cart[]
+  orders        Order[]
+  addresses     Address[]
+  reviews       Review[]
+  favorites     Favorite[]
+  conversations Conversation[]
 
   @@index([isActive])
+  @@index([createdAt])
+}
+
+// A customer's AI-assistant chat thread. Created by the chat endpoint; viewable
+// read-only by admins on the customer detail page.
+model Conversation {
+  id         String   @id @default(cuid())
+  customerId String
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  title      String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  messages Message[]
+
+  @@index([customerId])
+  @@index([updatedAt])
+}
+
+// One turn in a conversation. Usage/cost fields are set on assistant turns only.
+// costMicros = micro-USD (1e-6 USD; 1 cent = 10_000) to avoid sub-cent rounding
+// loss when summing many cheap messages for budget enforcement.
+model Message {
+  id             String       @id @default(cuid())
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  role           String // 'user' | 'assistant'
+  content        String
+  model          String?
+  inputTokens    Int?
+  outputTokens   Int?
+  costMicros     Int?
+  createdAt      DateTime     @default(now())
+
+  @@index([conversationId])
   @@index([createdAt])
 }
 

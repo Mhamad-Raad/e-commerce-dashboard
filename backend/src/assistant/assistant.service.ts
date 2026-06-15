@@ -17,6 +17,14 @@ export class AssistantService {
     });
   }
 
+  /** Auto-lock the assistant when a budget cap is reached (system-triggered). */
+  lock(reason: string) {
+    return this.prisma.assistantConfig.update({
+      where: { id: SINGLETON_ID },
+      data: { locked: true, lockedReason: reason },
+    });
+  }
+
   async updateConfig(dto: UpdateAssistantConfigDto) {
     // Manually clearing `locked` should also clear the stored reason.
     const data = {
