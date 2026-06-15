@@ -46,13 +46,37 @@ const attrRow = z
     path: ['optionsText'],
   });
 
-const schema = z.object({
-  name: z.string().min(1).max(60),
-  imageUrl: z.string().url().optional().or(z.literal('')),
-  description: z.string().max(1000).optional().or(z.literal('')),
-  isActive: z.boolean(),
-  attributeSchema: z.array(attrRow),
-});
+const schema = z
+  .object({
+    name: z.string().min(1).max(60),
+    imageUrl: z.string().url().optional().or(z.literal('')),
+    description: z.string().max(1000).optional().or(z.literal('')),
+    isActive: z.boolean(),
+    attributeSchema: z.array(attrRow),
+  })
+  // Derived attribute keys must be present and unique (they key product values).
+  .superRefine((vals, ctx) => {
+    const seen = new Set<string>();
+    vals.attributeSchema.forEach((row, i) => {
+      const key = row.key.trim() || toKey(row.label);
+      if (!key) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: 'Label must include letters or numbers',
+          path: ['attributeSchema', i, 'label'],
+        });
+        return;
+      }
+      if (seen.has(key)) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: 'Duplicate attribute',
+          path: ['attributeSchema', i, 'label'],
+        });
+      }
+      seen.add(key);
+    });
+  });
 
 type FormValues = z.infer<typeof schema>;
 

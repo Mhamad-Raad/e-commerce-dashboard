@@ -23,13 +23,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+import { AttributeFields } from '@/components/AttributeFields';
 import { extractErrorMessage, fromMinor, toMinor } from '@/lib/format';
 
 const schema = z.object({
@@ -185,6 +179,16 @@ export function ProductForm() {
 
   const saveMutation = useMutation({
     mutationFn: (values: FormValues) => {
+      // Build attributes from the current category schema: drop empties, drop
+      // keys not in the schema, and coerce number-typed values to numbers.
+      const cleanedAttributes: Record<string, unknown> = {};
+      for (const def of attrSchema) {
+        const v = values.attributes?.[def.key];
+        if (v == null || v === '' || (Array.isArray(v) && v.length === 0)) continue;
+        cleanedAttributes[def.key] =
+          def.type === 'number' && !Number.isNaN(Number(v)) ? Number(v) : v;
+      }
+
       const payload: ProductWritePayload = {
         name: values.name.trim(),
         sku: values.sku.trim(),
@@ -202,12 +206,7 @@ export function ProductForm() {
         categoryId: values.categoryId || undefined,
         imageUrl: values.imageUrl.trim(),
         images: values.images,
-        // Keep only values that belong to the current category's schema.
-        attributes: Object.fromEntries(
-          Object.entries(values.attributes ?? {}).filter(([k]) =>
-            attrSchema.some((d) => d.key === k),
-          ),
-        ),
+        attributes: cleanedAttributes,
         description: values.description?.trim() || undefined,
         isActive: values.isActive,
       };
@@ -397,87 +396,7 @@ export function ProductForm() {
               {attrSchema.length > 0 && (
                 <div className="space-y-4 md:col-span-2">
                   <p className="text-sm font-medium">{t('products.attributes')}</p>
-                  {attrSchema.map((def) => {
-                    const val = attributes[def.key];
-                    if (def.type === 'textarea') {
-                      return (
-                        <FormField key={def.key} label={def.label}>
-                          <Textarea
-                            rows={3}
-                            value={(val as string) ?? ''}
-                            onChange={(e) => setAttr(def.key, e.target.value)}
-                          />
-                        </FormField>
-                      );
-                    }
-                    if (def.type === 'number') {
-                      return (
-                        <FormField key={def.key} label={def.label}>
-                          <Input
-                            inputMode="decimal"
-                            value={val == null ? '' : String(val)}
-                            onChange={(e) => {
-                              const n = e.target.value;
-                              setAttr(
-                                def.key,
-                                n === '' ? undefined : Number.isNaN(Number(n)) ? n : Number(n),
-                              );
-                            }}
-                          />
-                        </FormField>
-                      );
-                    }
-                    if (def.type === 'select') {
-                      return (
-                        <FormField key={def.key} label={def.label}>
-                          <Select value={(val as string) ?? ''} onValueChange={(v) => setAttr(def.key, v)}>
-                            <SelectTrigger>
-                              <SelectValue placeholder={t('products.select_option')} />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {(def.options ?? []).map((o) => (
-                                <SelectItem key={o} value={o}>
-                                  {o}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </FormField>
-                      );
-                    }
-                    if (def.type === 'multiselect') {
-                      const arr = (val as string[]) ?? [];
-                      return (
-                        <FormField key={def.key} label={def.label}>
-                          <div className="flex flex-wrap gap-3">
-                            {(def.options ?? []).map((o) => (
-                              <label key={o} className="flex items-center gap-1.5 text-sm">
-                                <Checkbox
-                                  checked={arr.includes(o)}
-                                  onCheckedChange={(c) => {
-                                    const cur =
-                                      (((watch('attributes') ?? {}) as Record<string, unknown>)[
-                                        def.key
-                                      ] as string[]) ?? [];
-                                    setAttr(def.key, c === true ? [...cur, o] : cur.filter((x) => x !== o));
-                                  }}
-                                />
-                                {o}
-                              </label>
-                            ))}
-                          </div>
-                        </FormField>
-                      );
-                    }
-                    return (
-                      <FormField key={def.key} label={def.label}>
-                        <Input
-                          value={(val as string) ?? ''}
-                          onChange={(e) => setAttr(def.key, e.target.value)}
-                        />
-                      </FormField>
-                    );
-                  })}
+                  <AttributeFields schema={attrSchema} values={attributes} onChange={setAttr} />
                 </div>
               )}
             </div>
