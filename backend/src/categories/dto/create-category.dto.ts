@@ -1,10 +1,14 @@
 import {
+  IsArray,
   IsBoolean,
   IsOptional,
   IsString,
   IsUrl,
   Length,
+  ValidateNested,
 } from 'class-validator';
+import { Type } from 'class-transformer';
+import { AttributeDefDto } from './attribute-def.dto';
 
 export class CreateCategoryDto {
   @IsString()
@@ -23,4 +27,11 @@ export class CreateCategoryDto {
   @IsOptional()
   @IsBoolean()
   isActive?: boolean;
+
+  // Attribute definitions for products in this category (drives the product form).
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => AttributeDefDto)
+  attributeSchema?: AttributeDefDto[];
 }

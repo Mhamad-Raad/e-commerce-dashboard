@@ -95,9 +95,15 @@ export class ProductsService {
 
   async create(dto: CreateProductDto) {
     this.assertLeadOverride(dto.minLeadDays, dto.maxLeadDays);
+    const { attributes, ...rest } = dto;
     try {
       return await this.prisma.product.create({
-        data: dto,
+        data: {
+          ...rest,
+          ...(attributes !== undefined
+            ? { attributes: attributes as unknown as Prisma.InputJsonValue }
+            : {}),
+        },
         include: { store: true, category: true },
       });
     } catch (err) {
@@ -112,11 +118,17 @@ export class ProductsService {
       dto.minLeadDays !== undefined ? dto.minLeadDays : existing.minLeadDays,
       dto.maxLeadDays !== undefined ? dto.maxLeadDays : existing.maxLeadDays,
     );
+    const { attributes, ...rest } = dto;
     let updated;
     try {
       updated = await this.prisma.product.update({
         where: { id },
-        data: dto,
+        data: {
+          ...rest,
+          ...(attributes !== undefined
+            ? { attributes: attributes as unknown as Prisma.InputJsonValue }
+            : {}),
+        },
         include: { store: true, category: true },
       });
     } catch (err) {

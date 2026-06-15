@@ -4,6 +4,7 @@ import {
   IsBoolean,
   IsInt,
   IsNumber,
+  IsObject,
   IsOptional,
   IsString,
   IsUrl,
@@ -94,6 +95,12 @@ export class CreateProductDto {
   @ArrayMaxSize(12)
   @IsUrl({ require_tld: false }, { each: true })
   images?: string[];
+
+  // Values for the category's attribute schema, keyed by attribute key. Shape is
+  // validated by the dashboard form against the category; stored as JSON here.
+  @IsOptional()
+  @IsObject()
+  attributes?: Record<string, unknown>;
 
   @IsString()
   @Length(1, 40)

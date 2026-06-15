@@ -52,9 +52,16 @@ export class CategoriesService {
   }
 
   async create(dto: CreateCategoryDto) {
+    const { attributeSchema, ...rest } = dto;
     try {
       return await this.prisma.category.create({
-        data: { ...dto, slug: slugify(dto.name) },
+        data: {
+          ...rest,
+          slug: slugify(dto.name),
+          ...(attributeSchema !== undefined
+            ? { attributeSchema: attributeSchema as unknown as Prisma.InputJsonValue }
+            : {}),
+        },
       });
     } catch (err) {
       throw this.translateError(err, dto.name);
@@ -63,11 +70,18 @@ export class CategoriesService {
 
   async update(id: string, dto: UpdateCategoryDto) {
     const existing = await this.findById(id);
+    const { attributeSchema, ...rest } = dto;
     let updated;
     try {
       updated = await this.prisma.category.update({
         where: { id },
-        data: { ...dto, ...(dto.name ? { slug: slugify(dto.name) } : {}) },
+        data: {
+          ...rest,
+          ...(dto.name ? { slug: slugify(dto.name) } : {}),
+          ...(attributeSchema !== undefined
+            ? { attributeSchema: attributeSchema as unknown as Prisma.InputJsonValue }
+            : {}),
+        },
       });
     } catch (err) {
       throw this.translateError(err, dto.name);

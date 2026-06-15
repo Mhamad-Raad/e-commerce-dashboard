@@ -370,6 +370,11 @@ model Category {
   description String?
   imageUrl    String?
   isActive    Boolean  @default(true)
+  // Category-driven attribute definitions for products in this category, e.g.
+  // beauty: [{key:"ingredients",label:"Ingredients",type:"textarea"},
+  //          {key:"skinType",label:"Skin type",type:"multiselect",options:[...]}].
+  // Future verticals (clothes: size/colour/material) need no schema change.
+  attributeSchema Json   @default("[]")
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -393,6 +398,9 @@ model Product {
   imageUrl       String?
   // Optional additional gallery images, ordered. The cover is NOT included here.
   images         String[]  @default([])
+  // Values for this product's category attributes, keyed by attribute key
+  // (e.g. {"ingredients":"Aqua, Niacinamide", "skinType":["oily","combination"]}).
+  attributes     Json      @default("{}")
   storeId        String
   store          Store     @relation(fields: [storeId], references: [id], onDelete: Restrict)
   categoryId     String?
