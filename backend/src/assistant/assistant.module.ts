@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { AssistantController } from './assistant.controller';
 import { AssistantService } from './assistant.service';
 import { AssistantChatService } from './assistant-chat.service';
+import { AssistantToolsService } from './assistant-tools.service';
 import { ClaudeProvider } from './provider/claude.provider';
 import { ASSISTANT_PROVIDER } from './provider/assistant-provider.interface';
 
@@ -10,6 +11,7 @@ import { ASSISTANT_PROVIDER } from './provider/assistant-provider.interface';
   providers: [
     AssistantService,
     AssistantChatService,
+    AssistantToolsService,
     // Swap this binding to add Gemini/OpenRouter later — the chat service only
     // depends on the AssistantProvider interface.
     { provide: ASSISTANT_PROVIDER, useClass: ClaudeProvider },
