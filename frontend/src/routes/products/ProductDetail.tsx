@@ -179,6 +179,15 @@ export function ProductDetail() {
             <DetailRow label={t('products.category')}>
               {product.category?.name || t('common.none')}
             </DetailRow>
+            {(product.category?.attributeSchema ?? []).map((def) => {
+              const v = product.attributes?.[def.key];
+              if (v == null || v === '' || (Array.isArray(v) && v.length === 0)) return null;
+              return (
+                <DetailRow key={def.key} label={def.label}>
+                  {Array.isArray(v) ? v.join(', ') : String(v)}
+                </DetailRow>
+              );
+            })}
             <DetailRow label={t('common.status')}>
               <StatusBadge
                 label={product.isActive ? t('common.active') : t('common.hidden')}

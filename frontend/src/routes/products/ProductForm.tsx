@@ -23,6 +23,13 @@ import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { extractErrorMessage, fromMinor, toMinor } from '@/lib/format';
 
 const schema = z.object({
@@ -77,6 +84,8 @@ const schema = z.object({
   categoryId: z.string().optional().or(z.literal('')),
   imageUrl: z.string().min(1, { message: 'Cover image is required' }).url(),
   images: z.array(z.string().url()),
+  // Dynamic, category-driven values keyed by attribute key.
+  attributes: z.record(z.any()),
   description: z.string().max(5000).optional().or(z.literal('')),
   isActive: z.boolean(),
 })
@@ -108,6 +117,7 @@ const defaultValues: FormValues = {
   categoryId: '',
   imageUrl: '',
   images: [],
+  attributes: {},
   description: '',
   isActive: true,
 };
@@ -166,6 +176,7 @@ export function ProductForm() {
         categoryId: p.categoryId ?? '',
         imageUrl: p.imageUrl ?? '',
         images: p.images ?? [],
+        attributes: p.attributes ?? {},
         description: p.description ?? '',
         isActive: p.isActive,
       });
@@ -191,6 +202,12 @@ export function ProductForm() {
         categoryId: values.categoryId || undefined,
         imageUrl: values.imageUrl.trim(),
         images: values.images,
+        // Keep only values that belong to the current category's schema.
+        attributes: Object.fromEntries(
+          Object.entries(values.attributes ?? {}).filter(([k]) =>
+            attrSchema.some((d) => d.key === k),
+          ),
+        ),
         description: values.description?.trim() || undefined,
         isActive: values.isActive,
       };
@@ -205,6 +222,16 @@ export function ProductForm() {
     onError: (err) => toast.error(extractErrorMessage(err)),
   });
 
+  const categoryId = watch('categoryId');
+
+  // Load the selected category's attribute schema to drive the dynamic fields.
+  const attrCategoryQuery = useQuery({
+    queryKey: ['category', categoryId],
+    queryFn: () => categoriesApi.get(categoryId!),
+    enabled: !!categoryId,
+  });
+  const attrSchema = attrCategoryQuery.data?.attributeSchema ?? [];
+
   if (isEdit && productQuery.isLoading) {
     return <Skeleton className="h-96 w-full rounded-xl" />;
   }
@@ -214,7 +241,18 @@ export function ProductForm() {
 
   const isActive = watch('isActive');
   const storeId = watch('storeId');
-  const categoryId = watch('categoryId');
+  const attributes = (watch('attributes') ?? {}) as Record<string, unknown>;
+
+  // Add/clear a single attribute value (reads fresh state to avoid stale closures).
+  const setAttr = (key: string, val: unknown) => {
+    const next = { ...((watch('attributes') ?? {}) as Record<string, unknown>) };
+    if (val === undefined || val === '' || (Array.isArray(val) && val.length === 0)) {
+      delete next[key];
+    } else {
+      next[key] = val;
+    }
+    setValue('attributes', next, { shouldDirty: true });
+  };
 
   return (
     <div className="mx-auto max-w-3xl space-y-5">
@@ -355,6 +393,93 @@ export function ProductForm() {
                   <Textarea rows={4} {...register('description')} />
                 </FormField>
               </div>
+
+              {attrSchema.length > 0 && (
+                <div className="space-y-4 md:col-span-2">
+                  <p className="text-sm font-medium">{t('products.attributes')}</p>
+                  {attrSchema.map((def) => {
+                    const val = attributes[def.key];
+                    if (def.type === 'textarea') {
+                      return (
+                        <FormField key={def.key} label={def.label}>
+                          <Textarea
+                            rows={3}
+                            value={(val as string) ?? ''}
+                            onChange={(e) => setAttr(def.key, e.target.value)}
+                          />
+                        </FormField>
+                      );
+                    }
+                    if (def.type === 'number') {
+                      return (
+                        <FormField key={def.key} label={def.label}>
+                          <Input
+                            inputMode="decimal"
+                            value={val == null ? '' : String(val)}
+                            onChange={(e) => {
+                              const n = e.target.value;
+                              setAttr(
+                                def.key,
+                                n === '' ? undefined : Number.isNaN(Number(n)) ? n : Number(n),
+                              );
+                            }}
+                          />
+                        </FormField>
+                      );
+                    }
+                    if (def.type === 'select') {
+                      return (
+                        <FormField key={def.key} label={def.label}>
+                          <Select value={(val as string) ?? ''} onValueChange={(v) => setAttr(def.key, v)}>
+                            <SelectTrigger>
+                              <SelectValue placeholder={t('products.select_option')} />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {(def.options ?? []).map((o) => (
+                                <SelectItem key={o} value={o}>
+                                  {o}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </FormField>
+                      );
+                    }
+                    if (def.type === 'multiselect') {
+                      const arr = (val as string[]) ?? [];
+                      return (
+                        <FormField key={def.key} label={def.label}>
+                          <div className="flex flex-wrap gap-3">
+                            {(def.options ?? []).map((o) => (
+                              <label key={o} className="flex items-center gap-1.5 text-sm">
+                                <Checkbox
+                                  checked={arr.includes(o)}
+                                  onCheckedChange={(c) => {
+                                    const cur =
+                                      (((watch('attributes') ?? {}) as Record<string, unknown>)[
+                                        def.key
+                                      ] as string[]) ?? [];
+                                    setAttr(def.key, c === true ? [...cur, o] : cur.filter((x) => x !== o));
+                                  }}
+                                />
+                                {o}
+                              </label>
+                            ))}
+                          </div>
+                        </FormField>
+                      );
+                    }
+                    return (
+                      <FormField key={def.key} label={def.label}>
+                        <Input
+                          value={(val as string) ?? ''}
+                          onChange={(e) => setAttr(def.key, e.target.value)}
+                        />
+                      </FormField>
+                    );
+                  })}
+                </div>
+              )}
             </div>
 
             <label className="flex items-center gap-2 text-sm">

@@ -1,3 +1,5 @@
+import type { AttributeDef } from '@/features/categories/types';
+
 export interface ProductStoreRef {
   id: string;
   name: string;
@@ -10,6 +12,8 @@ export interface ProductStoreRef {
 export interface ProductCategoryRef {
   id: string;
   name: string;
+  // Present on the full product (category: true) — used to label attributes.
+  attributeSchema?: AttributeDef[];
 }
 
 export interface ProductVariant {
@@ -43,6 +47,7 @@ export interface Product {
   maxLeadDays: number | null;
   imageUrl: string | null;
   images: string[];
+  attributes: Record<string, unknown>;
   storeId: string;
   store?: ProductStoreRef | null;
   categoryId: string | null;
@@ -88,6 +93,7 @@ export interface ProductWritePayload {
   maxLeadDays?: number | null;
   imageUrl: string; // cover, required
   images?: string[];
+  attributes?: Record<string, unknown>;
   storeId: string;
   categoryId?: string;
   isActive?: boolean;
