@@ -18,6 +18,7 @@ import { PriceLabel } from '@/components/PriceLabel';
 import { ProductImage } from '@/features/products/ProductImage';
 import { formatDate, formatMoney, extractErrorMessage, initials } from '@/lib/format';
 import { CustomerAddresses } from './CustomerAddresses';
+import { CustomerConversations } from './CustomerConversations';
 
 export function CustomerDetail() {
   const { id } = useParams<{ id: string }>();
@@ -235,6 +236,8 @@ export function CustomerDetail() {
           </CardContent>
         </Card>
       </div>
+
+      <CustomerConversations customerId={customer.id} />
 
       <ConfirmDialog
         open={confirmOpen}

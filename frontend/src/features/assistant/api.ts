@@ -34,6 +34,25 @@ export const ASSISTANT_MODELS = [
   { value: 'claude-opus-4-8', label: 'Claude Opus 4.8 — most capable' },
 ] as const;
 
+export interface AssistantConversation {
+  id: string;
+  title: string | null;
+  createdAt: string;
+  updatedAt: string;
+  _count?: { messages: number };
+}
+
+export interface AssistantMessage {
+  id: string;
+  role: 'user' | 'assistant';
+  content: string;
+  createdAt: string;
+}
+
+export interface AssistantConversationDetail extends AssistantConversation {
+  messages: AssistantMessage[];
+}
+
 export const assistantApi = {
   getConfig: async (): Promise<AssistantConfig> => {
     const res = await api.get<AssistantConfig>('/assistant/config');
@@ -43,6 +62,16 @@ export const assistantApi = {
     payload: AssistantConfigWritePayload,
   ): Promise<AssistantConfig> => {
     const res = await api.patch<AssistantConfig>('/assistant/config', payload);
+    return res.data;
+  },
+  listConversations: async (customerId: string): Promise<AssistantConversation[]> => {
+    const res = await api.get<AssistantConversation[]>(
+      `/assistant/customers/${customerId}/conversations`,
+    );
+    return res.data;
+  },
+  getConversation: async (id: string): Promise<AssistantConversationDetail> => {
+    const res = await api.get<AssistantConversationDetail>(`/assistant/conversations/${id}`);
     return res.data;
   },
 };

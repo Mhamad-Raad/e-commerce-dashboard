@@ -622,7 +622,12 @@
     "locked_generic": "تم بلوغ أحد حدود الميزانية.",
     "locked_hint": "ارفع الحد ثم ألغِ القفل.",
     "unlock": "إلغاء القفل",
-    "unlocked_toast": "تم إلغاء قفل المساعد"
+    "unlocked_toast": "تم إلغاء قفل المساعد",
+    "conversations": "محادثات المساعد",
+    "no_conversations": "لا توجد محادثات بعد.",
+    "untitled": "بدون عنوان",
+    "conversation": "محادثة",
+    "message_count": "{{count}} رسالة"
   },
   "settings": {
     "title": "الإعدادات",

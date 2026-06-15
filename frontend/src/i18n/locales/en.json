@@ -622,7 +622,12 @@
     "locked_generic": "A budget cap was reached.",
     "locked_hint": "Raise the cap, then unlock.",
     "unlock": "Unlock",
-    "unlocked_toast": "Assistant unlocked"
+    "unlocked_toast": "Assistant unlocked",
+    "conversations": "AI conversations",
+    "no_conversations": "No conversations yet.",
+    "untitled": "Untitled",
+    "conversation": "Conversation",
+    "message_count": "{{count}} messages"
   },
   "settings": {
     "title": "Settings",
