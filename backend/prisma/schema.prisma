@@ -365,6 +365,7 @@ model Store {
 
   products Product[]
   featured FeaturedStore?
+  homeItems HomeSectionItem[]
 
   @@index([isActive])
   @@index([createdAt])
@@ -387,6 +388,7 @@ model Category {
 
   products Product[]
   featured FeaturedCategory?
+  homeItems HomeSectionItem[]
 
   @@index([isActive])
 }
@@ -431,6 +433,7 @@ model Product {
   featured       FeaturedProduct?
   stockMovements StockMovement[]
   favorites      Favorite[]
+  homeItems      HomeSectionItem[]
 
   @@index([storeId])
   @@index([categoryId])
@@ -501,6 +504,97 @@ model FeaturedStore {
   sortOrder Int    @default(0)
 
   @@index([sortOrder])
+}
+
+// ── Dashboard-built home layout (server-driven sections) ──────────────────────
+// The mobile home is an ordered list of HomeSections. Each section's `type`
+// selects a distinct design (mirrored 1:1 in the dashboard preview); its items
+// reference what to show + where tapping goes. Supersedes the fixed HeroBanner/
+// Featured* models above (kept until the new dashboard builder replaces them).
+
+enum HomeSectionType {
+  BANNER     // full-width promo/ad image carousel
+  BLOG       // editorial posts (cards/carousel) -> article reader
+  BRANDS     // row of store logos -> store page
+  CATEGORIES // row/grid of categories -> filtered product list
+  PRODUCTS   // product slider/grid -> product detail
+}
+
+// Where tapping a section item navigates.
+enum HomeTargetType {
+  NONE
+  PRODUCT
+  CATEGORY
+  STORE
+  BLOG
+  URL
+}
+
+model HomeSection {
+  id        String          @id @default(cuid())
+  type      HomeSectionType
+  position  Int             @default(0)
+  isActive  Boolean         @default(true)
+  // Bilingual section heading (optional — some sections show no title).
+  titleEn   String?
+  titleAr   String?
+  // Type-specific display options, e.g. {"layout":"slider"|"grid","autoplay":true}.
+  // Kept as JSON so new per-type options need no schema change.
+  config    Json            @default("{}")
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
+
+  items HomeSectionItem[]
+
+  @@index([position])
+  @@index([isActive])
+}
+
+model HomeSectionItem {
+  id         String          @id @default(cuid())
+  sectionId  String
+  section    HomeSection     @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+  position   Int             @default(0)
+  // Optional overrides; otherwise the target's own image/name is used.
+  imageUrl   String?
+  label      String?
+  // Tap target — at most one of the relations below is set, matching targetType.
+  targetType HomeTargetType  @default(NONE)
+  productId  String?
+  product    Product?        @relation(fields: [productId], references: [id], onDelete: Cascade)
+  categoryId String?
+  category   Category?       @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  storeId    String?
+  store      Store?          @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  blogPostId String?
+  blogPost   BlogPost?       @relation(fields: [blogPostId], references: [id], onDelete: Cascade)
+  url        String?
+  createdAt  DateTime        @default(now())
+  updatedAt  DateTime        @updatedAt
+
+  @@index([sectionId])
+}
+
+// Editorial "story"/blog post surfaced by BLOG home sections and read in-app.
+model BlogPost {
+  id          String    @id @default(cuid())
+  titleEn     String
+  titleAr     String?
+  excerptEn   String?
+  excerptAr   String?
+  // Rich body (HTML/markdown), bilingual.
+  bodyEn      String?
+  bodyAr      String?
+  coverImage  String?
+  isPublished Boolean   @default(false)
+  publishedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  homeItems HomeSectionItem[]
+
+  @@index([isPublished])
+  @@index([createdAt])
 }
 
 model Customer {

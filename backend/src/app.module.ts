@@ -5,6 +5,7 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { AssistantModule } from './assistant/assistant.module';
 import { AuthModule } from './auth/auth.module';
+import { BlogModule } from './blog/blog.module';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 import { CartsModule } from './carts/carts.module';
 import { CategoriesModule } from './categories/categories.module';
@@ -13,6 +14,7 @@ import { CustomerAuthModule } from './customer-auth/customer-auth.module';
 import { CustomersModule } from './customers/customers.module';
 import { FeeGroupsModule } from './feegroups/feegroups.module';
 import { HealthController } from './health/health.controller';
+import { HomeModule } from './home/home.module';
 import { HomepageModule } from './homepage/homepage.module';
 import { InventoryModule } from './inventory/inventory.module';
 import { NotificationsModule } from './notifications/notifications.module';
@@ -49,6 +51,8 @@ import { UsersModule } from './users/users.module';
     CouponsModule,
     FeeGroupsModule,
     HomepageModule,
+    HomeModule,
+    BlogModule,
     InventoryModule,
     NotificationsModule,
     RefundsModule,
