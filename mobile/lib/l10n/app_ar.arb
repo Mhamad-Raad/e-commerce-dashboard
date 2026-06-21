@@ -41,5 +41,20 @@
   "fillCodeAndPassword": "أدخل الرمز وكلمة المرور الجديدة.",
   "passwordUpdated": "تم تحديث كلمة المرور. الرجاء تسجيل الدخول.",
 
-  "logOut": "تسجيل الخروج"
+  "logOut": "تسجيل الخروج",
+
+  "tabHome": "الرئيسية",
+  "tabShop": "المتجر",
+  "tabSearch": "بحث",
+  "tabProfile": "حسابي",
+
+  "categoriesTitle": "الفئات",
+  "featuredTitle": "المميّزة",
+  "shopsTitle": "المتاجر",
+  "seeAll": "عرض الكل",
+  "homeLoadError": "تعذّر تحميل الصفحة الرئيسية.",
+  "retry": "إعادة المحاولة",
+  "comingSoon": "قريبًا",
+  "toggleTheme": "تبديل السمة",
+  "productsCount": "{count} منتج"
 }

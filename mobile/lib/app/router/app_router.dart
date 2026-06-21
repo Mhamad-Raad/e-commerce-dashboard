@@ -9,7 +9,11 @@ import '../../features/auth/presentation/providers/auth_controller.dart';
 import '../../features/auth/presentation/reset/reset_password_screen.dart';
 import '../../features/auth/presentation/signup/signup_screen.dart';
 import '../../features/auth/presentation/splash/splash_screen.dart';
+import '../../features/account/presentation/profile_screen.dart';
 import '../../features/catalog/presentation/home/home_screen.dart';
+import '../../features/catalog/presentation/shop/shop_screen.dart';
+import '../../features/search/presentation/search_screen.dart';
+import '../shell/main_shell.dart';
 import 'routes.dart';
 
 /// App router. A single [redirect] enforces auth gating (no guest checkout):
@@ -37,7 +41,25 @@ final appRouterProvider = Provider<GoRouter>((ref) {
     },
     routes: [
       GoRoute(path: Routes.splash, builder: (_, _) => const SplashScreen()),
-      GoRoute(path: Routes.home, builder: (_, _) => const HomeScreen()),
+      // Authenticated main tabs, each an independent navigation branch.
+      StatefulShellRoute.indexedStack(
+        builder: (_, _, navigationShell) =>
+            MainShell(navigationShell: navigationShell),
+        branches: [
+          StatefulShellBranch(routes: [
+            GoRoute(path: Routes.home, builder: (_, _) => const HomeScreen()),
+          ]),
+          StatefulShellBranch(routes: [
+            GoRoute(path: Routes.shop, builder: (_, _) => const ShopScreen()),
+          ]),
+          StatefulShellBranch(routes: [
+            GoRoute(path: Routes.search, builder: (_, _) => const SearchScreen()),
+          ]),
+          StatefulShellBranch(routes: [
+            GoRoute(path: Routes.profile, builder: (_, _) => const ProfileScreen()),
+          ]),
+        ],
+      ),
       GoRoute(path: Routes.login, builder: (_, _) => const LoginScreen()),
       GoRoute(path: Routes.signup, builder: (_, _) => const SignupScreen()),
       GoRoute(

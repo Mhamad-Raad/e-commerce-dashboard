@@ -46,5 +46,25 @@
   "fillCodeAndPassword": "Fill in the code and your new password.",
   "passwordUpdated": "Password updated. Please log in.",
 
-  "logOut": "Log out"
+  "logOut": "Log out",
+
+  "tabHome": "Home",
+  "tabShop": "Shop",
+  "tabSearch": "Search",
+  "tabProfile": "Profile",
+
+  "categoriesTitle": "Categories",
+  "featuredTitle": "Featured",
+  "shopsTitle": "Shops",
+  "seeAll": "See all",
+  "homeLoadError": "Couldn't load the home page.",
+  "retry": "Retry",
+  "comingSoon": "Coming soon",
+  "toggleTheme": "Toggle theme",
+  "productsCount": "{count} products",
+  "@productsCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  }
 }

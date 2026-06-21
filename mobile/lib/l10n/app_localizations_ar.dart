@@ -121,4 +121,45 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get logOut => 'تسجيل الخروج';
+
+  @override
+  String get tabHome => 'الرئيسية';
+
+  @override
+  String get tabShop => 'المتجر';
+
+  @override
+  String get tabSearch => 'بحث';
+
+  @override
+  String get tabProfile => 'حسابي';
+
+  @override
+  String get categoriesTitle => 'الفئات';
+
+  @override
+  String get featuredTitle => 'المميّزة';
+
+  @override
+  String get shopsTitle => 'المتاجر';
+
+  @override
+  String get seeAll => 'عرض الكل';
+
+  @override
+  String get homeLoadError => 'تعذّر تحميل الصفحة الرئيسية.';
+
+  @override
+  String get retry => 'إعادة المحاولة';
+
+  @override
+  String get comingSoon => 'قريبًا';
+
+  @override
+  String get toggleTheme => 'تبديل السمة';
+
+  @override
+  String productsCount(int count) {
+    return '$count منتج';
+  }
 }

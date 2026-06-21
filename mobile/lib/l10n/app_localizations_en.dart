@@ -123,4 +123,45 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get logOut => 'Log out';
+
+  @override
+  String get tabHome => 'Home';
+
+  @override
+  String get tabShop => 'Shop';
+
+  @override
+  String get tabSearch => 'Search';
+
+  @override
+  String get tabProfile => 'Profile';
+
+  @override
+  String get categoriesTitle => 'Categories';
+
+  @override
+  String get featuredTitle => 'Featured';
+
+  @override
+  String get shopsTitle => 'Shops';
+
+  @override
+  String get seeAll => 'See all';
+
+  @override
+  String get homeLoadError => 'Couldn\'t load the home page.';
+
+  @override
+  String get retry => 'Retry';
+
+  @override
+  String get comingSoon => 'Coming soon';
+
+  @override
+  String get toggleTheme => 'Toggle theme';
+
+  @override
+  String productsCount(int count) {
+    return '$count products';
+  }
 }

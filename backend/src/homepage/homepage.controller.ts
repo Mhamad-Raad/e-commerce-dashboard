@@ -10,6 +10,7 @@ import {
   Post,
   Put,
 } from '@nestjs/common';
+import { Public } from '../auth/decorators/public.decorator';
 import { CreateBannerDto } from './dto/create-banner.dto';
 import { SetFeaturedDto } from './dto/set-featured.dto';
 import { UpdateBannerDto } from './dto/update-banner.dto';
@@ -19,6 +20,10 @@ import { HomepageService } from './homepage.service';
 export class HomepageController {
   constructor(private homepage: HomepageService) {}
 
+  // Public storefront payload (curated banners + featured products/categories/
+  // stores) — consumed by the mobile app. Admin mutation routes below stay
+  // behind the global JwtAuthGuard.
+  @Public()
   @Get()
   get() {
     return this.homepage.getHomepage();

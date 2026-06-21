@@ -13,4 +13,14 @@ class AppSizes {
   /// Inline button spinner.
   static const double buttonSpinner = 22;
   static const double buttonSpinnerStroke = 2;
+
+  /// Home hero carousel height.
+  static const double heroHeight = 180;
+
+  /// Circular category avatar diameter (home categories row).
+  static const double categoryAvatar = 64;
+
+  /// Featured products grid: target card width — the grid fits as many columns
+  /// as the screen allows, so it scales from phones to tablets.
+  static const double productCardMaxWidth = 200;
 }
