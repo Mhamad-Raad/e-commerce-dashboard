@@ -234,6 +234,13 @@ enum NotificationType {
   REFUND_REQUESTED
 }
 
+// Why an OTP is being sent. One column lets sign-up verification and
+// forgot-password reuse a single challenge table + code path.
+enum OtpPurpose {
+  PHONE_VERIFICATION // sign-up: confirm the WhatsApp number is real
+  PASSWORD_RESET     // forgot password
+}
+
 // Store-wide activity feed shown in the dashboard navbar bell. Body text is
 // localized on the client from type + meta (kept consistent with EN/AR UI).
 model Notification {
@@ -498,9 +505,18 @@ model FeaturedStore {
 
 model Customer {
   id        String   @id @default(cuid())
-  email     String   @unique
+  // Optional + unique: dashboard-created customers still have an email, but the
+  // mobile app is phone-first, so app sign-ups may omit it. Postgres allows many
+  // NULLs under a unique index.
+  email     String?  @unique
   name      String
-  phone     String?
+  // The mobile login identifier. Stored normalized E.164 (+9647XXXXXXXXX) and
+  // unique so two accounts can't claim the same WhatsApp number.
+  phone     String?  @unique
+  // Null for dashboard-created customers who never set an app password.
+  passwordHash    String?
+  // Null until a WhatsApp OTP confirms the number. Login is gated on this.
+  phoneVerifiedAt DateTime?
   address   String?
   city      String?
   country   String?
@@ -517,9 +533,58 @@ model Customer {
   reviews       Review[]
   favorites     Favorite[]
   conversations Conversation[]
+  sessions      CustomerSession[]
 
   @@index([isActive])
   @@index([createdAt])
+}
+
+// One pending/used OTP code for a phone number. Single table for every
+// OtpPurpose. With Twilio Verify (v1) Twilio holds the actual code, so codeHash
+// stays NULL — we keep the row for resend throttling, attempt caps, purpose +
+// customer binding, and audit. The future self-managed Meta-direct provider
+// generates the code itself and stores its sha-256 in codeHash; no schema change.
+model OtpChallenge {
+  id          String     @id @default(cuid())
+  phone       String     // normalized E.164 destination
+  purpose     OtpPurpose
+  customerId  String?    // null during sign-up (account may not exist yet)
+  codeHash    String?    // NULL under Twilio Verify; sha-256 under self-managed
+  providerRef String?    // Twilio Verify SID — correlation + audit
+  expiresAt   DateTime
+  consumedAt  DateTime?  // single-use: set on the successful verify
+  attempts    Int        @default(0) // wrong-code tries; lock after a cap
+  resendCount Int        @default(0) // resends issued for this challenge
+  lastSentAt  DateTime   @default(now()) // drives the resend cooldown
+  createdAt   DateTime   @default(now())
+
+  @@index([phone, purpose])
+  @@index([expiresAt])
+}
+
+// A mobile refresh-token session. Unlike the admin User (one refreshHash column,
+// cookie-based, single device), the app needs multi-device sessions with
+// rotation + reuse detection — so each refresh lives as its own row.
+//
+// Rotation: on every /refresh the presented row is revoked and a new row is
+// created sharing the same familyId. Reuse detection: presenting a token whose
+// row is ALREADY revoked (replay/theft) revokes the whole family → forced
+// re-login. tokenHash is the sha-256 of the raw refresh token (never stored raw).
+model CustomerSession {
+  id         String    @id @default(cuid())
+  customerId String
+  customer   Customer  @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  familyId   String    // stable across rotations of one login session
+  tokenHash  String    @unique // sha-256 of the current refresh token
+  userAgent  String?
+  ip         String?
+  expiresAt  DateTime
+  rotatedAt  DateTime  @default(now())
+  revokedAt  DateTime? // set when rotated out or explicitly revoked
+  createdAt  DateTime  @default(now())
+
+  @@index([customerId])
+  @@index([familyId])
 }
 
 // A customer's AI-assistant chat thread. Created by the chat endpoint; viewable

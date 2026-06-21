@@ -9,6 +9,7 @@ import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 import { CartsModule } from './carts/carts.module';
 import { CategoriesModule } from './categories/categories.module';
 import { CouponsModule } from './coupons/coupons.module';
+import { CustomerAuthModule } from './customer-auth/customer-auth.module';
 import { CustomersModule } from './customers/customers.module';
 import { FeeGroupsModule } from './feegroups/feegroups.module';
 import { HealthController } from './health/health.controller';
@@ -42,6 +43,7 @@ import { UsersModule } from './users/users.module';
     CategoriesModule,
     StoresModule,
     CustomersModule,
+    CustomerAuthModule,
     CartsModule,
     OrdersModule,
     CouponsModule,

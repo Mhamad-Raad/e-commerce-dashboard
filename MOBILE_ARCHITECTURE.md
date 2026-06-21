@@ -296,7 +296,30 @@ abstract class TokenStore {
 - **WhatsApp is verification-only**: at sign-up an OTP is sent over WhatsApp to confirm the number (also for password reset). Not a login method.
 - **No guest checkout** — cart/checkout routes are gated.
 
-🔧 **Backend work required:** the current API is email/password JWT only. These endpoints must be **added** server-side: phone+password login, register, WhatsApp OTP send/verify, password reset, and **refresh-token rotation + reuse-detection**. The app is built against the intended contract; align DTOs when the endpoints land.
+✅ **Backend DELIVERED** (was: email/password JWT only). Customer auth now lives under **`/api/app/auth`** in the NestJS API, separate from the admin `/api/auth`:
+
+| Route | Body | Result |
+|---|---|---|
+| `POST /register` | name, phone, password, email? | creates unverified Customer, sends `PHONE_VERIFICATION` OTP |
+| `POST /verify-phone` | phone, code | sets `phoneVerifiedAt`, **auto-login** (returns tokens + customer) |
+| `POST /resend-otp` | phone, purpose | throttled resend (existence-blind) |
+| `POST /login` | phone, password | tokens + customer; 403 `PHONE_NOT_VERIFIED` if unverified (re-sends code) |
+| `POST /forgot-password` | phone | sends `PASSWORD_RESET` OTP — **always 200** (never leaks which numbers exist) |
+| `POST /reset-password` | phone, code, newPassword | sets password, **revokes all sessions** |
+| `POST /refresh` | refreshToken | **rotates** (new access+refresh); replaying a rotated token revokes the whole session family |
+| `POST /logout` | refreshToken? | revoke this device's family (or all sessions if omitted) — Bearer-gated |
+| `GET /me` | — | current customer — Bearer-gated |
+
+- **Data:** `Customer` gained `phone @unique`, `passwordHash`, `phoneVerifiedAt` (email made optional). New `OtpChallenge` table (one `OtpPurpose` enum column covers sign-up **and** password reset) and `CustomerSession` table (per-device rotating refresh with reuse detection). Migration `…_customer_auth_otp_sessions`.
+- **Tokens:** access = JWT signed with its own `CUSTOMER_JWT_ACCESS_SECRET` + `typ:'customer'` claim (can't cross over to admin routes); refresh = opaque random token, only its sha-256 stored. Matches the app's bearer-token + single-flight-rotation model in §6.
+- **Phone:** all inputs normalized to E.164 `+9647XXXXXXXXX`; Iraqi mobiles only.
+
+🔧 **App-side TODO:** align the Flutter `auth_api.dart` DTOs to these exact routes/shapes; handle the `PHONE_NOT_VERIFIED` 403 by routing to the OTP screen.
+
+#### OTP provider & cost roadmap
+WhatsApp OTP delivery sits behind an `OtpProvider` interface so the vendor is swappable:
+- **v1 = Twilio Verify** (WhatsApp channel) — managed code lifecycle, no WhatsApp template approval, no WABA. ≈ **$0.05 / successful verification**. Dormant until `TWILIO_ACCOUNT_SID` / `TWILIO_AUTH_TOKEN` / `TWILIO_VERIFY_SERVICE_SID` are set; locally it falls back to `LogOtpProvider`, which prints the code to the server console (no Twilio account needed for dev).
+- **Future = Meta WhatsApp Cloud API direct** — ≈ **$0.0034 / message** for Iraq ("Rest of Middle East" tier), no platform fee (**~15× cheaper**). When volume passes ~1,000 verifications/month, add a `MetaCloudOtpProvider` and swap the `OTP_PROVIDER` binding — **no endpoint, DTO, caller, or DB change**. The `OtpChallenge.codeHash` column already exists for that self-managed provider to own the code lifecycle (Meta has no managed-Verify equivalent).
 
 ---
 
@@ -401,7 +424,7 @@ Cross-platform push via **Firebase Cloud Messaging**.
 
 | NestJS module | Flutter feature | Notes |
 |---|---|---|
-| auth | `auth` | phone+password, WhatsApp OTP verify (pending backend) |
+| auth | `auth` | phone+password, WhatsApp OTP verify (✅ backend live at `/api/app/auth`) |
 | catalog / products / categories | `catalog` | home, shop, product, search, variants |
 | cart | `cart` | line items, coupon apply |
 | orders / fulfilment | `orders` | list, detail, tracking |
@@ -436,8 +459,8 @@ Drives freezed, json_serializable, riverpod_generator, retrofit_generator.
 ## 15. Decisions (resolved 2026-06-21)
 
 1. ✅ **IQD storage unit** — **whole dinars** (0 decimals). `Money.amount` == whole dinars.
-2. 🔧 **Backend auth endpoints** — to be **added** server-side: phone+password login, register, WhatsApp OTP send/verify, password reset. App built against the intended contract.
-3. ✅ **Refresh-token rotation** — **yes, rotate on use**: each refresh returns a new access + new refresh; old refresh invalidated (reuse-detection). Interceptor persists the new pair (single-flight). Backend must implement.
+2. ✅ **Backend auth endpoints** — **DELIVERED** under `/api/app/auth` (register, verify-phone, resend-otp, login, forgot/reset-password, refresh, logout, me). See §6 for the contract + OTP cost roadmap.
+3. ✅ **Refresh-token rotation** — **yes, rotate on use**: each refresh returns a new access + new refresh; old refresh invalidated (reuse-detection). Interceptor persists the new pair (single-flight). **Backend implemented** (`CustomerSession` family-revoke on reuse).
 4. ✅ **Offline** — **online-only** for v1. No drift/hive.
 5. ✅ **Theme** — **light + dark from the start**, both from the same tokens; `themeMode` persisted.
 
