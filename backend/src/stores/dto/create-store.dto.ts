@@ -17,8 +17,28 @@ export class CreateStoreDto {
 
   @IsOptional()
   @IsString()
+  @Length(0, 120)
+  nameAr?: string;
+
+  @IsOptional()
+  @IsString()
+  @Length(0, 120)
+  nameCkb?: string;
+
+  @IsOptional()
+  @IsString()
   @Length(0, 2000)
   description?: string;
+
+  @IsOptional()
+  @IsString()
+  @Length(0, 2000)
+  descriptionAr?: string;
+
+  @IsOptional()
+  @IsString()
+  @Length(0, 2000)
+  descriptionCkb?: string;
 
   @IsOptional()
   @IsUrl({ require_tld: false })

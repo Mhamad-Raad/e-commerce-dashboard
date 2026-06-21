@@ -22,8 +22,28 @@ export class CreateProductDto {
 
   @IsOptional()
   @IsString()
+  @Length(0, 200)
+  nameAr?: string;
+
+  @IsOptional()
+  @IsString()
+  @Length(0, 200)
+  nameCkb?: string;
+
+  @IsOptional()
+  @IsString()
   @Length(0, 5000)
   description?: string;
+
+  @IsOptional()
+  @IsString()
+  @Length(0, 5000)
+  descriptionAr?: string;
+
+  @IsOptional()
+  @IsString()
+  @Length(0, 5000)
+  descriptionCkb?: string;
 
   @IsString()
   @Matches(/^[A-Z0-9_-]{2,40}$/i, {

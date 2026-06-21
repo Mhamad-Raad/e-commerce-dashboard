@@ -17,8 +17,28 @@ export class CreateCategoryDto {
 
   @IsOptional()
   @IsString()
+  @Length(0, 60)
+  nameAr?: string;
+
+  @IsOptional()
+  @IsString()
+  @Length(0, 60)
+  nameCkb?: string;
+
+  @IsOptional()
+  @IsString()
   @Length(0, 1000)
   description?: string;
+
+  @IsOptional()
+  @IsString()
+  @Length(0, 1000)
+  descriptionAr?: string;
+
+  @IsOptional()
+  @IsString()
+  @Length(0, 1000)
+  descriptionCkb?: string;
 
   @IsOptional()
   @IsUrl({ require_tld: false })
