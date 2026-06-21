@@ -92,6 +92,7 @@ export class HomeService {
 
   async createSection(dto: CreateSectionDto) {
     const items = (dto.items ?? []).map((it, i) => this.mapItem(it, i));
+    await this.validateRefs(items);
     // New sections go to the end.
     const max = await this.prisma.homeSection.aggregate({
       _max: { position: true },
@@ -114,6 +115,7 @@ export class HomeService {
   async updateSection(id: string, dto: UpdateSectionDto) {
     await this.ensureSection(id);
     const mapped = dto.items?.map((it, i) => this.mapItem(it, i));
+    if (mapped) await this.validateRefs(mapped);
 
     const section = await this.prisma.$transaction(async (tx) => {
       await tx.homeSection.update({
@@ -165,6 +167,45 @@ export class HomeService {
     const section = await this.prisma.homeSection.findUnique({ where: { id } });
     if (!section) throw new NotFoundException('Section not found');
     return section;
+  }
+
+  // Verify every referenced product/category/store/blog id exists, so a bad id
+  // returns a clean 400 instead of a DB foreign-key 500.
+  private async validateRefs(
+    items: {
+      productId: string | null;
+      categoryId: string | null;
+      storeId: string | null;
+      blogPostId: string | null;
+    }[],
+  ) {
+    const uniq = (vals: (string | null)[]) =>
+      [...new Set(vals.filter((v): v is string => !!v))];
+
+    const productIds = uniq(items.map((i) => i.productId));
+    if (productIds.length &&
+      (await this.prisma.product.count({ where: { id: { in: productIds } } })) !==
+        productIds.length) {
+      throw new BadRequestException('One or more productId values do not exist');
+    }
+    const categoryIds = uniq(items.map((i) => i.categoryId));
+    if (categoryIds.length &&
+      (await this.prisma.category.count({ where: { id: { in: categoryIds } } })) !==
+        categoryIds.length) {
+      throw new BadRequestException('One or more categoryId values do not exist');
+    }
+    const storeIds = uniq(items.map((i) => i.storeId));
+    if (storeIds.length &&
+      (await this.prisma.store.count({ where: { id: { in: storeIds } } })) !==
+        storeIds.length) {
+      throw new BadRequestException('One or more storeId values do not exist');
+    }
+    const blogIds = uniq(items.map((i) => i.blogPostId));
+    if (blogIds.length &&
+      (await this.prisma.blogPost.count({ where: { id: { in: blogIds } } })) !==
+        blogIds.length) {
+      throw new BadRequestException('One or more blogPostId values do not exist');
+    }
   }
 
   // Normalize a DTO item to a single, validated target FK (others nulled).

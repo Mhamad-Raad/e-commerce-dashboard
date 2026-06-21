@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../app/theme/app_sizes.dart';
 import '../../../../app/theme/app_spacing.dart';
 import '../../../../core/error/failure.dart';
 import '../../../../core/l10n/l10n_ext.dart';
@@ -59,8 +60,12 @@ class _HomeBody extends StatelessWidget {
       );
     }
 
+    // Pad the bottom so the last section clears the frosted nav (extendBody).
+    final bottomInset = AppSizes.bottomNavHeight +
+        MediaQuery.viewPaddingOf(context).bottom +
+        AppSpacing.md;
     return ListView.separated(
-      padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
+      padding: EdgeInsets.fromLTRB(0, AppSpacing.md, 0, bottomInset),
       itemCount: visible.length,
       separatorBuilder: (_, _) => const SizedBox(height: AppSpacing.lg),
       itemBuilder: (_, i) => HomeSectionView(section: visible[i]),

@@ -34,4 +34,8 @@ class AppSizes {
   /// Blog/story card sizing in a BLOG section slider.
   static const double blogCardWidth = 260;
   static const double blogSliderHeight = 230;
+
+  /// Material 3 NavigationBar height — content scrolling behind the frosted nav
+  /// (extendBody) pads its bottom by this + the safe-area inset.
+  static const double bottomNavHeight = 80;
 }
