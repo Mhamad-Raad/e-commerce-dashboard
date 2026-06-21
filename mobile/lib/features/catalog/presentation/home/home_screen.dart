@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/app_spacing.dart';
 import '../../../../app/theme/theme_controller.dart';
+import '../../../../core/l10n/l10n_ext.dart';
+import '../../../../core/widgets/brand_wordmark.dart';
 import '../../../../core/widgets/rozhna_app_bar.dart';
 import '../../../auth/presentation/providers/auth_controller.dart';
 
@@ -23,11 +24,7 @@ class HomeScreen extends ConsumerWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text(
-                "Rozhna's Store",
-                style: text.displayLarge?.copyWith(color: AppColors.berry),
-                textAlign: TextAlign.center,
-              ),
+              const BrandWordmark(),
               const SizedBox(height: AppSpacing.sm),
               Text('Scaffold ready — home goes here', style: text.bodyLarge),
               const SizedBox(height: AppSpacing.xl),
@@ -39,7 +36,7 @@ class HomeScreen extends ConsumerWidget {
               ),
               TextButton(
                 onPressed: () => ref.read(authControllerProvider.notifier).logout(),
-                child: const Text('Log out'),
+                child: Text(context.l10n.logOut),
               ),
             ],
           ),

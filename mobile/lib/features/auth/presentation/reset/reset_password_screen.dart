@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../app/router/routes.dart';
 import '../../../../app/theme/app_spacing.dart';
+import '../../../../core/l10n/l10n_ext.dart';
 import '../../../../core/network/api_result.dart';
 import '../../../../core/widgets/rozhna_app_bar.dart';
 import '../providers/auth_controller.dart';
@@ -40,7 +41,7 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
     if (_phone.text.trim().isEmpty ||
         _code.text.trim().isEmpty ||
         _password.text.isEmpty) {
-      showMessage(context, 'Fill in the code and your new password.');
+      showMessage(context, context.l10n.fillCodeAndPassword);
       return;
     }
     setState(() => _loading = true);
@@ -54,7 +55,7 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
     setState(() => _loading = false);
     switch (result) {
       case Success():
-        showMessage(context, 'Password updated. Please log in.');
+        showMessage(context, context.l10n.passwordUpdated);
         context.go(Routes.login);
       case Failed(failure: final failure):
         showFailure(context, failure);
@@ -63,51 +64,43 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final text = Theme.of(context).textTheme;
-    return Scaffold(
+    return AuthScaffold(
       appBar: const RozhnaAppBar(showBack: true),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(AppSpacing.margin),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text('New password', style: text.headlineMedium),
-              const SizedBox(height: AppSpacing.sm),
-              Text('Enter the code we sent and choose a new password.',
-                  style: text.bodyLarge),
-              const SizedBox(height: AppSpacing.xl),
-              AuthField(
-                controller: _phone,
-                label: 'Phone number',
-                prefixText: '+964 ',
-                keyboardType: TextInputType.phone,
-                textInputAction: TextInputAction.next,
-              ),
-              const SizedBox(height: AppSpacing.md),
-              AuthField(
-                controller: _code,
-                label: 'Reset code',
-                keyboardType: TextInputType.number,
-                textInputAction: TextInputAction.next,
-                autofillHints: const [AutofillHints.oneTimeCode],
-              ),
-              const SizedBox(height: AppSpacing.md),
-              PasswordField(
-                controller: _password,
-                label: 'New password (min 8 characters)',
-                textInputAction: TextInputAction.done,
-              ),
-              const SizedBox(height: AppSpacing.lg),
-              PrimaryButton(
-                label: 'Save password',
-                loading: _loading,
-                onPressed: _submit,
-              ),
-            ],
-          ),
+      children: [
+        Text(l10n.newPasswordTitle, style: text.headlineMedium),
+        const SizedBox(height: AppSpacing.sm),
+        Text(l10n.newPasswordSubtitle, style: text.bodyLarge),
+        const SizedBox(height: AppSpacing.xl),
+        AuthField(
+          controller: _phone,
+          label: l10n.phoneNumber,
+          prefixText: '+964 ',
+          keyboardType: TextInputType.phone,
+          textInputAction: TextInputAction.next,
         ),
-      ),
+        const SizedBox(height: AppSpacing.md),
+        AuthField(
+          controller: _code,
+          label: l10n.resetCode,
+          keyboardType: TextInputType.number,
+          textInputAction: TextInputAction.next,
+          autofillHints: const [AutofillHints.oneTimeCode],
+        ),
+        const SizedBox(height: AppSpacing.md),
+        PasswordField(
+          controller: _password,
+          label: l10n.newPasswordMin8,
+          textInputAction: TextInputAction.done,
+        ),
+        const SizedBox(height: AppSpacing.lg),
+        PrimaryButton(
+          label: l10n.savePassword,
+          loading: _loading,
+          onPressed: _submit,
+        ),
+      ],
     );
   }
 }

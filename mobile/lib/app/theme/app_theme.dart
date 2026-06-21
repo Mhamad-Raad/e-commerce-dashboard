@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'app_colors.dart';
 import 'app_radii.dart';
+import 'app_sizes.dart';
 import 'app_typography.dart';
 
 /// Light + dark Material 3 themes, both derived from the Radiant Retail tokens.
@@ -27,7 +28,7 @@ class AppTheme {
         style: FilledButton.styleFrom(
           backgroundColor: scheme.primary,
           foregroundColor: scheme.onPrimary,
-          minimumSize: const Size.fromHeight(52),
+          minimumSize: const Size.fromHeight(AppSizes.controlHeight),
           shape: const StadiumBorder(),
           textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
         ),

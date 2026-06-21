@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../app/router/routes.dart';
 import '../../../../app/theme/app_spacing.dart';
+import '../../../../core/l10n/l10n_ext.dart';
 import '../../../../core/network/api_result.dart';
 import '../../../../core/widgets/rozhna_app_bar.dart';
 import '../providers/auth_controller.dart';
@@ -32,7 +33,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
 
   Future<void> _submit() async {
     if (_phone.text.trim().isEmpty) {
-      showMessage(context, 'Enter your phone number.');
+      showMessage(context, context.l10n.enterPhone);
       return;
     }
     setState(() => _loading = true);
@@ -43,7 +44,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
     setState(() => _loading = false);
     switch (result) {
       case Success():
-        showMessage(context, 'If the number is registered, a code was sent.');
+        showMessage(context, context.l10n.ifRegisteredCodeSent);
         context.push(Routes.resetPassword, extra: {'phone': _phone.text.trim()});
       case Failed(failure: final failure):
         showFailure(context, failure);
@@ -52,40 +53,26 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final text = Theme.of(context).textTheme;
-    return Scaffold(
+    return AuthScaffold(
       appBar: const RozhnaAppBar(showBack: true),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(AppSpacing.margin),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text('Reset password', style: text.headlineMedium),
-              const SizedBox(height: AppSpacing.sm),
-              Text(
-                "Enter your phone number and we'll send a reset code on WhatsApp.",
-                style: text.bodyLarge,
-              ),
-              const SizedBox(height: AppSpacing.xl),
-              AuthField(
-                controller: _phone,
-                label: 'Phone number',
-                prefixText: '+964 ',
-                keyboardType: TextInputType.phone,
-                textInputAction: TextInputAction.done,
-                autofillHints: const [AutofillHints.telephoneNumber],
-              ),
-              const SizedBox(height: AppSpacing.lg),
-              PrimaryButton(
-                label: 'Send code',
-                loading: _loading,
-                onPressed: _submit,
-              ),
-            ],
-          ),
+      children: [
+        Text(l10n.resetPassword, style: text.headlineMedium),
+        const SizedBox(height: AppSpacing.sm),
+        Text(l10n.forgotSubtitle, style: text.bodyLarge),
+        const SizedBox(height: AppSpacing.xl),
+        AuthField(
+          controller: _phone,
+          label: l10n.phoneNumber,
+          prefixText: '+964 ',
+          keyboardType: TextInputType.phone,
+          textInputAction: TextInputAction.done,
+          autofillHints: const [AutofillHints.telephoneNumber],
         ),
-      ),
+        const SizedBox(height: AppSpacing.lg),
+        PrimaryButton(label: l10n.sendCode, loading: _loading, onPressed: _submit),
+      ],
     );
   }
 }

@@ -1,0 +1,45 @@
+{
+  "@@locale": "ar",
+  "brandName": "متجر روژنا",
+
+  "loginSubtitle": "سجّل الدخول للمتابعة",
+  "phoneNumber": "رقم الهاتف",
+  "password": "كلمة المرور",
+  "forgotPassword": "نسيت كلمة المرور؟",
+  "logIn": "تسجيل الدخول",
+  "newHere": "مستخدم جديد؟",
+  "createAccount": "إنشاء حساب",
+  "enterPhoneAndPassword": "أدخل رقم هاتفك وكلمة المرور.",
+  "verifyToContinue": "فعّل رقمك للمتابعة — أرسلنا لك رمزًا.",
+
+  "createYourAccount": "أنشئ حسابك",
+  "fullName": "الاسم الكامل",
+  "emailOptional": "البريد الإلكتروني (اختياري)",
+  "passwordMin8": "كلمة المرور (٨ أحرف على الأقل)",
+  "namePhonePasswordRequired": "الاسم ورقم الهاتف وكلمة المرور مطلوبة.",
+  "numberAlreadyRegistered": "هذا الرقم لديه حساب بالفعل. الرجاء تسجيل الدخول.",
+
+  "verifyYourNumber": "فعّل رقمك",
+  "otpSentTo": "أدخل الرمز الذي أرسلناه عبر واتساب إلى {phone}.",
+  "verificationCode": "رمز التحقق",
+  "verify": "تحقّق",
+  "resendCode": "لم يصلك الرمز؟ إعادة الإرسال",
+  "newCodeSent": "في الطريق إليك رمز جديد.",
+  "enterTheCode": "أدخل الرمز الذي أرسلناه إليك.",
+
+  "resetPassword": "إعادة تعيين كلمة المرور",
+  "forgotSubtitle": "أدخل رقم هاتفك وسنرسل رمز إعادة التعيين عبر واتساب.",
+  "sendCode": "إرسال الرمز",
+  "enterPhone": "أدخل رقم هاتفك.",
+  "ifRegisteredCodeSent": "إذا كان الرقم مسجّلًا، فقد أُرسل رمز.",
+
+  "newPasswordTitle": "كلمة مرور جديدة",
+  "newPasswordSubtitle": "أدخل الرمز الذي أرسلناه واختر كلمة مرور جديدة.",
+  "resetCode": "رمز إعادة التعيين",
+  "newPasswordMin8": "كلمة مرور جديدة (٨ أحرف على الأقل)",
+  "savePassword": "حفظ كلمة المرور",
+  "fillCodeAndPassword": "أدخل الرمز وكلمة المرور الجديدة.",
+  "passwordUpdated": "تم تحديث كلمة المرور. الرجاء تسجيل الدخول.",
+
+  "logOut": "تسجيل الخروج"
+}

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/app_spacing.dart';
+import '../../../../core/widgets/brand_wordmark.dart';
 
 /// Shown while the session is restored on launch (AuthStatus.unknown).
 class SplashScreen extends StatelessWidget {
@@ -9,18 +9,14 @@ class SplashScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final text = Theme.of(context).textTheme;
-    return Scaffold(
+    return const Scaffold(
       body: Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(
-              "Rozhna's Store",
-              style: text.displayLarge?.copyWith(color: AppColors.berry),
-            ),
-            const SizedBox(height: AppSpacing.lg),
-            const CircularProgressIndicator(),
+            BrandWordmark(),
+            SizedBox(height: AppSpacing.lg),
+            CircularProgressIndicator(),
           ],
         ),
       ),

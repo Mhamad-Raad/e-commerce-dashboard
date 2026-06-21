@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../app/theme/app_spacing.dart';
+import '../../../../core/l10n/l10n_ext.dart';
 import '../../../../core/network/api_result.dart';
 import '../../../../core/widgets/rozhna_app_bar.dart';
 import '../providers/auth_controller.dart';
@@ -30,7 +31,7 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
 
   Future<void> _verify() async {
     if (_code.text.trim().isEmpty) {
-      showMessage(context, 'Enter the code we sent you.');
+      showMessage(context, context.l10n.enterTheCode);
       return;
     }
     setState(() => _loading = true);
@@ -46,12 +47,13 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
   }
 
   Future<void> _resend() async {
-    final result =
-        await ref.read(authControllerProvider.notifier).resendVerification(widget.phone);
+    final result = await ref
+        .read(authControllerProvider.notifier)
+        .resendVerification(widget.phone);
     if (!mounted) return;
     switch (result) {
       case Success():
-        showMessage(context, 'A new code is on its way.');
+        showMessage(context, context.l10n.newCodeSent);
       case Failed(failure: final failure):
         showFailure(context, failure);
     }
@@ -59,45 +61,28 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final text = Theme.of(context).textTheme;
-    return Scaffold(
+    return AuthScaffold(
       appBar: const RozhnaAppBar(showBack: true),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(AppSpacing.margin),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text('Verify your number', style: text.headlineMedium),
-              const SizedBox(height: AppSpacing.sm),
-              Text(
-                'Enter the code we sent on WhatsApp to ${widget.phone}.',
-                style: text.bodyLarge,
-              ),
-              const SizedBox(height: AppSpacing.xl),
-              AuthField(
-                controller: _code,
-                label: 'Verification code',
-                keyboardType: TextInputType.number,
-                textInputAction: TextInputAction.done,
-                autofillHints: const [AutofillHints.oneTimeCode],
-              ),
-              const SizedBox(height: AppSpacing.lg),
-              PrimaryButton(
-                label: 'Verify',
-                loading: _loading,
-                onPressed: _verify,
-              ),
-              const SizedBox(height: AppSpacing.sm),
-              // TODO(auth): add a resend countdown to match the backend cooldown.
-              TextButton(
-                onPressed: _resend,
-                child: const Text("Didn't get it? Resend code"),
-              ),
-            ],
-          ),
+      children: [
+        Text(l10n.verifyYourNumber, style: text.headlineMedium),
+        const SizedBox(height: AppSpacing.sm),
+        Text(l10n.otpSentTo(widget.phone), style: text.bodyLarge),
+        const SizedBox(height: AppSpacing.xl),
+        AuthField(
+          controller: _code,
+          label: l10n.verificationCode,
+          keyboardType: TextInputType.number,
+          textInputAction: TextInputAction.done,
+          autofillHints: const [AutofillHints.oneTimeCode],
         ),
-      ),
+        const SizedBox(height: AppSpacing.lg),
+        PrimaryButton(label: l10n.verify, loading: _loading, onPressed: _verify),
+        const SizedBox(height: AppSpacing.sm),
+        // TODO(auth): add a resend countdown to match the backend cooldown.
+        TextButton(onPressed: _resend, child: Text(l10n.resendCode)),
+      ],
     );
   }
 }

@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 
-import '../../../../app/theme/app_radii.dart';
+import '../../../../app/theme/app_sizes.dart';
+import '../../../../app/theme/app_spacing.dart';
 import '../../../../core/error/failure.dart';
 
-/// Rounded text field used across the auth screens.
+/// Rounded text field. Styling (fill, berry focus ring, radius) comes from the
+/// app's inputDecorationTheme — we intentionally don't override `border` here.
 class AuthField extends StatelessWidget {
   const AuthField({
     super.key,
@@ -29,11 +31,7 @@ class AuthField extends StatelessWidget {
       keyboardType: keyboardType,
       textInputAction: textInputAction,
       autofillHints: autofillHints,
-      decoration: InputDecoration(
-        labelText: label,
-        prefixText: prefixText,
-        border: const OutlineInputBorder(borderRadius: AppRadii.fieldRadius),
-      ),
+      decoration: InputDecoration(labelText: label, prefixText: prefixText),
     );
   }
 }
@@ -43,7 +41,7 @@ class PasswordField extends StatefulWidget {
   const PasswordField({
     super.key,
     required this.controller,
-    this.label = 'Password',
+    required this.label,
     this.textInputAction,
   });
 
@@ -66,9 +64,9 @@ class _PasswordFieldState extends State<PasswordField> {
       textInputAction: widget.textInputAction,
       decoration: InputDecoration(
         labelText: widget.label,
-        border: const OutlineInputBorder(borderRadius: AppRadii.fieldRadius),
         suffixIcon: IconButton(
           icon: Icon(_obscure ? Icons.visibility_off : Icons.visibility),
+          tooltip: _obscure ? 'Show password' : 'Hide password',
           onPressed: () => setState(() => _obscure = !_obscure),
         ),
       ),
@@ -76,7 +74,8 @@ class _PasswordFieldState extends State<PasswordField> {
   }
 }
 
-/// Full-width berry pill CTA with an inline loading state.
+/// Full-width pill CTA with an inline loading state. Height/shape/colours come
+/// from filledButtonTheme; the spinner uses onPrimary so it adapts to the theme.
 class PrimaryButton extends StatelessWidget {
   const PrimaryButton({
     super.key,
@@ -93,17 +92,54 @@ class PrimaryButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return SizedBox(
       width: double.infinity,
-      height: 52,
       child: FilledButton(
-        style: FilledButton.styleFrom(shape: const StadiumBorder()),
         onPressed: loading ? null : onPressed,
         child: loading
-            ? const SizedBox(
-                height: 22,
-                width: 22,
-                child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+            ? SizedBox(
+                height: AppSizes.buttonSpinner,
+                width: AppSizes.buttonSpinner,
+                child: CircularProgressIndicator(
+                  strokeWidth: AppSizes.buttonSpinnerStroke,
+                  color: Theme.of(context).colorScheme.onPrimary,
+                ),
               )
             : Text(label),
+      ),
+    );
+  }
+}
+
+/// Shared layout for the auth screens: app bar (optional), a scrollable,
+/// width-capped, centered column. Centralizes padding, the tablet max-width,
+/// and SafeArea so the screens only describe their content.
+class AuthScaffold extends StatelessWidget {
+  const AuthScaffold({
+    super.key,
+    required this.children,
+    this.appBar,
+  });
+
+  final List<Widget> children;
+  final PreferredSizeWidget? appBar;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: appBar,
+      body: SafeArea(
+        child: Center(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(AppSpacing.margin),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: AppSizes.maxContentWidth),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: children,
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }

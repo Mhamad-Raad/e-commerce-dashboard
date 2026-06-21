@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 
-import '../../app/theme/app_colors.dart';
+import '../l10n/l10n_ext.dart';
 
 /// The shared app bar used across the app: "Rozhna's Store" wordmark centered,
-/// optional back (left) and cart (right).
+/// optional back (left) and cart (right). Uses colorScheme.primary so the
+/// wordmark stays readable in dark mode.
 class RozhnaAppBar extends StatelessWidget implements PreferredSizeWidget {
   const RozhnaAppBar({
     super.key,
@@ -21,9 +22,9 @@ class RozhnaAppBar extends StatelessWidget implements PreferredSizeWidget {
     return AppBar(
       automaticallyImplyLeading: showBack,
       title: Text(
-        "Rozhna's Store",
+        context.l10n.brandName,
         style: Theme.of(context).textTheme.titleLarge?.copyWith(
-              color: AppColors.berry,
+              color: Theme.of(context).colorScheme.primary,
               fontStyle: FontStyle.italic,
               fontWeight: FontWeight.w700,
             ),

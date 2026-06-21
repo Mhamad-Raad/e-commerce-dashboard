@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../app/router/routes.dart';
 import '../../../../app/theme/app_spacing.dart';
 import '../../../../core/error/failure.dart';
+import '../../../../core/l10n/l10n_ext.dart';
 import '../../../../core/network/api_result.dart';
 import '../../../../core/widgets/rozhna_app_bar.dart';
 import '../providers/auth_controller.dart';
@@ -41,7 +42,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
     if (_name.text.trim().isEmpty ||
         _phone.text.trim().isEmpty ||
         _password.text.isEmpty) {
-      showMessage(context, 'Name, phone and password are required.');
+      showMessage(context, context.l10n.namePhonePasswordRequired);
       return;
     }
     setState(() => _loading = true);
@@ -61,8 +62,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
       case Failed(failure: final failure):
         if (failure is ConflictFailure) {
           // Number already has an account — no OTP was sent. Send them to login.
-          showMessage(context,
-              'This number already has an account. Please log in.');
+          showMessage(context, context.l10n.numberAlreadyRegistered);
           context.go(Routes.login);
         } else {
           showFailure(context, failure);
@@ -72,56 +72,49 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    final l10n = context.l10n;
+    return AuthScaffold(
       appBar: const RozhnaAppBar(showBack: true),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(AppSpacing.margin),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text('Create your account',
-                  style: Theme.of(context).textTheme.headlineMedium),
-              const SizedBox(height: AppSpacing.lg),
-              AuthField(
-                controller: _name,
-                label: 'Full name',
-                textInputAction: TextInputAction.next,
-                autofillHints: const [AutofillHints.name],
-              ),
-              const SizedBox(height: AppSpacing.md),
-              AuthField(
-                controller: _phone,
-                label: 'Phone number',
-                prefixText: '+964 ',
-                keyboardType: TextInputType.phone,
-                textInputAction: TextInputAction.next,
-                autofillHints: const [AutofillHints.telephoneNumber],
-              ),
-              const SizedBox(height: AppSpacing.md),
-              AuthField(
-                controller: _email,
-                label: 'Email (optional)',
-                keyboardType: TextInputType.emailAddress,
-                textInputAction: TextInputAction.next,
-                autofillHints: const [AutofillHints.email],
-              ),
-              const SizedBox(height: AppSpacing.md),
-              PasswordField(
-                controller: _password,
-                label: 'Password (min 8 characters)',
-                textInputAction: TextInputAction.done,
-              ),
-              const SizedBox(height: AppSpacing.xl),
-              PrimaryButton(
-                label: 'Create account',
-                loading: _loading,
-                onPressed: _submit,
-              ),
-            ],
-          ),
+      children: [
+        Text(l10n.createYourAccount,
+            style: Theme.of(context).textTheme.headlineMedium),
+        const SizedBox(height: AppSpacing.lg),
+        AuthField(
+          controller: _name,
+          label: l10n.fullName,
+          textInputAction: TextInputAction.next,
+          autofillHints: const [AutofillHints.name],
         ),
-      ),
+        const SizedBox(height: AppSpacing.md),
+        AuthField(
+          controller: _phone,
+          label: l10n.phoneNumber,
+          prefixText: '+964 ',
+          keyboardType: TextInputType.phone,
+          textInputAction: TextInputAction.next,
+          autofillHints: const [AutofillHints.telephoneNumber],
+        ),
+        const SizedBox(height: AppSpacing.md),
+        AuthField(
+          controller: _email,
+          label: l10n.emailOptional,
+          keyboardType: TextInputType.emailAddress,
+          textInputAction: TextInputAction.next,
+          autofillHints: const [AutofillHints.email],
+        ),
+        const SizedBox(height: AppSpacing.md),
+        PasswordField(
+          controller: _password,
+          label: l10n.passwordMin8,
+          textInputAction: TextInputAction.done,
+        ),
+        const SizedBox(height: AppSpacing.xl),
+        PrimaryButton(
+          label: l10n.createAccount,
+          loading: _loading,
+          onPressed: _submit,
+        ),
+      ],
     );
   }
 }

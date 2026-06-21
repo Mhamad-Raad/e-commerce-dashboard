@@ -1,0 +1,50 @@
+{
+  "@@locale": "en",
+  "brandName": "Rozhna's Store",
+
+  "loginSubtitle": "Log in to continue",
+  "phoneNumber": "Phone number",
+  "password": "Password",
+  "forgotPassword": "Forgot password?",
+  "logIn": "Log in",
+  "newHere": "New here?",
+  "createAccount": "Create account",
+  "enterPhoneAndPassword": "Enter your phone number and password.",
+  "verifyToContinue": "Verify your number to continue — we sent a code.",
+
+  "createYourAccount": "Create your account",
+  "fullName": "Full name",
+  "emailOptional": "Email (optional)",
+  "passwordMin8": "Password (min 8 characters)",
+  "namePhonePasswordRequired": "Name, phone and password are required.",
+  "numberAlreadyRegistered": "This number already has an account. Please log in.",
+
+  "verifyYourNumber": "Verify your number",
+  "otpSentTo": "Enter the code we sent on WhatsApp to {phone}.",
+  "@otpSentTo": {
+    "placeholders": {
+      "phone": { "type": "String" }
+    }
+  },
+  "verificationCode": "Verification code",
+  "verify": "Verify",
+  "resendCode": "Didn't get it? Resend code",
+  "newCodeSent": "A new code is on its way.",
+  "enterTheCode": "Enter the code we sent you.",
+
+  "resetPassword": "Reset password",
+  "forgotSubtitle": "Enter your phone number and we'll send a reset code on WhatsApp.",
+  "sendCode": "Send code",
+  "enterPhone": "Enter your phone number.",
+  "ifRegisteredCodeSent": "If the number is registered, a code was sent.",
+
+  "newPasswordTitle": "New password",
+  "newPasswordSubtitle": "Enter the code we sent and choose a new password.",
+  "resetCode": "Reset code",
+  "newPasswordMin8": "New password (min 8 characters)",
+  "savePassword": "Save password",
+  "fillCodeAndPassword": "Fill in the code and your new password.",
+  "passwordUpdated": "Password updated. Please log in.",
+
+  "logOut": "Log out"
+}
