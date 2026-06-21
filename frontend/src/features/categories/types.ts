@@ -11,8 +11,12 @@ export interface AttributeDef {
 export interface Category {
   id: string;
   name: string;
+  nameAr: string | null;
+  nameCkb: string | null;
   slug: string;
   description: string | null;
+  descriptionAr: string | null;
+  descriptionCkb: string | null;
   imageUrl: string | null;
   isActive: boolean;
   attributeSchema: AttributeDef[];
@@ -30,7 +34,11 @@ export interface CategoryListResponse {
 
 export interface CategoryWritePayload {
   name: string;
+  nameAr?: string;
+  nameCkb?: string;
   description?: string;
+  descriptionAr?: string;
+  descriptionCkb?: string;
   imageUrl?: string | null;
   isActive?: boolean;
   attributeSchema?: AttributeDef[];

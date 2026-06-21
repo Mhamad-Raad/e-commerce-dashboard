@@ -1,8 +1,12 @@
 export interface Store {
   id: string;
   name: string;
+  nameAr: string | null;
+  nameCkb: string | null;
   slug: string;
   description: string | null;
+  descriptionAr: string | null;
+  descriptionCkb: string | null;
   logoUrl: string | null;
   bannerUrl: string | null;
   email: string | null;
@@ -46,7 +50,11 @@ export interface StoreListResponse {
 
 export interface StoreWritePayload {
   name: string;
+  nameAr?: string;
+  nameCkb?: string;
   description?: string;
+  descriptionAr?: string;
+  descriptionCkb?: string;
   logoUrl?: string | null;
   bannerUrl?: string | null;
   email?: string;

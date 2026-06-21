@@ -13,10 +13,10 @@ import { feeGroupsApi } from '@/features/feegroups/api';
 import { PageHeader } from '@/components/PageHeader';
 import { FormField } from '@/components/FormField';
 import { ImageUpload } from '@/components/ImageUpload';
+import { TranslatableInput } from '@/components/TranslatableInput';
 import { AsyncCombobox } from '@/components/AsyncCombobox';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -24,7 +24,11 @@ import { extractErrorMessage } from '@/lib/format';
 
 const schema = z.object({
   name: z.string().min(1).max(120),
+  nameAr: z.string().max(120).optional().or(z.literal('')),
+  nameCkb: z.string().max(120).optional().or(z.literal('')),
   description: z.string().max(2000).optional().or(z.literal('')),
+  descriptionAr: z.string().max(2000).optional().or(z.literal('')),
+  descriptionCkb: z.string().max(2000).optional().or(z.literal('')),
   logoUrl: z.string().url().optional().or(z.literal('')),
   bannerUrl: z.string().url().optional().or(z.literal('')),
   email: z.string().email().optional().or(z.literal('')),
@@ -55,7 +59,11 @@ type FormValues = z.infer<typeof schema>;
 
 const defaultValues: FormValues = {
   name: '',
+  nameAr: '',
+  nameCkb: '',
   description: '',
+  descriptionAr: '',
+  descriptionCkb: '',
   logoUrl: '',
   bannerUrl: '',
   email: '',
@@ -96,7 +104,11 @@ export function StoreForm() {
       const s = storeQuery.data;
       reset({
         name: s.name,
+        nameAr: s.nameAr ?? '',
+        nameCkb: s.nameCkb ?? '',
         description: s.description ?? '',
+        descriptionAr: s.descriptionAr ?? '',
+        descriptionCkb: s.descriptionCkb ?? '',
         logoUrl: s.logoUrl ?? '',
         bannerUrl: s.bannerUrl ?? '',
         email: s.email ?? '',
@@ -117,7 +129,11 @@ export function StoreForm() {
       const clean = (v?: string) => v?.trim() || undefined;
       const payload: StoreWritePayload = {
         name: values.name.trim(),
+        nameAr: clean(values.nameAr),
+        nameCkb: clean(values.nameCkb),
         description: clean(values.description),
+        descriptionAr: clean(values.descriptionAr),
+        descriptionCkb: clean(values.descriptionCkb),
         logoUrl: values.logoUrl?.trim() || null,
         bannerUrl: values.bannerUrl?.trim() || null,
         email: clean(values.email),
@@ -167,14 +183,38 @@ export function StoreForm() {
           <form onSubmit={handleSubmit((v) => saveMutation.mutate(v))} className="space-y-5" noValidate>
             <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
               <div className="md:col-span-2">
-                <FormField label={t('stores.name')} error={errors.name?.message}>
-                  <Input autoComplete="off" {...register('name')} />
-                </FormField>
+                <TranslatableInput
+                  label={t('stores.name')}
+                  required
+                  value={{
+                    en: watch('name') ?? '',
+                    ar: watch('nameAr') ?? '',
+                    ckb: watch('nameCkb') ?? '',
+                  }}
+                  onChange={(v) => {
+                    setValue('name', v.en, { shouldDirty: true });
+                    setValue('nameAr', v.ar, { shouldDirty: true });
+                    setValue('nameCkb', v.ckb, { shouldDirty: true });
+                  }}
+                  error={errors.name?.message}
+                />
               </div>
               <div className="md:col-span-2">
-                <FormField label={t('stores.description')} error={errors.description?.message}>
-                  <Textarea rows={3} {...register('description')} />
-                </FormField>
+                <TranslatableInput
+                  label={t('stores.description')}
+                  multiline
+                  value={{
+                    en: watch('description') ?? '',
+                    ar: watch('descriptionAr') ?? '',
+                    ckb: watch('descriptionCkb') ?? '',
+                  }}
+                  onChange={(v) => {
+                    setValue('description', v.en, { shouldDirty: true });
+                    setValue('descriptionAr', v.ar, { shouldDirty: true });
+                    setValue('descriptionCkb', v.ckb, { shouldDirty: true });
+                  }}
+                  error={errors.description?.message}
+                />
               </div>
               <FormField label={t('stores.logo')} error={errors.logoUrl?.message}>
                 <ImageUpload

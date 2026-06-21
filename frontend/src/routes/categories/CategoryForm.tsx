@@ -12,9 +12,9 @@ import type { AttributeType, CategoryWritePayload } from '@/features/categories/
 import { PageHeader } from '@/components/PageHeader';
 import { FormField } from '@/components/FormField';
 import { ImageUpload } from '@/components/ImageUpload';
+import { TranslatableInput } from '@/components/TranslatableInput';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -49,8 +49,12 @@ const attrRow = z
 const schema = z
   .object({
     name: z.string().min(1).max(60),
+    nameAr: z.string().max(60).optional().or(z.literal('')),
+    nameCkb: z.string().max(60).optional().or(z.literal('')),
     imageUrl: z.string().url().optional().or(z.literal('')),
     description: z.string().max(1000).optional().or(z.literal('')),
+    descriptionAr: z.string().max(1000).optional().or(z.literal('')),
+    descriptionCkb: z.string().max(1000).optional().or(z.literal('')),
     isActive: z.boolean(),
     attributeSchema: z.array(attrRow),
   })
@@ -82,8 +86,12 @@ type FormValues = z.infer<typeof schema>;
 
 const defaultValues: FormValues = {
   name: '',
+  nameAr: '',
+  nameCkb: '',
   imageUrl: '',
   description: '',
+  descriptionAr: '',
+  descriptionCkb: '',
   isActive: true,
   attributeSchema: [],
 };
@@ -118,8 +126,12 @@ export function CategoryForm() {
       const c = categoryQuery.data;
       reset({
         name: c.name,
+        nameAr: c.nameAr ?? '',
+        nameCkb: c.nameCkb ?? '',
         imageUrl: c.imageUrl ?? '',
         description: c.description ?? '',
+        descriptionAr: c.descriptionAr ?? '',
+        descriptionCkb: c.descriptionCkb ?? '',
         isActive: c.isActive,
         attributeSchema: (c.attributeSchema ?? []).map((a) => ({
           key: a.key,
@@ -135,8 +147,12 @@ export function CategoryForm() {
     mutationFn: (values: FormValues) => {
       const payload: CategoryWritePayload = {
         name: values.name.trim(),
+        nameAr: values.nameAr?.trim() || undefined,
+        nameCkb: values.nameCkb?.trim() || undefined,
         imageUrl: values.imageUrl?.trim() || null,
         description: values.description?.trim() || undefined,
+        descriptionAr: values.descriptionAr?.trim() || undefined,
+        descriptionCkb: values.descriptionCkb?.trim() || undefined,
         isActive: values.isActive,
         attributeSchema: values.attributeSchema.map((row) => ({
           key: row.key.trim() || toKey(row.label),
@@ -186,9 +202,21 @@ export function CategoryForm() {
       <form onSubmit={handleSubmit((v) => saveMutation.mutate(v))} className="space-y-5" noValidate>
         <Card>
           <CardContent className="space-y-5 pt-6">
-            <FormField label={t('categories.name')} error={errors.name?.message}>
-              <Input autoComplete="off" {...register('name')} />
-            </FormField>
+            <TranslatableInput
+              label={t('categories.name')}
+              required
+              value={{
+                en: watch('name') ?? '',
+                ar: watch('nameAr') ?? '',
+                ckb: watch('nameCkb') ?? '',
+              }}
+              onChange={(v) => {
+                setValue('name', v.en, { shouldDirty: true });
+                setValue('nameAr', v.ar, { shouldDirty: true });
+                setValue('nameCkb', v.ckb, { shouldDirty: true });
+              }}
+              error={errors.name?.message}
+            />
             <FormField label={t('categories.image')} error={errors.imageUrl?.message}>
               <ImageUpload
                 value={watch('imageUrl') ?? ''}
@@ -196,9 +224,21 @@ export function CategoryForm() {
                 folder="categories"
               />
             </FormField>
-            <FormField label={t('categories.description')} error={errors.description?.message}>
-              <Textarea rows={3} {...register('description')} />
-            </FormField>
+            <TranslatableInput
+              label={t('categories.description')}
+              multiline
+              value={{
+                en: watch('description') ?? '',
+                ar: watch('descriptionAr') ?? '',
+                ckb: watch('descriptionCkb') ?? '',
+              }}
+              onChange={(v) => {
+                setValue('description', v.en, { shouldDirty: true });
+                setValue('descriptionAr', v.ar, { shouldDirty: true });
+                setValue('descriptionCkb', v.ckb, { shouldDirty: true });
+              }}
+              error={errors.description?.message}
+            />
 
             <label className="flex items-center gap-2 text-sm">
               <Checkbox checked={isActive} onCheckedChange={(c) => setValue('isActive', c === true)} />

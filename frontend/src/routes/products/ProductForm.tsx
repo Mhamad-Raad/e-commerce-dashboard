@@ -13,6 +13,7 @@ import { storesApi } from '@/features/stores/api';
 import { categoriesApi } from '@/features/categories/api';
 import { settingsApi } from '@/features/settings/api';
 import { PageHeader } from '@/components/PageHeader';
+import { TranslatableInput } from '@/components/TranslatableInput';
 import { FormField } from '@/components/FormField';
 import { ImageUpload } from '@/components/ImageUpload';
 import { MultiImageUpload } from '@/components/MultiImageUpload';
@@ -28,6 +29,8 @@ import { extractErrorMessage, fromMinor, toMinor } from '@/lib/format';
 
 const schema = z.object({
   name: z.string().min(1).max(200),
+  nameAr: z.string().max(200).optional().or(z.literal('')),
+  nameCkb: z.string().max(200).optional().or(z.literal('')),
   sku: z.string().min(2).max(40).regex(/^[A-Z0-9_-]+$/i),
   price: z.string().min(1).refine((v) => !Number.isNaN(Number(v)) && Number(v) >= 0),
   salePrice: z
@@ -81,6 +84,8 @@ const schema = z.object({
   // Dynamic, category-driven values keyed by attribute key.
   attributes: z.record(z.any()),
   description: z.string().max(5000).optional().or(z.literal('')),
+  descriptionAr: z.string().max(5000).optional().or(z.literal('')),
+  descriptionCkb: z.string().max(5000).optional().or(z.literal('')),
   isActive: z.boolean(),
 })
   // Delivery override is all-or-nothing: both blank (inherit) or both set.
@@ -97,6 +102,8 @@ type FormValues = z.infer<typeof schema>;
 
 const defaultValues: FormValues = {
   name: '',
+  nameAr: '',
+  nameCkb: '',
   sku: '',
   price: '',
   salePrice: '',
@@ -113,6 +120,8 @@ const defaultValues: FormValues = {
   images: [],
   attributes: {},
   description: '',
+  descriptionAr: '',
+  descriptionCkb: '',
   isActive: true,
 };
 
@@ -156,6 +165,8 @@ export function ProductForm() {
       const p = productQuery.data;
       reset({
         name: p.name,
+        nameAr: p.nameAr ?? '',
+        nameCkb: p.nameCkb ?? '',
         sku: p.sku,
         price: fromMinor(p.priceCents, p.currency).toString(),
         salePrice: p.salePriceCents != null ? fromMinor(p.salePriceCents, p.currency).toString() : '',
@@ -172,6 +183,8 @@ export function ProductForm() {
         images: p.images ?? [],
         attributes: p.attributes ?? {},
         description: p.description ?? '',
+        descriptionAr: p.descriptionAr ?? '',
+        descriptionCkb: p.descriptionCkb ?? '',
         isActive: p.isActive,
       });
     }
@@ -191,6 +204,8 @@ export function ProductForm() {
 
       const payload: ProductWritePayload = {
         name: values.name.trim(),
+        nameAr: values.nameAr?.trim() || undefined,
+        nameCkb: values.nameCkb?.trim() || undefined,
         sku: values.sku.trim(),
         priceCents: toMinor(Number(values.price), values.currency),
         salePriceCents: values.salePrice ? toMinor(Number(values.salePrice), values.currency) : null,
@@ -208,6 +223,8 @@ export function ProductForm() {
         images: values.images,
         attributes: cleanedAttributes,
         description: values.description?.trim() || undefined,
+        descriptionAr: values.descriptionAr?.trim() || undefined,
+        descriptionCkb: values.descriptionCkb?.trim() || undefined,
         isActive: values.isActive,
       };
       return isEdit ? productsApi.update(id!, payload) : productsApi.create(payload);
@@ -268,9 +285,21 @@ export function ProductForm() {
         <CardContent className="pt-6">
           <form onSubmit={handleSubmit((v) => saveMutation.mutate(v))} className="space-y-5" noValidate>
             <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-              <FormField label={t('products.name')} error={errors.name?.message}>
-                <Input autoComplete="off" {...register('name')} />
-              </FormField>
+              <TranslatableInput
+                label={t('products.name')}
+                required
+                value={{
+                  en: watch('name') ?? '',
+                  ar: watch('nameAr') ?? '',
+                  ckb: watch('nameCkb') ?? '',
+                }}
+                onChange={(v) => {
+                  setValue('name', v.en, { shouldDirty: true });
+                  setValue('nameAr', v.ar, { shouldDirty: true });
+                  setValue('nameCkb', v.ckb, { shouldDirty: true });
+                }}
+                error={errors.name?.message}
+              />
               <FormField label={t('products.sku')} error={errors.sku?.message}>
                 <Input className="font-mono" autoComplete="off" {...register('sku')} />
               </FormField>
@@ -388,9 +417,21 @@ export function ProductForm() {
                 </FormField>
               </div>
               <div className="md:col-span-2">
-                <FormField label={t('products.description')} error={errors.description?.message}>
-                  <Textarea rows={4} {...register('description')} />
-                </FormField>
+                <TranslatableInput
+                  label={t('products.description')}
+                  multiline
+                  value={{
+                    en: watch('description') ?? '',
+                    ar: watch('descriptionAr') ?? '',
+                    ckb: watch('descriptionCkb') ?? '',
+                  }}
+                  onChange={(v) => {
+                    setValue('description', v.en, { shouldDirty: true });
+                    setValue('descriptionAr', v.ar, { shouldDirty: true });
+                    setValue('descriptionCkb', v.ckb, { shouldDirty: true });
+                  }}
+                  error={errors.description?.message}
+                />
               </div>
 
               {attrSchema.length > 0 && (

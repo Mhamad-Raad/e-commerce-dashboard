@@ -35,7 +35,11 @@ export interface ProductVariant {
 export interface Product {
   id: string;
   name: string;
+  nameAr: string | null;
+  nameCkb: string | null;
   description: string | null;
+  descriptionAr: string | null;
+  descriptionCkb: string | null;
   sku: string;
   priceCents: number;
   salePriceCents: number | null;
@@ -82,7 +86,11 @@ export interface ProductListResponse {
 
 export interface ProductWritePayload {
   name: string;
+  nameAr?: string;
+  nameCkb?: string;
   description?: string;
+  descriptionAr?: string;
+  descriptionCkb?: string;
   sku: string;
   priceCents: number;
   salePriceCents?: number | null;
