@@ -7,6 +7,7 @@ import '../../../core/error/failure.dart';
 import '../../../core/l10n/l10n_ext.dart';
 import '../../../core/widgets/app_network_image.dart';
 import '../../../core/widgets/rozhna_app_bar.dart';
+import '../../../core/widgets/skeleton.dart';
 import '../data/blog_repository.dart';
 
 /// Full story/blog article reader.
@@ -24,7 +25,7 @@ class BlogArticleScreen extends ConsumerWidget {
     return Scaffold(
       appBar: const RozhnaAppBar(showBack: true),
       body: post.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const _ArticleSkeleton(),
         error: (error, _) => Center(
           child: Padding(
             padding: const EdgeInsets.all(AppSpacing.margin),
@@ -71,6 +72,41 @@ class BlogArticleScreen extends ConsumerWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+/// Loading placeholder mirroring the article (cover → title → body lines).
+class _ArticleSkeleton extends StatelessWidget {
+  const _ArticleSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    return Shimmer(
+      child: ListView(
+        physics: const NeverScrollableScrollPhysics(),
+        children: [
+          const SkeletonBox(
+            height: 200,
+            radius: BorderRadius.vertical(bottom: Radius.circular(AppRadii.card)),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(AppSpacing.margin),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SkeletonBox(width: 220, height: 28),
+                const SizedBox(height: AppSpacing.lg),
+                for (var i = 0; i < 6; i++) ...[
+                  const SkeletonBox(height: 14),
+                  const SizedBox(height: AppSpacing.sm),
+                ],
+                const SkeletonBox(width: 180, height: 14),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

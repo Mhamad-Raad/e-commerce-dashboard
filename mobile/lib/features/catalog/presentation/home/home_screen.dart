@@ -9,6 +9,7 @@ import '../../../../core/widgets/rozhna_app_bar.dart';
 import '../../data/home_repository.dart';
 import '../../domain/home_section.dart';
 import 'sections/home_section_view.dart';
+import 'widgets/home_skeleton.dart';
 
 /// Storefront landing — a server-driven, dashboard-built list of sections.
 class HomeScreen extends ConsumerWidget {
@@ -20,7 +21,7 @@ class HomeScreen extends ConsumerWidget {
     return Scaffold(
       appBar: const RozhnaAppBar(showCart: true),
       body: layout.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const HomeSkeleton(),
         error: (error, _) => _HomeError(
           message: error is Failure ? error.message : context.l10n.homeLoadError,
           onRetry: () => ref.invalidate(homeProvider),
