@@ -557,7 +557,10 @@ model HomeSectionItem {
   position   Int             @default(0)
   // Optional overrides; otherwise the target's own image/name is used.
   imageUrl   String?
-  label      String?
+  label      String?  // headline / display name
+  subtitle   String?  // banner sub-headline
+  badge      String?  // pill badge, e.g. "NEW ARRIVALS" / "BESTSELLER"
+  ctaLabel   String?  // banner call-to-action button text
   // Tap target — at most one of the relations below is set, matching targetType.
   targetType HomeTargetType  @default(NONE)
   productId  String?

@@ -42,6 +42,7 @@ class ProductsSection extends StatelessWidget {
           width: AppSizes.productSliderItemWidth,
           child: ProductCard(
             product: items[i].product!,
+            badge: items[i].badge,
             onTap: () => navigateToHomeTarget(context, items[i]),
           ),
         ),
@@ -63,6 +64,7 @@ class ProductsSection extends StatelessWidget {
       itemCount: items.length,
       itemBuilder: (context, i) => ProductCard(
         product: items[i].product!,
+        badge: items[i].badge,
         onTap: () => navigateToHomeTarget(context, items[i]),
       ),
     );

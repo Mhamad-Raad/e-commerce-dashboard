@@ -17,6 +17,9 @@ class BannerSection extends StatelessWidget {
         BannerSlide(
           imageUrl: item.imageUrl ?? item.product?.imageUrl,
           title: item.label,
+          subtitle: item.subtitle,
+          badge: item.badge,
+          ctaLabel: item.ctaLabel,
           onTap: () => navigateToHomeTarget(context, item),
         ),
     ];

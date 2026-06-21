@@ -5,6 +5,15 @@ import 'package:google_fonts/google_fonts.dart';
 class AppTypography {
   AppTypography._();
 
+  /// Italic Bodoni Moda — the "boutique brand" label above product names and in
+  /// editorial spots. Centralized so the serif brand voice is consistent.
+  static TextStyle brand(Color color) => GoogleFonts.bodoniModa(
+        fontSize: 13,
+        fontStyle: FontStyle.italic,
+        fontWeight: FontWeight.w500,
+        color: color,
+      );
+
   static TextTheme textTheme(ColorScheme scheme) {
     final base = GoogleFonts.plusJakartaSansTextTheme();
     return base

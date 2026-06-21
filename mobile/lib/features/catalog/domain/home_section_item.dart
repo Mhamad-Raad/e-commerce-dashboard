@@ -23,6 +23,9 @@ class HomeSectionItem {
     required this.targetType,
     this.imageUrl,
     this.label,
+    this.subtitle,
+    this.badge,
+    this.ctaLabel,
     this.url,
     this.product,
     this.category,
@@ -34,6 +37,9 @@ class HomeSectionItem {
   final HomeTargetType targetType;
   final String? imageUrl;
   final String? label;
+  final String? subtitle;
+  final String? badge;
+  final String? ctaLabel;
   final String? url;
   final CatalogProduct? product;
   final CatalogCategory? category;
@@ -48,6 +54,9 @@ class HomeSectionItem {
       targetType: _targetFromString(json['targetType'] as String?),
       imageUrl: json['imageUrl'] as String?,
       label: json['label'] as String?,
+      subtitle: json['subtitle'] as String?,
+      badge: json['badge'] as String?,
+      ctaLabel: json['ctaLabel'] as String?,
       url: json['url'] as String?,
       product: sub('product') == null ? null : CatalogProduct.fromJson(sub('product')!),
       category:

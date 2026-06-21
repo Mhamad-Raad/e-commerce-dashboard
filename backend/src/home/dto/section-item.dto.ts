@@ -17,6 +17,18 @@ export class HomeSectionItemDto {
   @IsString()
   label?: string;
 
+  @IsOptional()
+  @IsString()
+  subtitle?: string;
+
+  @IsOptional()
+  @IsString()
+  badge?: string;
+
+  @IsOptional()
+  @IsString()
+  ctaLabel?: string;
+
   @IsEnum(HomeTargetType)
   targetType!: HomeTargetType;
 

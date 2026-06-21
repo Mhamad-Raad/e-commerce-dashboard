@@ -4,19 +4,30 @@ import '../../../../../app/theme/app_radii.dart';
 import '../../../../../app/theme/app_sizes.dart';
 import '../../../../../app/theme/app_spacing.dart';
 import '../../../../../core/widgets/app_network_image.dart';
+import 'pill_badge.dart';
 
-/// One banner slide: an image with optional title/subtitle overlay and a tap.
+/// One banner slide: an image with an optional badge / serif headline / subtitle
+/// / CTA overlay and a tap target.
 class BannerSlide {
-  const BannerSlide({required this.imageUrl, this.title, this.subtitle, this.onTap});
+  const BannerSlide({
+    this.imageUrl,
+    this.title,
+    this.subtitle,
+    this.badge,
+    this.ctaLabel,
+    this.onTap,
+  });
 
   final String? imageUrl;
   final String? title;
   final String? subtitle;
+  final String? badge;
+  final String? ctaLabel;
   final VoidCallback? onTap;
 }
 
-/// Swipeable banners with a dot indicator. A gradient scrim keeps any overlay
-/// text legible. Used by the BANNER home section.
+/// Swipeable hero banners with a dot indicator — editorial style: badge pill,
+/// Bodoni headline, and a pill CTA over a scrimmed image.
 class HeroCarousel extends StatefulWidget {
   const HeroCarousel({super.key, required this.slides});
 
@@ -71,9 +82,10 @@ class _Slide extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
     final text = Theme.of(context).textTheme;
-    final hasText = (slide.title?.isNotEmpty ?? false) ||
-        (slide.subtitle?.isNotEmpty ?? false);
+    final hasOverlay = [slide.title, slide.subtitle, slide.badge, slide.ctaLabel]
+        .any((v) => v != null && v.isNotEmpty);
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.margin),
@@ -85,43 +97,71 @@ class _Slide extends StatelessWidget {
             fit: StackFit.expand,
             children: [
               AppNetworkImage(url: slide.imageUrl),
-              if (hasText) ...[
+              if (hasOverlay)
                 const DecoratedBox(
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,
-                      colors: [Colors.transparent, Colors.black54],
+                      colors: [Colors.black26, Colors.transparent, Colors.black87],
+                      stops: [0, 0.45, 1],
                     ),
                   ),
                 ),
-                Padding(
+              if (slide.badge != null && slide.badge!.isNotEmpty)
+                Align(
+                  alignment: AlignmentDirectional.topStart,
+                  child: Padding(
+                    padding: const EdgeInsets.all(AppSpacing.md),
+                    child: PillBadge(label: slide.badge!),
+                  ),
+                ),
+              Align(
+                alignment: AlignmentDirectional.bottomStart,
+                child: Padding(
                   padding: const EdgeInsets.all(AppSpacing.md),
                   child: Column(
-                    mainAxisAlignment: MainAxisAlignment.end,
+                    mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      if (slide.title != null)
+                      if (slide.title != null && slide.title!.isNotEmpty)
                         Text(
                           slide.title!,
-                          maxLines: 1,
+                          maxLines: 2,
                           overflow: TextOverflow.ellipsis,
-                          style: text.titleLarge?.copyWith(
+                          style: text.headlineMedium?.copyWith(
                             color: Colors.white,
                             fontWeight: FontWeight.w700,
+                            height: 1.1,
                           ),
                         ),
-                      if (slide.subtitle != null)
+                      if (slide.subtitle != null && slide.subtitle!.isNotEmpty) ...[
+                        const SizedBox(height: AppSpacing.xs),
                         Text(
                           slide.subtitle!,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: text.bodySmall?.copyWith(color: Colors.white70),
                         ),
+                      ],
+                      if (slide.ctaLabel != null && slide.ctaLabel!.isNotEmpty) ...[
+                        const SizedBox(height: AppSpacing.sm),
+                        FilledButton(
+                          onPressed: slide.onTap,
+                          style: FilledButton.styleFrom(
+                            backgroundColor: scheme.primary,
+                            foregroundColor: scheme.onPrimary,
+                            minimumSize: const Size(0, 40),
+                            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+                            shape: const StadiumBorder(),
+                          ),
+                          child: Text(slide.ctaLabel!),
+                        ),
+                      ],
                     ],
                   ),
                 ),
-              ],
+              ),
             ],
           ),
         ),
