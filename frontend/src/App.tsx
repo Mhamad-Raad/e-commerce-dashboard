@@ -36,6 +36,9 @@ const StoreDetail = lazy(() =>
 const Homepage = lazy(() =>
   import('./routes/homepage/Homepage').then((m) => ({ default: m.Homepage })),
 );
+const HomeBuilder = lazy(() =>
+  import('./routes/home-layout/HomeBuilder').then((m) => ({ default: m.HomeBuilder })),
+);
 const CustomersList = lazy(() =>
   import('./routes/customers/CustomersList').then((m) => ({ default: m.CustomersList })),
 );
@@ -121,6 +124,7 @@ export default function App() {
           }
         >
           <Route path="/" element={<Overview />} />
+          <Route path="/home-builder" element={<HomeBuilder />} />
           <Route path="/homepage" element={<Homepage />} />
           <Route path="/products" element={<ProductsList />} />
           <Route path="/products/new" element={<ProductForm />} />

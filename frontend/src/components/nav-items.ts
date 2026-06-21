@@ -8,6 +8,7 @@ import {
   ClipboardList,
   BarChart3,
   LayoutTemplate,
+  Blocks,
   TicketPercent,
   Boxes,
   Receipt,
@@ -37,6 +38,7 @@ export const navGroups: NavGroup[] = [
   {
     labelKey: 'nav.group_storefront',
     items: [
+      { to: '/home-builder', labelKey: 'nav.home_builder', icon: Blocks },
       { to: '/homepage', labelKey: 'nav.homepage', icon: LayoutTemplate },
       { to: '/stores', labelKey: 'nav.stores', icon: Store },
     ],
