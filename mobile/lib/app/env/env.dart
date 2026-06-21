@@ -15,10 +15,13 @@ class AppConfig {
   final String apiBaseUrl;
   final bool assistantEnabled;
 
-  // TODO: replace with the real dev/prod API base URLs (Neon/Render dev; prod parked).
+  // Local backend for now. 10.0.2.2 = the host machine from the Android emulator;
+  // use http://localhost:3000/api on an iOS simulator, or your machine's LAN IP
+  // (e.g. http://192.168.x.x:3000/api) from a physical device. Swap to the
+  // deployed Render dev URL once the customer-auth endpoints are pushed there.
   static const dev = AppConfig(
     env: Env.dev,
-    apiBaseUrl: 'https://dev-api.rozhna.example/api',
+    apiBaseUrl: 'http://10.0.2.2:3000/api',
   );
 
   static const prod = AppConfig(

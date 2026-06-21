@@ -2,35 +2,69 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../features/auth/presentation/forgot/forgot_password_screen.dart';
 import '../../features/auth/presentation/login/login_screen.dart';
+import '../../features/auth/presentation/otp/otp_screen.dart';
 import '../../features/auth/presentation/providers/auth_controller.dart';
+import '../../features/auth/presentation/reset/reset_password_screen.dart';
+import '../../features/auth/presentation/signup/signup_screen.dart';
+import '../../features/auth/presentation/splash/splash_screen.dart';
 import '../../features/catalog/presentation/home/home_screen.dart';
 import 'routes.dart';
 
-/// App router. A single [redirect] enforces auth gating (no guest checkout).
+/// App router. A single [redirect] enforces auth gating (no guest checkout):
+/// while the session is restoring we sit on the splash, then route to home or
+/// login based on the resolved [AuthStatus].
 final appRouterProvider = Provider<GoRouter>((ref) {
   final auth = _AuthRefresh(ref);
 
   return GoRouter(
-    initialLocation: Routes.home,
+    initialLocation: Routes.splash,
     refreshListenable: auth,
     redirect: (context, state) {
-      final loggedIn = ref.read(isLoggedInProvider);
-      final goingToAuth = state.matchedLocation.startsWith('/auth');
-      if (!loggedIn && !goingToAuth) return Routes.login;
-      if (loggedIn && goingToAuth) return Routes.home;
+      final status = ref.read(authControllerProvider).status;
+      final location = state.matchedLocation;
+      final inAuthArea =
+          location.startsWith('/auth') || location == Routes.splash;
+
+      if (status == AuthStatus.unknown) {
+        return location == Routes.splash ? null : Routes.splash;
+      }
+      final loggedIn = status == AuthStatus.authenticated;
+      if (!loggedIn && !inAuthArea) return Routes.login;
+      if (loggedIn && inAuthArea) return Routes.home;
       return null;
     },
     routes: [
+      GoRoute(path: Routes.splash, builder: (_, _) => const SplashScreen()),
       GoRoute(path: Routes.home, builder: (_, _) => const HomeScreen()),
       GoRoute(path: Routes.login, builder: (_, _) => const LoginScreen()),
+      GoRoute(path: Routes.signup, builder: (_, _) => const SignupScreen()),
+      GoRoute(
+        path: Routes.otp,
+        builder: (_, state) => OtpScreen(phone: _phoneArg(state)),
+      ),
+      GoRoute(
+        path: Routes.forgotPassword,
+        builder: (_, _) => const ForgotPasswordScreen(),
+      ),
+      GoRoute(
+        path: Routes.resetPassword,
+        builder: (_, state) => ResetPasswordScreen(phone: _phoneArg(state)),
+      ),
     ],
   );
 });
 
-/// Bridges the [isLoggedInProvider] state into a Listenable go_router can watch.
+// OTP / reset screens receive the phone via `extra: {'phone': ...}`.
+String _phoneArg(GoRouterState state) {
+  final extra = state.extra;
+  return extra is Map && extra['phone'] is String ? extra['phone'] as String : '';
+}
+
+/// Bridges [authControllerProvider] into a Listenable go_router can watch.
 class _AuthRefresh extends ChangeNotifier {
   _AuthRefresh(Ref ref) {
-    ref.listen<bool>(isLoggedInProvider, (_, _) => notifyListeners());
+    ref.listen<AuthState>(authControllerProvider, (_, _) => notifyListeners());
   }
 }

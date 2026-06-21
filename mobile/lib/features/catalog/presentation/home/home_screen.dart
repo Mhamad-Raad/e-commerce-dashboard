@@ -38,7 +38,7 @@ class HomeScreen extends ConsumerWidget {
                 child: const Text('Toggle theme'),
               ),
               TextButton(
-                onPressed: () => ref.read(isLoggedInProvider.notifier).logOut(),
+                onPressed: () => ref.read(authControllerProvider.notifier).logout(),
                 child: const Text('Log out'),
               ),
             ],
