@@ -3,13 +3,18 @@ import 'package:flutter/material.dart';
 import '../../../../../app/theme/app_sizes.dart';
 import '../../../../../app/theme/app_spacing.dart';
 import '../../../../../core/widgets/app_network_image.dart';
-import '../../../domain/catalog_category.dart';
 
-/// Circular category image + name, used in the home categories row.
-class CategoryAvatar extends StatelessWidget {
-  const CategoryAvatar({super.key, required this.category, this.onTap});
+/// Circular image + label, used by the Brands and Categories sections.
+class CircleTile extends StatelessWidget {
+  const CircleTile({
+    super.key,
+    required this.imageUrl,
+    required this.label,
+    this.onTap,
+  });
 
-  final CatalogCategory category;
+  final String? imageUrl;
+  final String label;
   final VoidCallback? onTap;
 
   @override
@@ -23,14 +28,14 @@ class CategoryAvatar extends StatelessWidget {
           children: [
             ClipOval(
               child: AppNetworkImage(
-                url: category.imageUrl,
+                url: imageUrl,
                 width: AppSizes.categoryAvatar,
                 height: AppSizes.categoryAvatar,
               ),
             ),
             const SizedBox(height: AppSpacing.xs),
             Text(
-              category.name,
+              label,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               textAlign: TextAlign.center,

@@ -10,6 +10,7 @@ import '../../features/auth/presentation/reset/reset_password_screen.dart';
 import '../../features/auth/presentation/signup/signup_screen.dart';
 import '../../features/auth/presentation/splash/splash_screen.dart';
 import '../../features/account/presentation/profile_screen.dart';
+import '../../features/blog/presentation/blog_article_screen.dart';
 import '../../features/catalog/presentation/home/home_screen.dart';
 import '../../features/catalog/presentation/shop/shop_screen.dart';
 import '../../features/search/presentation/search_screen.dart';
@@ -59,6 +60,12 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             GoRoute(path: Routes.profile, builder: (_, _) => const ProfileScreen()),
           ]),
         ],
+      ),
+      // Full-screen article reader, pushed over the tab shell.
+      GoRoute(
+        path: '${Routes.blog}/:id',
+        builder: (_, state) =>
+            BlogArticleScreen(id: state.pathParameters['id']!),
       ),
       GoRoute(path: Routes.login, builder: (_, _) => const LoginScreen()),
       GoRoute(path: Routes.signup, builder: (_, _) => const SignupScreen()),

@@ -1,39 +1,35 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../app/theme/app_sizes.dart';
 import '../../../../app/theme/app_spacing.dart';
 import '../../../../core/error/failure.dart';
 import '../../../../core/l10n/l10n_ext.dart';
 import '../../../../core/widgets/rozhna_app_bar.dart';
 import '../../data/home_repository.dart';
-import '../../domain/home_data.dart';
-import 'widgets/category_avatar.dart';
-import 'widgets/hero_carousel.dart';
-import 'widgets/product_card.dart';
-import 'widgets/section_header.dart';
+import '../../domain/home_section.dart';
+import 'sections/home_section_view.dart';
 
-/// Storefront landing: hero banners, featured categories, featured products.
+/// Storefront landing — a server-driven, dashboard-built list of sections.
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final home = ref.watch(homeProvider);
+    final layout = ref.watch(homeProvider);
     return Scaffold(
       appBar: const RozhnaAppBar(showCart: true),
-      body: home.when(
+      body: layout.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, _) => _HomeError(
           message: error is Failure ? error.message : context.l10n.homeLoadError,
           onRetry: () => ref.invalidate(homeProvider),
         ),
-        data: (data) => RefreshIndicator(
+        data: (sections) => RefreshIndicator(
           onRefresh: () async {
             ref.invalidate(homeProvider);
             await ref.read(homeProvider.future);
           },
-          child: _HomeBody(data: data),
+          child: _HomeBody(sections: sections),
         ),
       ),
     );
@@ -41,17 +37,19 @@ class HomeScreen extends ConsumerWidget {
 }
 
 class _HomeBody extends StatelessWidget {
-  const _HomeBody({required this.data});
+  const _HomeBody({required this.sections});
 
-  final HomeData data;
+  final List<HomeSection> sections;
 
   @override
   Widget build(BuildContext context) {
-    final isEmpty = data.banners.isEmpty &&
-        data.featuredCategories.isEmpty &&
-        data.featuredProducts.isEmpty;
+    // Only render sections that have something to show.
+    final visible = sections
+        .where((s) =>
+            s.type != HomeSectionType.unknown && s.items.isNotEmpty)
+        .toList();
 
-    if (isEmpty) {
+    if (visible.isEmpty) {
       // Keep it scrollable so pull-to-refresh still works.
       return ListView(
         children: [
@@ -61,52 +59,11 @@ class _HomeBody extends StatelessWidget {
       );
     }
 
-    return CustomScrollView(
-      slivers: [
-        if (data.banners.isNotEmpty)
-          SliverPadding(
-            padding: const EdgeInsets.only(top: AppSpacing.md),
-            sliver: SliverToBoxAdapter(child: HeroCarousel(banners: data.banners)),
-          ),
-        if (data.featuredCategories.isNotEmpty) ...[
-          SliverToBoxAdapter(child: SectionHeader(title: context.l10n.categoriesTitle)),
-          SliverToBoxAdapter(
-            child: SizedBox(
-              height: AppSizes.categoryAvatar + AppSpacing.xl + AppSpacing.sm,
-              child: ListView.separated(
-                scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.margin),
-                itemCount: data.featuredCategories.length,
-                separatorBuilder: (_, _) => const SizedBox(width: AppSpacing.sm),
-                itemBuilder: (_, i) =>
-                    CategoryAvatar(category: data.featuredCategories[i]),
-              ),
-            ),
-          ),
-        ],
-        if (data.featuredProducts.isNotEmpty) ...[
-          SliverToBoxAdapter(child: SectionHeader(title: context.l10n.featuredTitle)),
-          SliverPadding(
-            padding: const EdgeInsets.fromLTRB(
-              AppSpacing.margin,
-              0,
-              AppSpacing.margin,
-              AppSpacing.lg,
-            ),
-            sliver: SliverGrid.builder(
-              gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                maxCrossAxisExtent: AppSizes.productCardMaxWidth,
-                mainAxisSpacing: AppSpacing.gutter,
-                crossAxisSpacing: AppSpacing.gutter,
-                childAspectRatio: 0.62,
-              ),
-              itemCount: data.featuredProducts.length,
-              itemBuilder: (_, i) =>
-                  ProductCard(product: data.featuredProducts[i]),
-            ),
-          ),
-        ],
-      ],
+    return ListView.separated(
+      padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
+      itemCount: visible.length,
+      separatorBuilder: (_, _) => const SizedBox(height: AppSpacing.lg),
+      itemBuilder: (_, i) => HomeSectionView(section: visible[i]),
     );
   }
 }

@@ -16,10 +16,10 @@ class CatalogCategory {
         id: json['id'] as String,
         name: (json['name'] as String?) ?? '',
         imageUrl: json['imageUrl'] as String?,
-        productCount: _count(json['_count']),
+        // Flat `productCount` (/home/layout) or nested `_count.products` (/homepage).
+        productCount: (json['productCount'] as int?) ?? _count(json['_count']),
       );
 
-  // The backend includes `_count: { products: n }`.
   static int _count(dynamic count) =>
       count is Map && count['products'] is int ? count['products'] as int : 0;
 }

@@ -37,7 +37,9 @@ class CatalogProduct {
         salePriceCents: (json['salePriceCents'] as num?)?.toInt(),
         currency: (json['currency'] as String?) ?? 'IQD',
         imageUrl: json['imageUrl'] as String?,
-        storeName: json['store'] is Map ? json['store']['name'] as String? : null,
+        // Accept the flat `storeName` (/home/layout) or nested store (/homepage).
+        storeName: (json['storeName'] as String?) ??
+            (json['store'] is Map ? json['store']['name'] as String? : null),
         ratingAvg: (json['ratingAvg'] as num?)?.toDouble() ?? 0,
         ratingCount: (json['ratingCount'] as num?)?.toInt() ?? 0,
       );

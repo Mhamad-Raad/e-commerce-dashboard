@@ -23,4 +23,15 @@ class AppSizes {
   /// Featured products grid: target card width — the grid fits as many columns
   /// as the screen allows, so it scales from phones to tablets.
   static const double productCardMaxWidth = 200;
+
+  /// Product card aspect ratio (width / height) — square image + text below.
+  static const double productCardAspect = 0.62;
+
+  /// Horizontal product slider item sizing.
+  static const double productSliderItemWidth = 160;
+  static const double productSliderHeight = 260;
+
+  /// Blog/story card sizing in a BLOG section slider.
+  static const double blogCardWidth = 260;
+  static const double blogSliderHeight = 230;
 }

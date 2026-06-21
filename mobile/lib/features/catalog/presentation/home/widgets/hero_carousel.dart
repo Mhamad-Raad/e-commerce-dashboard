@@ -4,14 +4,23 @@ import '../../../../../app/theme/app_radii.dart';
 import '../../../../../app/theme/app_sizes.dart';
 import '../../../../../app/theme/app_spacing.dart';
 import '../../../../../core/widgets/app_network_image.dart';
-import '../../../domain/hero_banner.dart';
 
-/// Swipeable hero banners with a dot indicator. A gradient scrim keeps the
-/// title/subtitle legible over any image.
+/// One banner slide: an image with optional title/subtitle overlay and a tap.
+class BannerSlide {
+  const BannerSlide({required this.imageUrl, this.title, this.subtitle, this.onTap});
+
+  final String? imageUrl;
+  final String? title;
+  final String? subtitle;
+  final VoidCallback? onTap;
+}
+
+/// Swipeable banners with a dot indicator. A gradient scrim keeps any overlay
+/// text legible. Used by the BANNER home section.
 class HeroCarousel extends StatefulWidget {
-  const HeroCarousel({super.key, required this.banners});
+  const HeroCarousel({super.key, required this.slides});
 
-  final List<HeroBanner> banners;
+  final List<BannerSlide> slides;
 
   @override
   State<HeroCarousel> createState() => _HeroCarouselState();
@@ -29,8 +38,8 @@ class _HeroCarouselState extends State<HeroCarousel> {
 
   @override
   Widget build(BuildContext context) {
-    final banners = widget.banners;
-    if (banners.isEmpty) return const SizedBox.shrink();
+    final slides = widget.slides;
+    if (slides.isEmpty) return const SizedBox.shrink();
 
     return Column(
       children: [
@@ -38,16 +47,16 @@ class _HeroCarouselState extends State<HeroCarousel> {
           height: AppSizes.heroHeight,
           child: PageView.builder(
             controller: _controller,
-            itemCount: banners.length,
+            itemCount: slides.length,
             onPageChanged: (i) => setState(() => _index = i),
-            itemBuilder: (_, i) => _Slide(banner: banners[i]),
+            itemBuilder: (_, i) => _Slide(slide: slides[i]),
           ),
         ),
-        if (banners.length > 1) ...[
+        if (slides.length > 1) ...[
           const SizedBox(height: AppSpacing.sm),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
-            children: List.generate(banners.length, (i) => _Dot(active: i == _index)),
+            children: List.generate(slides.length, (i) => _Dot(active: i == _index)),
           ),
         ],
       ],
@@ -56,57 +65,65 @@ class _HeroCarouselState extends State<HeroCarousel> {
 }
 
 class _Slide extends StatelessWidget {
-  const _Slide({required this.banner});
+  const _Slide({required this.slide});
 
-  final HeroBanner banner;
+  final BannerSlide slide;
 
   @override
   Widget build(BuildContext context) {
     final text = Theme.of(context).textTheme;
+    final hasText = (slide.title?.isNotEmpty ?? false) ||
+        (slide.subtitle?.isNotEmpty ?? false);
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.margin),
-      child: ClipRRect(
-        borderRadius: AppRadii.cardRadius,
-        child: Stack(
-          fit: StackFit.expand,
-          children: [
-            AppNetworkImage(url: banner.imageUrl),
-            // Scrim for text legibility over the image.
-            const DecoratedBox(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [Colors.transparent, Colors.black54],
-                ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(AppSpacing.md),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.end,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    banner.title,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: text.titleLarge?.copyWith(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w700,
+      child: GestureDetector(
+        onTap: slide.onTap,
+        child: ClipRRect(
+          borderRadius: AppRadii.cardRadius,
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              AppNetworkImage(url: slide.imageUrl),
+              if (hasText) ...[
+                const DecoratedBox(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [Colors.transparent, Colors.black54],
                     ),
                   ),
-                  if (banner.subtitle != null)
-                    Text(
-                      banner.subtitle!,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: text.bodySmall?.copyWith(color: Colors.white70),
-                    ),
-                ],
-              ),
-            ),
-          ],
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(AppSpacing.md),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      if (slide.title != null)
+                        Text(
+                          slide.title!,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: text.titleLarge?.copyWith(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      if (slide.subtitle != null)
+                        Text(
+                          slide.subtitle!,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: text.bodySmall?.copyWith(color: Colors.white70),
+                        ),
+                    ],
+                  ),
+                ),
+              ],
+            ],
+          ),
         ),
       ),
     );

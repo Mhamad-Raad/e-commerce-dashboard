@@ -8,6 +8,7 @@ class Routes {
   static const shop = '/shop';
   static const search = '/search';
   static const profile = '/profile';
+  static const blog = '/blog'; // article route is '/blog/:id'
   static const login = '/auth/login';
   static const signup = '/auth/signup';
   static const otp = '/auth/otp';
