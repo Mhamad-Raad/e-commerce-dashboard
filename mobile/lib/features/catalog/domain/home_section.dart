@@ -38,7 +38,10 @@ class HomeSection {
   }
 
   /// e.g. config['layout'] == 'grid' for a PRODUCTS grid (default: slider).
-  String get layout => (config['layout'] as String?) ?? 'slider';
+  String get layout {
+    final value = config['layout'];
+    return value is String ? value : 'slider';
+  }
 
   factory HomeSection.fromJson(Map<String, dynamic> json) => HomeSection(
         id: json['id'] as String,

@@ -27,9 +27,11 @@ class AppSizes {
   /// Product card aspect ratio (width / height) — square image + text below.
   static const double productCardAspect = 0.62;
 
-  /// Horizontal product slider item sizing.
+  /// Horizontal product slider item sizing. Height carries slack over the card's
+  /// content (square image + brand + 2-line name + price + card margin) to avoid
+  /// a RenderFlex overflow.
   static const double productSliderItemWidth = 160;
-  static const double productSliderHeight = 260;
+  static const double productSliderHeight = 292;
 
   /// Blog/story card sizing in a BLOG section slider.
   static const double blogCardWidth = 260;
