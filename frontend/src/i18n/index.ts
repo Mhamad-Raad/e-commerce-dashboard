@@ -3,15 +3,19 @@ import { initReactI18next } from 'react-i18next';
 import LanguageDetector from 'i18next-browser-languagedetector';
 import en from './locales/en.json';
 import ar from './locales/ar.json';
+import ckb from './locales/ckb.json';
 
-export const SUPPORTED_LANGUAGES = ['en', 'ar'] as const;
+export const SUPPORTED_LANGUAGES = ['en', 'ar', 'ckb'] as const;
 export type SupportedLanguage = (typeof SUPPORTED_LANGUAGES)[number];
 
+// Arabic and Kurdish Sorani (ckb) are RTL. Kurdish strings fall back to English
+// (fallbackLng) for keys not yet translated in ckb.json.
+const RTL_LANGS = ['ar', 'ckb'];
+
 function applyDirection(lng: string | undefined) {
-  const lang = lng === 'ar' ? 'ar' : 'en';
-  const dir = lang === 'ar' ? 'rtl' : 'ltr';
+  const lang = lng === 'ar' ? 'ar' : lng === 'ckb' ? 'ckb' : 'en';
   document.documentElement.lang = lang;
-  document.documentElement.dir = dir;
+  document.documentElement.dir = RTL_LANGS.includes(lang) ? 'rtl' : 'ltr';
 }
 
 i18n
@@ -21,6 +25,7 @@ i18n
     resources: {
       en: { translation: en },
       ar: { translation: ar },
+      ckb: { translation: ckb },
     },
     fallbackLng: 'en',
     supportedLngs: SUPPORTED_LANGUAGES as unknown as string[],

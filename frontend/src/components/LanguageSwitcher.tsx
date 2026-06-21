@@ -10,12 +10,13 @@ import {
 
 const LANGUAGES = [
   { code: 'en', label: 'English' },
+  { code: 'ckb', label: 'کوردی' },
   { code: 'ar', label: 'العربية' },
 ];
 
 export function LanguageSwitcher() {
   const { i18n, t } = useTranslation();
-  const current = i18n.resolvedLanguage === 'ar' ? 'ar' : 'en';
+  const current = i18n.resolvedLanguage ?? 'en';
 
   return (
     <DropdownMenu>

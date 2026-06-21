@@ -60,6 +60,8 @@
     "back": "Back",
     "theme": "Theme",
     "language": "Language",
+    "add_translations": "Add translations",
+    "hide_translations": "Hide translations",
     "light": "Light",
     "dark": "Dark",
     "system": "System",
