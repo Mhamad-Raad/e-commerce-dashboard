@@ -27,6 +27,10 @@ export class CreateSectionDto {
   @IsString()
   titleAr?: string;
 
+  @IsOptional()
+  @IsString()
+  titleCkb?: string;
+
   // Free-form per-type display options (e.g. { layout: 'slider' | 'grid' }).
   @IsOptional()
   @IsObject()

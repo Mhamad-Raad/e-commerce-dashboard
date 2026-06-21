@@ -342,9 +342,14 @@ model FeeGroup {
 
 model Store {
   id          String   @id @default(cuid())
+  // Trilingual: bare field = English (main); Ar/Ckb optional, fall back to English.
   name        String
+  nameAr      String?
+  nameCkb     String?
   slug        String   @unique
   description String?
+  descriptionAr  String?
+  descriptionCkb String?
   logoUrl     String?
   bannerUrl   String?
   email       String?
@@ -373,9 +378,14 @@ model Store {
 
 model Category {
   id          String   @id @default(cuid())
+  // Trilingual: bare field = English (main); Ar/Ckb optional, fall back to English.
   name        String   @unique
+  nameAr      String?
+  nameCkb     String?
   slug        String   @unique
   description String?
+  descriptionAr  String?
+  descriptionCkb String?
   imageUrl    String?
   isActive    Boolean  @default(true)
   // Category-driven attribute definitions for products in this category, e.g.
@@ -395,8 +405,13 @@ model Category {
 
 model Product {
   id             String    @id @default(cuid())
+  // Trilingual: bare field = English (main); Ar/Ckb optional, fall back to English.
   name           String
+  nameAr         String?
+  nameCkb        String?
   description    String?
+  descriptionAr  String?
+  descriptionCkb String?
   sku            String    @unique
   priceCents     Int
   salePriceCents Int?
@@ -535,9 +550,10 @@ model HomeSection {
   type      HomeSectionType
   position  Int             @default(0)
   isActive  Boolean         @default(true)
-  // Bilingual section heading (optional — some sections show no title).
+  // Trilingual section heading (optional — some sections show no title).
   titleEn   String?
   titleAr   String?
+  titleCkb  String?
   // Type-specific display options, e.g. {"layout":"slider"|"grid","autoplay":true}.
   // Kept as JSON so new per-type options need no schema change.
   config    Json            @default("{}")
@@ -557,10 +573,19 @@ model HomeSectionItem {
   position   Int             @default(0)
   // Optional overrides; otherwise the target's own image/name is used.
   imageUrl   String?
-  label      String?  // headline / display name
-  subtitle   String?  // banner sub-headline
-  badge      String?  // pill badge, e.g. "NEW ARRIVALS" / "BESTSELLER"
-  ctaLabel   String?  // banner call-to-action button text
+  // Trilingual item text — bare field = English (main); Ar/Ckb fall back to it.
+  label       String?  // headline / display name
+  labelAr     String?
+  labelCkb    String?
+  subtitle    String?  // banner sub-headline
+  subtitleAr  String?
+  subtitleCkb String?
+  badge       String?  // pill badge, e.g. "NEW ARRIVALS" / "BESTSELLER"
+  badgeAr     String?
+  badgeCkb    String?
+  ctaLabel    String?  // banner call-to-action button text
+  ctaLabelAr  String?
+  ctaLabelCkb String?
   // Tap target — at most one of the relations below is set, matching targetType.
   targetType HomeTargetType  @default(NONE)
   productId  String?
@@ -583,11 +608,14 @@ model BlogPost {
   id          String    @id @default(cuid())
   titleEn     String
   titleAr     String?
+  titleCkb    String?
   excerptEn   String?
   excerptAr   String?
-  // Rich body (HTML/markdown), bilingual.
+  excerptCkb  String?
+  // Rich body (HTML/markdown), trilingual.
   bodyEn      String?
   bodyAr      String?
+  bodyCkb     String?
   coverImage  String?
   isPublished Boolean   @default(false)
   publishedAt DateTime?

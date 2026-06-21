@@ -19,7 +19,23 @@ export class HomeSectionItemDto {
 
   @IsOptional()
   @IsString()
+  labelAr?: string;
+
+  @IsOptional()
+  @IsString()
+  labelCkb?: string;
+
+  @IsOptional()
+  @IsString()
   subtitle?: string;
+
+  @IsOptional()
+  @IsString()
+  subtitleAr?: string;
+
+  @IsOptional()
+  @IsString()
+  subtitleCkb?: string;
 
   @IsOptional()
   @IsString()
@@ -27,7 +43,23 @@ export class HomeSectionItemDto {
 
   @IsOptional()
   @IsString()
+  badgeAr?: string;
+
+  @IsOptional()
+  @IsString()
+  badgeCkb?: string;
+
+  @IsOptional()
+  @IsString()
   ctaLabel?: string;
+
+  @IsOptional()
+  @IsString()
+  ctaLabelAr?: string;
+
+  @IsOptional()
+  @IsString()
+  ctaLabelCkb?: string;
 
   @IsEnum(HomeTargetType)
   targetType!: HomeTargetType;

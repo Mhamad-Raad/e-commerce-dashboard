@@ -18,6 +18,11 @@ export class CreateBlogDto {
 
   @IsOptional()
   @IsString()
+  @Length(1, 200)
+  titleCkb?: string;
+
+  @IsOptional()
+  @IsString()
   @Length(0, 500)
   excerptEn?: string;
 
@@ -28,11 +33,20 @@ export class CreateBlogDto {
 
   @IsOptional()
   @IsString()
+  @Length(0, 500)
+  excerptCkb?: string;
+
+  @IsOptional()
+  @IsString()
   bodyEn?: string;
 
   @IsOptional()
   @IsString()
   bodyAr?: string;
+
+  @IsOptional()
+  @IsString()
+  bodyCkb?: string;
 
   @IsOptional()
   @IsUrl({ require_tld: false })

@@ -8,8 +8,10 @@ import {
   Param,
   Patch,
   Post,
+  Query,
 } from '@nestjs/common';
 import { Public } from '../auth/decorators/public.decorator';
+import { toLang } from '../common/i18n';
 import { BlogService } from './blog.service';
 import { CreateBlogDto } from './dto/create-blog.dto';
 import { UpdateBlogDto } from './dto/update-blog.dto';
@@ -21,8 +23,8 @@ export class BlogController {
   // Public: published posts only. Static routes are declared before ':id'.
   @Public()
   @Get()
-  listPublished() {
-    return this.blog.listPublished();
+  listPublished(@Query('lang') lang?: string) {
+    return this.blog.listPublished(toLang(lang));
   }
 
   // Admin: all posts incl. drafts (behind the global JwtAuthGuard).
@@ -38,8 +40,8 @@ export class BlogController {
 
   @Public()
   @Get(':id')
-  getPublished(@Param('id') id: string) {
-    return this.blog.getPublished(id);
+  getPublished(@Param('id') id: string, @Query('lang') lang?: string) {
+    return this.blog.getPublished(id, toLang(lang));
   }
 
   @Post()

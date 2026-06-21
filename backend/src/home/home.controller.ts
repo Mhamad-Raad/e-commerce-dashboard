@@ -8,8 +8,10 @@ import {
   Param,
   Patch,
   Post,
+  Query,
 } from '@nestjs/common';
 import { Public } from '../auth/decorators/public.decorator';
+import { toLang } from '../common/i18n';
 import { CreateSectionDto } from './dto/create-section.dto';
 import { ReorderSectionsDto } from './dto/reorder-sections.dto';
 import { UpdateSectionDto } from './dto/update-section.dto';
@@ -22,8 +24,8 @@ export class HomeController {
   // Public storefront layout — ordered active sections with resolved items.
   @Public()
   @Get('layout')
-  getLayout() {
-    return this.home.getLayout();
+  getLayout(@Query('lang') lang?: string) {
+    return this.home.getLayout(toLang(lang));
   }
 
   // ── Admin builder (behind the global JwtAuthGuard) ──────────────────────────

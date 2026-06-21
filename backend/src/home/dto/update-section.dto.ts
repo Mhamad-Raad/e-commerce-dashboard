@@ -25,6 +25,10 @@ export class UpdateSectionDto {
   titleAr?: string;
 
   @IsOptional()
+  @IsString()
+  titleCkb?: string;
+
+  @IsOptional()
   @IsObject()
   config?: Record<string, unknown>;
 
