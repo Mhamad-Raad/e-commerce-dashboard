@@ -19,15 +19,15 @@ export function normalizeIraqiPhone(raw: string): string | null {
   const hadPlus = raw.trim().startsWith('+');
   let digits = raw.replace(/\D/g, '');
 
-  // Strip the various country-code / trunk prefixes down to the 10-digit
-  // national number.
-  if (hadPlus && digits.startsWith('964')) {
-    digits = digits.slice(3);
-  } else if (digits.startsWith('00964')) {
+  // Strip the country code in any written form…
+  if (digits.startsWith('00964')) {
     digits = digits.slice(5);
-  } else if (digits.startsWith('964') && digits.length > 10) {
+  } else if ((hadPlus || digits.length > 10) && digits.startsWith('964')) {
     digits = digits.slice(3);
-  } else if (digits.startsWith('0')) {
+  }
+  // …then a single trunk '0' (handles "0770…" and a mistyped "+964 0770…").
+  // Iraqi mobile national numbers start with 7, never 0, so this is always safe.
+  if (digits.startsWith('0')) {
     digits = digits.slice(1);
   }
 

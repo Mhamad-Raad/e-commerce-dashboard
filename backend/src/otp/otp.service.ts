@@ -2,9 +2,11 @@ import {
   BadRequestException,
   Inject,
   Injectable,
+  Logger,
   HttpException,
   HttpStatus,
 } from '@nestjs/common';
+import { Cron, CronExpression } from '@nestjs/schedule';
 import { OtpChallenge, OtpPurpose } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { OTP_PROVIDER, OtpProvider } from './provider/otp-provider.interface';
@@ -19,10 +21,23 @@ const MAX_ATTEMPTS = 5; // wrong-code checks before lockout
 
 @Injectable()
 export class OtpService {
+  private readonly logger = new Logger(OtpService.name);
+
   constructor(
     private prisma: PrismaService,
     @Inject(OTP_PROVIDER) private provider: OtpProvider,
   ) {}
+
+  // Housekeeping: drop challenges a day past expiry (consumed ones carry an
+  // expiresAt too, so they age out). Keeps the table from growing unbounded.
+  @Cron(CronExpression.EVERY_DAY_AT_4AM)
+  async pruneExpiredChallenges(): Promise<void> {
+    const cutoff = new Date(Date.now() - 24 * 60 * 60 * 1000);
+    const { count } = await this.prisma.otpChallenge.deleteMany({
+      where: { expiresAt: { lt: cutoff } },
+    });
+    if (count) this.logger.log(`Pruned ${count} expired OTP challenge(s).`);
+  }
 
   /**
    * Send (or resend) a code for (purpose, phone). Reuses the active challenge so

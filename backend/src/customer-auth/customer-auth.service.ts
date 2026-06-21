@@ -3,9 +3,11 @@ import {
   ConflictException,
   ForbiddenException,
   Injectable,
+  Logger,
   UnauthorizedException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { Cron, CronExpression } from '@nestjs/schedule';
 import { JwtService } from '@nestjs/jwt';
 import { Customer, OtpPurpose, Prisma } from '@prisma/client';
 import * as bcrypt from 'bcryptjs';
@@ -22,6 +24,7 @@ interface SessionContext {
 
 @Injectable()
 export class CustomerAuthService {
+  private readonly logger = new Logger(CustomerAuthService.name);
   // Run bcrypt even when the phone is unknown so login timing can't be used to
   // enumerate registered numbers (mirrors the admin AuthService).
   private readonly dummyHash = bcrypt.hashSync('login-timing-placeholder', 12);
@@ -33,8 +36,9 @@ export class CustomerAuthService {
     private config: ConfigService,
     private otp: OtpService,
   ) {
-    const days = Number(this.config.get('CUSTOMER_REFRESH_TTL_DAYS') ?? 30);
-    this.refreshTtlMs = days * 24 * 60 * 60 * 1000;
+    const days = Number(this.config.get('CUSTOMER_REFRESH_TTL_DAYS'));
+    const validDays = Number.isFinite(days) && days > 0 ? days : 30;
+    this.refreshTtlMs = validDays * 24 * 60 * 60 * 1000;
   }
 
   // ── Sign up ──────────────────────────────────────────────────────────────
@@ -73,6 +77,14 @@ export class CustomerAuthService {
         err instanceof Prisma.PrismaClientKnownRequestError &&
         err.code === 'P2002'
       ) {
+        // A concurrent sign-up could trip the phone unique index between our
+        // check and the write — report the right field rather than guessing email.
+        const target = Array.isArray(err.meta?.target)
+          ? (err.meta.target as string[])
+          : [];
+        if (target.includes('phone')) {
+          throw new ConflictException('This phone number is already registered.');
+        }
         throw new ConflictException('That email is already in use.');
       }
       throw err;
@@ -89,6 +101,7 @@ export class CustomerAuthService {
 
     const customer = await this.prisma.customer.findUnique({ where: { phone } });
     if (!customer) throw new BadRequestException('No account for this number.');
+    if (!customer.isActive) throw new ForbiddenException('This account is disabled.');
 
     const verified =
       customer.phoneVerifiedAt
@@ -119,8 +132,9 @@ export class CustomerAuthService {
 
     if (!customer.phoneVerifiedAt) {
       // Account exists but was never verified — re-send a code and tell the
-      // client to route to the OTP screen.
-      await this.otp.send(OtpPurpose.PHONE_VERIFICATION, customer.phone!);
+      // client to route to the OTP screen. safeSend so a resend cooldown can't
+      // mask the actionable 403 with a 429.
+      await this.safeSend(OtpPurpose.PHONE_VERIFICATION, customer.phone!, customer.id);
       throw new ForbiddenException({
         message: 'Phone number not verified. We sent you a new code.',
         code: 'PHONE_NOT_VERIFIED',
@@ -138,7 +152,7 @@ export class CustomerAuthService {
     if (phone) {
       const customer = await this.prisma.customer.findUnique({ where: { phone } });
       if (customer?.phoneVerifiedAt && customer.isActive) {
-        await this.otp.send(OtpPurpose.PASSWORD_RESET, phone, customer.id);
+        await this.safeSend(OtpPurpose.PASSWORD_RESET, phone, customer.id);
       }
     }
     return { status: 'ok' as const };
@@ -168,10 +182,10 @@ export class CustomerAuthService {
       const customer = await this.prisma.customer.findUnique({ where: { phone } });
       if (input.purpose === OtpPurpose.PHONE_VERIFICATION) {
         if (customer && !customer.phoneVerifiedAt) {
-          await this.otp.send(OtpPurpose.PHONE_VERIFICATION, phone, customer.id);
+          await this.safeSend(OtpPurpose.PHONE_VERIFICATION, phone, customer.id);
         }
       } else if (customer?.phoneVerifiedAt && customer.isActive) {
-        await this.otp.send(OtpPurpose.PASSWORD_RESET, phone, customer.id);
+        await this.safeSend(OtpPurpose.PASSWORD_RESET, phone, customer.id);
       }
     }
     return { status: 'ok' as const };
@@ -244,6 +258,37 @@ export class CustomerAuthService {
   }
 
   // ── Helpers ───────────────────────────────────────────────────────────────
+
+  // Send a code without letting failures surface. Existence-blind endpoints rely
+  // on this: a resend cooldown (429) or provider outage (503) on a real number
+  // must not produce a different response than a no-op on an unknown number.
+  private async safeSend(
+    purpose: OtpPurpose,
+    phone: string,
+    customerId?: string,
+  ): Promise<void> {
+    try {
+      await this.otp.send(purpose, phone, customerId);
+    } catch (err) {
+      this.logger.warn(
+        `OTP send failed (${purpose}, ${phone}): ${
+          err instanceof Error ? err.message : String(err)
+        }`,
+      );
+    }
+  }
+
+  // Housekeeping: drop sessions a week past expiry (revoked ones still carry an
+  // expiresAt, so they age out too). Keeps the table from growing unbounded.
+  @Cron(CronExpression.EVERY_DAY_AT_4AM)
+  async pruneExpiredSessions(): Promise<void> {
+    const cutoff = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+    const { count } = await this.prisma.customerSession.deleteMany({
+      where: { expiresAt: { lt: cutoff } },
+    });
+    if (count) this.logger.log(`Pruned ${count} expired customer session(s).`);
+  }
+
   private async issueSession(
     customerId: string,
     ctx: SessionContext,
