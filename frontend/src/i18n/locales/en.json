@@ -11,6 +11,7 @@
     "group_system": "System",
     "overview": "Overview",
     "home_builder": "Home builder",
+    "blog": "Stories",
     "homepage": "Homepage",
     "stores": "Stores",
     "products": "Products",
@@ -254,6 +255,22 @@
     "cta": "Button text",
     "preview": "Live preview",
     "empty": "Nothing to show yet."
+  },
+  "blog": {
+    "title": "Stories",
+    "new": "New story",
+    "title_col": "Title",
+    "cover": "Cover image",
+    "excerpt": "Excerpt",
+    "body": "Body",
+    "published": "Published",
+    "draft": "Draft",
+    "saved_toast": "Story saved",
+    "deleted_toast": "Story deleted",
+    "delete_title": "Delete story?",
+    "delete_message": "Delete \"{{title}}\"?",
+    "empty_title": "No stories yet",
+    "empty_desc": "Write your first story to feature it on the home."
   },
   "homepage": {
     "title": "Homepage",

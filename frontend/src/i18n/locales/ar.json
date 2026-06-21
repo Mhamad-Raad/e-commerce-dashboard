@@ -11,6 +11,7 @@
     "group_system": "النظام",
     "overview": "نظرة عامة",
     "home_builder": "منشئ الرئيسية",
+    "blog": "القصص",
     "homepage": "الصفحة الرئيسية",
     "stores": "المتاجر",
     "products": "المنتجات",
@@ -254,6 +255,22 @@
     "cta": "نص الزر",
     "preview": "معاينة حية",
     "empty": "لا شيء للعرض بعد."
+  },
+  "blog": {
+    "title": "القصص",
+    "new": "قصة جديدة",
+    "title_col": "العنوان",
+    "cover": "صورة الغلاف",
+    "excerpt": "مقتطف",
+    "body": "المحتوى",
+    "published": "منشور",
+    "draft": "مسودة",
+    "saved_toast": "تم حفظ القصة",
+    "deleted_toast": "تم حذف القصة",
+    "delete_title": "حذف القصة؟",
+    "delete_message": "حذف \"{{title}}\"؟",
+    "empty_title": "لا توجد قصص بعد",
+    "empty_desc": "اكتب أول قصة لعرضها في الصفحة الرئيسية."
   },
   "homepage": {
     "title": "الصفحة الرئيسية",

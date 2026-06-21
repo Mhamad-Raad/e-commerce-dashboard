@@ -39,6 +39,12 @@ const Homepage = lazy(() =>
 const HomeBuilder = lazy(() =>
   import('./routes/home-layout/HomeBuilder').then((m) => ({ default: m.HomeBuilder })),
 );
+const BlogList = lazy(() =>
+  import('./routes/blog/BlogList').then((m) => ({ default: m.BlogList })),
+);
+const BlogForm = lazy(() =>
+  import('./routes/blog/BlogForm').then((m) => ({ default: m.BlogForm })),
+);
 const CustomersList = lazy(() =>
   import('./routes/customers/CustomersList').then((m) => ({ default: m.CustomersList })),
 );
@@ -125,6 +131,9 @@ export default function App() {
         >
           <Route path="/" element={<Overview />} />
           <Route path="/home-builder" element={<HomeBuilder />} />
+          <Route path="/blog" element={<BlogList />} />
+          <Route path="/blog/new" element={<BlogForm />} />
+          <Route path="/blog/:id/edit" element={<BlogForm />} />
           <Route path="/homepage" element={<Homepage />} />
           <Route path="/products" element={<ProductsList />} />
           <Route path="/products/new" element={<ProductForm />} />
