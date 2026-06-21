@@ -10,7 +10,9 @@ class Money {
   final String currency;
 
   String format({String? locale}) {
-    final f = NumberFormat.decimalPattern(locale ?? 'en');
+    // intl has no `ckb` number data — use Arabic digits (same script) for it.
+    final loc = locale == 'ckb' ? 'ar' : (locale ?? 'en');
+    final f = NumberFormat.decimalPattern(loc);
     return '${f.format(amount)} $currency';
   }
 

@@ -17,8 +17,7 @@ class ProductsSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final lang = Localizations.localeOf(context).languageCode;
-    final title = section.title(lang);
+    final title = section.title;
     final items = section.items.where((i) => i.product != null).toList();
 
     return Column(

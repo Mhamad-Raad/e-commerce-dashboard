@@ -9,8 +9,9 @@ export function toLang(raw: unknown): Lang {
 }
 
 /**
- * Resolve a trilingual field for `lang`, falling back to English (the main,
- * always-present value). Used to shape public/storefront payloads.
+ * Resolve a trilingual field for `lang`, falling back to English (the main
+ * value) when the requested translation is **missing OR empty**. Used to shape
+ * public/storefront payloads.
  */
 export function pick(
   lang: Lang,
@@ -18,6 +19,8 @@ export function pick(
   ar?: string | null,
   ckb?: string | null,
 ): string | null {
-  const value = lang === 'ar' ? ar : lang === 'ckb' ? ckb : en;
-  return value ?? en ?? null;
+  const requested = lang === 'ar' ? ar : lang === 'ckb' ? ckb : en;
+  const nonEmpty = (v: string | null | undefined) =>
+    v != null && v.trim() !== '' ? v : null;
+  return nonEmpty(requested) ?? nonEmpty(en) ?? null;
 }

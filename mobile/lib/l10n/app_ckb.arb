@@ -1,0 +1,61 @@
+{
+  "@@locale": "ckb",
+  "brandName": "فرۆشگای ڕۆژنا",
+
+  "loginSubtitle": "بۆ بەردەوامبوون بچۆ ژوورەوە",
+  "phoneNumber": "ژمارەی مۆبایل",
+  "password": "وشەی نهێنی",
+  "forgotPassword": "وشەی نهێنیت لەبیرکردووە؟",
+  "logIn": "چوونەژوورەوە",
+  "newHere": "نوێیت لێرە؟",
+  "createAccount": "هەژمار دروستبکە",
+  "enterPhoneAndPassword": "ژمارەی مۆبایل و وشەی نهێنی بنووسە.",
+  "verifyToContinue": "بۆ بەردەوامبوون ژمارەکەت پشتڕاستبکەرەوە — کۆدێکمان نارد.",
+
+  "createYourAccount": "هەژمارەکەت دروستبکە",
+  "fullName": "ناوی تەواو",
+  "emailOptional": "ئیمەیل (ئیختیاری)",
+  "passwordMin8": "وشەی نهێنی (لانیکەم ٨ پیت)",
+  "namePhonePasswordRequired": "ناو، ژمارەی مۆبایل و وشەی نهێنی پێویستن.",
+  "numberAlreadyRegistered": "ئەم ژمارەیە هەژماری هەیە. تکایە بچۆ ژوورەوە.",
+
+  "verifyYourNumber": "ژمارەکەت پشتڕاستبکەرەوە",
+  "otpSentTo": "ئەو کۆدە بنووسە کە لە ڕێگەی واتساپەوە بۆ {phone} ناردمان.",
+  "verificationCode": "کۆدی پشتڕاستکردنەوە",
+  "verify": "پشتڕاستکردنەوە",
+  "resendCode": "نەگەیشت؟ کۆدەکە دووبارە بنێرە",
+  "newCodeSent": "کۆدێکی نوێ لە ڕێگەدایە.",
+  "enterTheCode": "ئەو کۆدە بنووسە کە بۆمان ناردیت.",
+
+  "resetPassword": "ڕێکخستنەوەی وشەی نهێنی",
+  "forgotSubtitle": "ژمارەی مۆبایلەکەت بنووسە و کۆدی ڕێکخستنەوەت لە واتساپ بۆ دەنێرین.",
+  "sendCode": "ناردنی کۆد",
+  "enterPhone": "ژمارەی مۆبایلەکەت بنووسە.",
+  "ifRegisteredCodeSent": "ئەگەر ژمارەکە تۆمارکرابێت، کۆدێک نێردرا.",
+
+  "newPasswordTitle": "وشەی نهێنی نوێ",
+  "newPasswordSubtitle": "کۆدەکە بنووسە و وشەیەکی نهێنی نوێ هەڵبژێرە.",
+  "resetCode": "کۆدی ڕێکخستنەوە",
+  "newPasswordMin8": "وشەی نهێنی نوێ (لانیکەم ٨ پیت)",
+  "savePassword": "پاشەکەوتکردنی وشەی نهێنی",
+  "fillCodeAndPassword": "کۆد و وشەی نهێنی نوێ پڕبکەرەوە.",
+  "passwordUpdated": "وشەی نهێنی نوێکرایەوە. تکایە بچۆ ژوورەوە.",
+
+  "logOut": "چوونەدەرەوە",
+
+  "tabHome": "سەرەکی",
+  "tabShop": "فرۆشگا",
+  "tabSearch": "گەڕان",
+  "tabProfile": "هەژمار",
+
+  "categoriesTitle": "پۆلەکان",
+  "featuredTitle": "هەڵبژێردراو",
+  "shopsTitle": "فرۆشگاکان",
+  "seeAll": "هەمووی ببینە",
+  "homeLoadError": "نەتوانرا پەڕەی سەرەکی باربکرێت.",
+  "retry": "دووبارە هەوڵبدەرەوە",
+  "comingSoon": "بەمزووانە",
+  "toggleTheme": "گۆڕینی ڕووکار",
+  "language": "زمان",
+  "productsCount": "{count} بەرهەم"
+}

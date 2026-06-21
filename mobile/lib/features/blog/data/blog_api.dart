@@ -9,8 +9,8 @@ class BlogApi {
   BlogApi(this._dio);
   final Dio _dio;
 
-  Future<Map<String, dynamic>> getPost(String id) async {
-    final res = await _dio.get('/blog/$id');
+  Future<Map<String, dynamic>> getPost(String id, String lang) async {
+    final res = await _dio.get('/blog/$id', queryParameters: {'lang': lang});
     return res.data is Map
         ? Map<String, dynamic>.from(res.data as Map)
         : <String, dynamic>{};

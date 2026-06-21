@@ -61,6 +61,7 @@
   "retry": "Retry",
   "comingSoon": "Coming soon",
   "toggleTheme": "Toggle theme",
+  "language": "Language",
   "productsCount": "{count} products",
   "@productsCount": {
     "placeholders": {

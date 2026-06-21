@@ -161,6 +161,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get toggleTheme => 'Toggle theme';
 
   @override
+  String get language => 'Language';
+
+  @override
   String productsCount(int count) {
     return '$count products';
   }

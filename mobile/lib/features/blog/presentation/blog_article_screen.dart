@@ -19,7 +19,6 @@ class BlogArticleScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final post = ref.watch(blogPostProvider(id));
-    final lang = Localizations.localeOf(context).languageCode;
     final text = Theme.of(context).textTheme;
 
     return Scaffold(
@@ -62,11 +61,11 @@ class BlogArticleScreen extends ConsumerWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(article.title(lang), style: text.headlineMedium),
+                  Text(article.title, style: text.headlineMedium),
                   const SizedBox(height: AppSpacing.md),
                   // TODO(blog): render rich HTML/markdown body (flutter_html /
                   // flutter_markdown) — plain text for the skeleton.
-                  Text(article.body(lang) ?? '', style: text.bodyLarge),
+                  Text(article.body ?? '', style: text.bodyLarge),
                 ],
               ),
             ),

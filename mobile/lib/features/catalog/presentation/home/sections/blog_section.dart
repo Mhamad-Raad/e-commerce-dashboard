@@ -17,8 +17,7 @@ class BlogSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final lang = Localizations.localeOf(context).languageCode;
-    final title = section.title(lang);
+    final title = section.title;
     final items = section.items.where((i) => i.blog != null).toList();
 
     return Column(
@@ -34,7 +33,6 @@ class BlogSection extends StatelessWidget {
             separatorBuilder: (_, _) => const SizedBox(width: AppSpacing.gutter),
             itemBuilder: (context, i) => _BlogCard(
               post: items[i].blog!,
-              lang: lang,
               onTap: () => navigateToHomeTarget(context, items[i]),
             ),
           ),
@@ -45,16 +43,14 @@ class BlogSection extends StatelessWidget {
 }
 
 class _BlogCard extends StatelessWidget {
-  const _BlogCard({required this.post, required this.lang, this.onTap});
+  const _BlogCard({required this.post, this.onTap});
 
   final BlogSummary post;
-  final String lang;
   final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
     final text = Theme.of(context).textTheme;
-    final excerpt = post.excerpt(lang);
 
     return SizedBox(
       width: AppSizes.blogCardWidth,
@@ -76,15 +72,15 @@ class _BlogCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      post.title(lang),
+                      post.title,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: text.bodyLarge?.copyWith(fontWeight: FontWeight.w700),
                     ),
-                    if (excerpt != null) ...[
+                    if (post.excerpt != null) ...[
                       const SizedBox(height: AppSpacing.xs),
                       Text(
-                        excerpt,
+                        post.excerpt!,
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                         style: text.bodySmall?.copyWith(

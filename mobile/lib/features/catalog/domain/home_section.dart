@@ -19,23 +19,16 @@ class HomeSection {
     required this.id,
     required this.type,
     required this.items,
-    this.titleEn,
-    this.titleAr,
+    this.title,
     this.config = const {},
   });
 
   final String id;
   final HomeSectionType type;
-  final String? titleEn;
-  final String? titleAr;
+  // Already resolved to the requested language by the backend (?lang).
+  final String? title;
   final Map<String, dynamic> config;
   final List<HomeSectionItem> items;
-
-  /// Localized heading, or null when the section has no title.
-  String? title(String lang) {
-    final value = lang == 'ar' ? (titleAr ?? titleEn) : (titleEn ?? titleAr);
-    return (value == null || value.isEmpty) ? null : value;
-  }
 
   /// e.g. config['layout'] == 'grid' for a PRODUCTS grid (default: slider).
   String get layout {
@@ -46,8 +39,9 @@ class HomeSection {
   factory HomeSection.fromJson(Map<String, dynamic> json) => HomeSection(
         id: json['id'] as String,
         type: _typeFromString(json['type'] as String?),
-        titleEn: json['titleEn'] as String?,
-        titleAr: json['titleAr'] as String?,
+        title: (json['title'] as String?)?.isEmpty ?? true
+            ? null
+            : json['title'] as String?,
         config: json['config'] is Map
             ? Map<String, dynamic>.from(json['config'] as Map)
             : const {},

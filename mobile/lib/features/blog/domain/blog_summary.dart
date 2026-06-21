@@ -1,32 +1,22 @@
-/// Blog post as shown in a BLOG home section (list/card). No body.
+/// Blog post as shown in a BLOG home section (list/card). Text is already
+/// resolved to the requested language by the backend (?lang).
 class BlogSummary {
   const BlogSummary({
     required this.id,
-    required this.titleEn,
-    this.titleAr,
-    this.excerptEn,
-    this.excerptAr,
+    required this.title,
+    this.excerpt,
     this.coverImage,
   });
 
   final String id;
-  final String titleEn;
-  final String? titleAr;
-  final String? excerptEn;
-  final String? excerptAr;
+  final String title;
+  final String? excerpt;
   final String? coverImage;
-
-  String title(String lang) =>
-      lang == 'ar' ? (titleAr ?? titleEn) : (titleEn);
-  String? excerpt(String lang) =>
-      lang == 'ar' ? (excerptAr ?? excerptEn) : excerptEn;
 
   factory BlogSummary.fromJson(Map<String, dynamic> json) => BlogSummary(
         id: json['id'] as String,
-        titleEn: (json['titleEn'] as String?) ?? '',
-        titleAr: json['titleAr'] as String?,
-        excerptEn: json['excerptEn'] as String?,
-        excerptAr: json['excerptAr'] as String?,
+        title: (json['title'] as String?) ?? '',
+        excerpt: json['excerpt'] as String?,
         coverImage: json['coverImage'] as String?,
       );
 }

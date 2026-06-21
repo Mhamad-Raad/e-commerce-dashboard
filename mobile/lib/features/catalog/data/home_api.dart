@@ -10,8 +10,8 @@ class HomeApi {
   HomeApi(this._dio);
   final Dio _dio;
 
-  Future<List<dynamic>> getLayout() async {
-    final res = await _dio.get('/home/layout');
+  Future<List<dynamic>> getLayout(String lang) async {
+    final res = await _dio.get('/home/layout', queryParameters: {'lang': lang});
     return res.data is List ? res.data as List : const [];
   }
 }

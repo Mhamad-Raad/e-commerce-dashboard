@@ -159,6 +159,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get toggleTheme => 'تبديل السمة';
 
   @override
+  String get language => 'اللغة';
+
+  @override
   String productsCount(int count) {
     return '$count منتج';
   }
