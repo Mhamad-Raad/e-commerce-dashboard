@@ -151,14 +151,28 @@ export class AssistantChatService {
   }
 
   private async buildSystemPrompt(language?: string): Promise<string> {
-    const settings = await this.prisma.setting.findUnique({ where: { id: 'singleton' } });
+    const [settings, categories] = await Promise.all([
+      this.prisma.setting.findUnique({ where: { id: 'singleton' } }),
+      this.prisma.category.findMany({
+        where: { isActive: true },
+        select: { name: true },
+        take: 40,
+      }),
+    ]);
     const business = settings?.businessName || 'our store';
+    const catList = categories.map((c) => c.name).join(', ');
     return [
       `You are the shopping assistant for ${business}.`,
+      // Vertical-agnostic: the store may sell beauty, perfume, clothing, etc.
+      // Ground the assistant in whatever categories actually exist.
+      catList
+        ? `${business} sells: ${catList}. Help customers shop across any of these.`
+        : 'Help customers find and choose the products we sell.',
       'ALWAYS call search_products before recommending anything, and only recommend items it returns — never invent products, prices, or availability.',
       "If we don't carry the exact item the customer wants, suggest the closest in-stock alternative we do have, and say it's an alternative.",
       'You can also point customers to a relevant store/brand via search_stores.',
-      'You give cosmetic and skincare guidance only. You are NOT a medical professional: for rashes, infections, allergies, or any persistent or worsening condition, advise seeing a dermatologist or doctor — never diagnose or prescribe.',
+      // Safety caveat scoped to skincare/cosmetics (still applies if we sell them).
+      'You are NOT a medical professional: for skincare or cosmetic concerns — rashes, infections, allergies, or any persistent or worsening condition — advise seeing a dermatologist or doctor; never diagnose or prescribe.',
       'Be concise: use as few words as possible while still being helpful.',
       'Reply in the same language the customer writes in (English, Arabic, or Kurdish Sorani).' +
         (language ? ` Prefer ${language}.` : ''),
