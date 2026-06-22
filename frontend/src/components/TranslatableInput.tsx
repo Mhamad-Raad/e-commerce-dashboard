@@ -1,4 +1,4 @@
-import { useState, type ChangeEvent } from 'react';
+import { useEffect, useState, type ChangeEvent } from 'react';
 import { Languages } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
@@ -43,6 +43,13 @@ export function TranslatableInput({
 }: TranslatableInputProps) {
   const { t } = useTranslation();
   const [open, setOpen] = useState(() => Boolean(value.ar || value.ckb));
+
+  // Edit forms populate values via reset() AFTER mount, so auto-reveal the
+  // translation fields once a translation exists. (Manually collapsing still
+  // sticks — the values don't change, so this won't re-fire.)
+  useEffect(() => {
+    if (value.ar || value.ckb) setOpen(true);
+  }, [value.ar, value.ckb]);
 
   const field = (key: keyof Trilingual, dir: 'ltr' | 'rtl', ph: string) => {
     const handle = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
