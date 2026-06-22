@@ -1,9 +1,14 @@
-# E-commerce Admin Dashboard
+# Rozhna — e-commerce platform
 
-Admin dashboard for an e-commerce mobile app. Manages customers, products, carts, orders, and reports.
+An Iraqi beauty-resell storefront: a **NestJS API**, a **React admin dashboard**, and a **Flutter customer app** ("Rozhna's Store"). The dashboard manages catalog, customers, orders, the **dashboard-composed home layout**, **stories/blog**, and reports; the app does browsing + checkout. All content is **trilingual** (English + Arabic + Kurdish Sorani).
 
-- **Backend**: NestJS + Prisma + PostgreSQL, JWT access + refresh (httpOnly cookie)
-- **Frontend**: React + Vite + TypeScript + Tailwind v4 + TanStack Query
+- **Backend**: NestJS + Prisma + PostgreSQL, JWT (admin: httpOnly refresh cookie; app: bearer + rotating refresh)
+- **Frontend**: React + Vite + TypeScript + Tailwind v4 + shadcn/ui + TanStack Query
+- **Mobile**: Flutter (Riverpod + go_router + Dio) — see [`mobile/`](mobile/) and [`MOBILE_ARCHITECTURE.md`](MOBILE_ARCHITECTURE.md)
+
+## 📖 Documentation
+
+Full project wiki in **[`docs/`](docs/README.md)** — [customer auth](docs/customer-auth.md) · [home builder](docs/home-builder.md) · [internationalization](docs/internationalization.md) · [blog/stories](docs/blog.md) · [mobile app](docs/mobile-app.md) · [AI assistant](docs/assistant.md).
 
 ## Prerequisites
 
@@ -101,11 +106,20 @@ ecommerce-dashboard/
 
 ## Status
 
-- ✅ Auth (login, refresh, logout, me)
-- ✅ Products CRUD
-- ✅ Customers CRUD
-- ✅ Carts CRUD + items management
-- ✅ Orders CRUD + status workflow
-- ✅ Reports (summary, top products, recent orders)
-- ✅ Dummy data seed for showcase
-- ✅ Code-split routes (lazy-loaded)
+**Admin dashboard / API**
+- ✅ Admin auth, Products / Categories / Stores / Customers / Carts / Orders / Coupons / Inventory / Refunds / Fee groups / Reports
+- ✅ Category-driven product attributes (vertical-agnostic catalog)
+- ✅ Images via Cloudflare R2; receipts; CSV export; notifications
+- ✅ **Home builder** — drag-drop, server-driven home sections + live preview ([docs](docs/home-builder.md))
+- ✅ **Stories / blog** authoring ([docs](docs/blog.md))
+- ✅ AI shopping assistant — built **dormant** until `ANTHROPIC_API_KEY` ([docs](docs/assistant.md))
+
+**Customer mobile app (Flutter)**
+- ✅ **Phone + password auth + WhatsApp OTP** verification, rotating refresh ([docs](docs/customer-auth.md))
+- ✅ Server-driven home renderer (sections + skeletons), stories reader, app shell + frosted bottom nav
+- ⬜ Product detail / shop / search / checkout screens, FCM push, assistant chat UI — pending
+
+**Trilingual (English + Arabic + Kurdish Sorani)**
+- ✅ End-to-end: API resolves by `?lang` (English fallback), dashboard `TranslatableInput`, app ARBs + switcher ([docs](docs/internationalization.md))
+
+> Deployed dev/staging on Neon + Render + Vercel; intentionally **dev-only / prod parked**.
