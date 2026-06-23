@@ -163,6 +163,88 @@ class AppLocalizationsCkb extends AppLocalizations {
   String get language => 'زمان';
 
   @override
+  String get account => 'هەژمار';
+
+  @override
+  String get myAddresses => 'ناونیشانەکانم';
+
+  @override
+  String get addAddress => 'زیادکردنی ناونیشان';
+
+  @override
+  String get editAddress => 'دەستکاریکردنی ناونیشان';
+
+  @override
+  String get noAddressesYet => 'هێشتا هیچ ناونیشانێک نییە';
+
+  @override
+  String get addAddressHint =>
+      'ناونیشانێکی گەیاندن زیاد بکە تا بزانین داواکارییەکانت بۆ کوێ بنێرین.';
+
+  @override
+  String get addressLabel => 'ناونیشان (وەک: ماڵەوە، کار)';
+
+  @override
+  String get addressFallbackLabel => 'ناونیشان';
+
+  @override
+  String get governorate => 'پارێزگا';
+
+  @override
+  String get city => 'شار';
+
+  @override
+  String get district => 'گەڕەک';
+
+  @override
+  String get street => 'شەقام';
+
+  @override
+  String get nearestLandmark => 'نزیکترین نیشانە';
+
+  @override
+  String get contactPhone => 'ژمارەی پەیوەندی';
+
+  @override
+  String get setAsDefault => 'وەک بنەڕەت دایبنێ';
+
+  @override
+  String get defaultBadge => 'بنەڕەت';
+
+  @override
+  String get saveAddress => 'پاشەکەوتکردنی ناونیشان';
+
+  @override
+  String get selectGovernorate => 'پارێزگا هەڵبژێرە';
+
+  @override
+  String get selectCity => 'شار هەڵبژێرە';
+
+  @override
+  String get governorateCityRequired => 'تکایە پارێزگا و شار هەڵبژێرە.';
+
+  @override
+  String get deleteAddress => 'سڕینەوەی ناونیشان';
+
+  @override
+  String get deleteAddressConfirm => 'ئەم ناونیشانە بسڕێتەوە؟';
+
+  @override
+  String get delete => 'سڕینەوە';
+
+  @override
+  String get cancel => 'هەڵوەشاندنەوە';
+
+  @override
+  String get addressDeleted => 'ناونیشان سڕایەوە.';
+
+  @override
+  String get addressesLoadError => 'نەتوانرا ناونیشانەکانت باربکرێن.';
+
+  @override
+  String get makeDefault => 'بیکە بە بنەڕەت';
+
+  @override
   String productsCount(int count) {
     return '$count بەرهەم';
   }

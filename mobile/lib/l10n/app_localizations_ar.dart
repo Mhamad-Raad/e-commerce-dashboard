@@ -162,6 +162,87 @@ class AppLocalizationsAr extends AppLocalizations {
   String get language => 'اللغة';
 
   @override
+  String get account => 'الحساب';
+
+  @override
+  String get myAddresses => 'عناويني';
+
+  @override
+  String get addAddress => 'إضافة عنوان';
+
+  @override
+  String get editAddress => 'تعديل العنوان';
+
+  @override
+  String get noAddressesYet => 'لا توجد عناوين بعد';
+
+  @override
+  String get addAddressHint => 'أضف عنوان توصيل حتى نعرف أين نشحن طلباتك.';
+
+  @override
+  String get addressLabel => 'التسمية (مثل: المنزل، العمل)';
+
+  @override
+  String get addressFallbackLabel => 'العنوان';
+
+  @override
+  String get governorate => 'المحافظة';
+
+  @override
+  String get city => 'المدينة';
+
+  @override
+  String get district => 'الحي';
+
+  @override
+  String get street => 'الشارع';
+
+  @override
+  String get nearestLandmark => 'أقرب نقطة دالة';
+
+  @override
+  String get contactPhone => 'هاتف للتواصل';
+
+  @override
+  String get setAsDefault => 'تعيين كافتراضي';
+
+  @override
+  String get defaultBadge => 'افتراضي';
+
+  @override
+  String get saveAddress => 'حفظ العنوان';
+
+  @override
+  String get selectGovernorate => 'اختر المحافظة';
+
+  @override
+  String get selectCity => 'اختر المدينة';
+
+  @override
+  String get governorateCityRequired => 'الرجاء اختيار المحافظة والمدينة.';
+
+  @override
+  String get deleteAddress => 'حذف العنوان';
+
+  @override
+  String get deleteAddressConfirm => 'حذف هذا العنوان؟';
+
+  @override
+  String get delete => 'حذف';
+
+  @override
+  String get cancel => 'إلغاء';
+
+  @override
+  String get addressDeleted => 'تم حذف العنوان.';
+
+  @override
+  String get addressesLoadError => 'تعذّر تحميل عناوينك.';
+
+  @override
+  String get makeDefault => 'جعله افتراضيًا';
+
+  @override
   String productsCount(int count) {
     return '$count منتج';
   }

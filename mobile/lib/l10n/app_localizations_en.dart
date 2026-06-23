@@ -164,6 +164,88 @@ class AppLocalizationsEn extends AppLocalizations {
   String get language => 'Language';
 
   @override
+  String get account => 'Account';
+
+  @override
+  String get myAddresses => 'My addresses';
+
+  @override
+  String get addAddress => 'Add address';
+
+  @override
+  String get editAddress => 'Edit address';
+
+  @override
+  String get noAddressesYet => 'No addresses yet';
+
+  @override
+  String get addAddressHint =>
+      'Add a delivery address so we know where to ship your orders.';
+
+  @override
+  String get addressLabel => 'Label (e.g. Home, Work)';
+
+  @override
+  String get addressFallbackLabel => 'Address';
+
+  @override
+  String get governorate => 'Governorate';
+
+  @override
+  String get city => 'City';
+
+  @override
+  String get district => 'District';
+
+  @override
+  String get street => 'Street';
+
+  @override
+  String get nearestLandmark => 'Nearest landmark';
+
+  @override
+  String get contactPhone => 'Contact phone';
+
+  @override
+  String get setAsDefault => 'Set as default';
+
+  @override
+  String get defaultBadge => 'Default';
+
+  @override
+  String get saveAddress => 'Save address';
+
+  @override
+  String get selectGovernorate => 'Select a governorate';
+
+  @override
+  String get selectCity => 'Select a city';
+
+  @override
+  String get governorateCityRequired => 'Please choose a governorate and city.';
+
+  @override
+  String get deleteAddress => 'Delete address';
+
+  @override
+  String get deleteAddressConfirm => 'Delete this address?';
+
+  @override
+  String get delete => 'Delete';
+
+  @override
+  String get cancel => 'Cancel';
+
+  @override
+  String get addressDeleted => 'Address deleted.';
+
+  @override
+  String get addressesLoadError => 'Couldn\'t load your addresses.';
+
+  @override
+  String get makeDefault => 'Make default';
+
+  @override
   String productsCount(int count) {
     return '$count products';
   }

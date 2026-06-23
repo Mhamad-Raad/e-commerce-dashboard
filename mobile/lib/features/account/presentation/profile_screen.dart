@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../app/locale/locale_controller.dart';
+import '../../../app/router/routes.dart';
 import '../../../app/theme/app_spacing.dart';
 import '../../../app/theme/theme_controller.dart';
 import '../../../core/l10n/l10n_ext.dart';
@@ -44,6 +46,18 @@ class ProfileScreen extends ConsumerWidget {
                       .set(Locale(lang.code)),
                 ),
             ],
+          ),
+          const SizedBox(height: AppSpacing.lg),
+          Text(l10n.account, style: Theme.of(context).textTheme.titleLarge),
+          const SizedBox(height: AppSpacing.sm),
+          Card(
+            margin: EdgeInsets.zero,
+            child: ListTile(
+              leading: const Icon(Icons.location_on_outlined),
+              title: Text(l10n.myAddresses),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => context.push(Routes.addresses),
+            ),
           ),
           const SizedBox(height: AppSpacing.xl),
           FilledButton.tonalIcon(

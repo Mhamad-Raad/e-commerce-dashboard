@@ -394,6 +394,168 @@ abstract class AppLocalizations {
   /// **'Language'**
   String get language;
 
+  /// No description provided for @account.
+  ///
+  /// In en, this message translates to:
+  /// **'Account'**
+  String get account;
+
+  /// No description provided for @myAddresses.
+  ///
+  /// In en, this message translates to:
+  /// **'My addresses'**
+  String get myAddresses;
+
+  /// No description provided for @addAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'Add address'**
+  String get addAddress;
+
+  /// No description provided for @editAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit address'**
+  String get editAddress;
+
+  /// No description provided for @noAddressesYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No addresses yet'**
+  String get noAddressesYet;
+
+  /// No description provided for @addAddressHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a delivery address so we know where to ship your orders.'**
+  String get addAddressHint;
+
+  /// No description provided for @addressLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Label (e.g. Home, Work)'**
+  String get addressLabel;
+
+  /// No description provided for @addressFallbackLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Address'**
+  String get addressFallbackLabel;
+
+  /// No description provided for @governorate.
+  ///
+  /// In en, this message translates to:
+  /// **'Governorate'**
+  String get governorate;
+
+  /// No description provided for @city.
+  ///
+  /// In en, this message translates to:
+  /// **'City'**
+  String get city;
+
+  /// No description provided for @district.
+  ///
+  /// In en, this message translates to:
+  /// **'District'**
+  String get district;
+
+  /// No description provided for @street.
+  ///
+  /// In en, this message translates to:
+  /// **'Street'**
+  String get street;
+
+  /// No description provided for @nearestLandmark.
+  ///
+  /// In en, this message translates to:
+  /// **'Nearest landmark'**
+  String get nearestLandmark;
+
+  /// No description provided for @contactPhone.
+  ///
+  /// In en, this message translates to:
+  /// **'Contact phone'**
+  String get contactPhone;
+
+  /// No description provided for @setAsDefault.
+  ///
+  /// In en, this message translates to:
+  /// **'Set as default'**
+  String get setAsDefault;
+
+  /// No description provided for @defaultBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Default'**
+  String get defaultBadge;
+
+  /// No description provided for @saveAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'Save address'**
+  String get saveAddress;
+
+  /// No description provided for @selectGovernorate.
+  ///
+  /// In en, this message translates to:
+  /// **'Select a governorate'**
+  String get selectGovernorate;
+
+  /// No description provided for @selectCity.
+  ///
+  /// In en, this message translates to:
+  /// **'Select a city'**
+  String get selectCity;
+
+  /// No description provided for @governorateCityRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Please choose a governorate and city.'**
+  String get governorateCityRequired;
+
+  /// No description provided for @deleteAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete address'**
+  String get deleteAddress;
+
+  /// No description provided for @deleteAddressConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete this address?'**
+  String get deleteAddressConfirm;
+
+  /// No description provided for @delete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get delete;
+
+  /// No description provided for @cancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get cancel;
+
+  /// No description provided for @addressDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Address deleted.'**
+  String get addressDeleted;
+
+  /// No description provided for @addressesLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t load your addresses.'**
+  String get addressesLoadError;
+
+  /// No description provided for @makeDefault.
+  ///
+  /// In en, this message translates to:
+  /// **'Make default'**
+  String get makeDefault;
+
   /// No description provided for @productsCount.
   ///
   /// In en, this message translates to:

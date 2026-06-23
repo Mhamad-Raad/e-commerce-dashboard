@@ -10,6 +10,9 @@ import '../../features/auth/presentation/reset/reset_password_screen.dart';
 import '../../features/auth/presentation/signup/signup_screen.dart';
 import '../../features/auth/presentation/splash/splash_screen.dart';
 import '../../features/account/presentation/profile_screen.dart';
+import '../../features/addresses/domain/address.dart';
+import '../../features/addresses/presentation/address_form_screen.dart';
+import '../../features/addresses/presentation/addresses_screen.dart';
 import '../../features/blog/presentation/blog_article_screen.dart';
 import '../../features/catalog/presentation/home/home_screen.dart';
 import '../../features/catalog/presentation/shop/shop_screen.dart';
@@ -66,6 +69,20 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: '${Routes.blog}/:id',
         builder: (_, state) =>
             BlogArticleScreen(id: state.pathParameters['id']!),
+      ),
+      // Addresses — listed, created, and edited over the tab shell.
+      GoRoute(
+        path: Routes.addresses,
+        builder: (_, _) => const AddressesScreen(),
+      ),
+      GoRoute(
+        path: Routes.addressNew,
+        builder: (_, _) => const AddressFormScreen(),
+      ),
+      GoRoute(
+        path: '${Routes.addresses}/:id/edit',
+        builder: (_, state) =>
+            AddressFormScreen(address: state.extra as Address?),
       ),
       GoRoute(path: Routes.login, builder: (_, _) => const LoginScreen()),
       GoRoute(path: Routes.signup, builder: (_, _) => const SignupScreen()),
