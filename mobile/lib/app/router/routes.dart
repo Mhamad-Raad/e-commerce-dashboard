@@ -13,6 +13,11 @@ class Routes {
   static const addresses = '/addresses';
   static const addressNew = '/addresses/new';
   static String addressEdit(String id) => '/addresses/$id/edit';
+  // Cart → checkout flow (pushed over the tab shell; require auth).
+  static const cart = '/cart';
+  static const checkoutAddress = '/checkout/address';
+  static const checkout = '/checkout';
+  static const orderConfirmation = '/order-confirmation';
   static const login = '/auth/login';
   static const signup = '/auth/signup';
   static const otp = '/auth/otp';

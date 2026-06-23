@@ -10,7 +10,7 @@ class ShopScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const Scaffold(
-      appBar: RozhnaAppBar(),
+      appBar: RozhnaAppBar(showCart: true),
       body: ComingSoonView(icon: Icons.storefront_outlined),
     );
   }

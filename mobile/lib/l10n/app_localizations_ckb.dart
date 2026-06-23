@@ -245,6 +245,125 @@ class AppLocalizationsCkb extends AppLocalizations {
   String get makeDefault => 'بیکە بە بنەڕەت';
 
   @override
+  String get cartTitle => 'سەبەتە';
+
+  @override
+  String get cartEmpty => 'سەبەتەکەت بەتاڵە';
+
+  @override
+  String get startShopping => 'دەستبکە بە کڕین';
+
+  @override
+  String get cartLoadError => 'نەتوانرا سەبەتەکەت باربکرێت.';
+
+  @override
+  String get couponCode => 'کۆدی داشکاندن';
+
+  @override
+  String get apply => 'جێبەجێکردن';
+
+  @override
+  String get remove => 'لابردن';
+
+  @override
+  String get subtotal => 'کۆی بەشەکی';
+
+  @override
+  String get discount => 'داشکاندن';
+
+  @override
+  String get taxesFeesAtCheckout => 'باج و کرێکان لە کاتی پارەدان دەژمێردرێن.';
+
+  @override
+  String get proceedToCheckout => 'بەردەوامبوون بۆ پارەدان';
+
+  @override
+  String get selectAddress => 'ناونیشان هەڵبژێرە';
+
+  @override
+  String get noAddressForCheckout =>
+      'بۆ بەردەوامبوون پێویستت بە ناونیشانی گەیاندنە.';
+
+  @override
+  String get addAnotherAddress => 'ناونیشانێکی تر زیاد بکە';
+
+  @override
+  String get continueToReview => 'بەردەوامبوون';
+
+  @override
+  String get checkout => 'پارەدان';
+
+  @override
+  String get deliveryAddress => 'ناونیشانی گەیاندن';
+
+  @override
+  String get change => 'گۆڕین';
+
+  @override
+  String get orderItems => 'ئایتمەکان';
+
+  @override
+  String get notesOptional => 'تێبینی (ئیختیاری)';
+
+  @override
+  String get notesHint => 'هیچ ڕێنماییەک بۆ گەیاندن؟';
+
+  @override
+  String get paymentMethod => 'شێوازی پارەدان';
+
+  @override
+  String get orderSummary => 'کورتەی داواکاری';
+
+  @override
+  String get tax => 'باج';
+
+  @override
+  String get fees => 'کرێ';
+
+  @override
+  String get shipping => 'گەیاندن';
+
+  @override
+  String get total => 'کۆی گشتی';
+
+  @override
+  String get placeOrder => 'داواکاری بکە';
+
+  @override
+  String get orderPlaced => 'داواکارییەکەت تۆمارکرا!';
+
+  @override
+  String get orderPlacedSubtitle =>
+      'سوپاس. داواکارییەکەتمان وەرگرت و پەیوەندیت پێوە دەکەین بۆ پشتڕاستکردنەوە.';
+
+  @override
+  String get orderNumber => 'ژمارەی داواکاری';
+
+  @override
+  String get continueShopping => 'بەردەوامبە لە کڕین';
+
+  @override
+  String get payCod => 'پارەدان لە کاتی گەیاندن';
+
+  @override
+  String get payZainCash => 'زین کاش';
+
+  @override
+  String get payFib => 'FIB';
+
+  @override
+  String get payTransfer => 'گواستنەوەی بانکی';
+
+  @override
+  String get payCard => 'کارت';
+
+  @override
+  String get payWallet => 'جزدان';
+
+  @override
+  String get addedToCart => 'زیادکرا بۆ سەبەتە';
+
+  @override
   String productsCount(int count) {
     return '$count بەرهەم';
   }

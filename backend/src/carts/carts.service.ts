@@ -11,6 +11,7 @@ import { effectivePriceCents } from '../common/pricing';
 import { OrdersService } from '../orders/orders.service';
 import { PaymentsService } from '../orders/payments.service';
 import { PrismaService } from '../prisma/prisma.service';
+import { AppCheckoutDto } from './dto/app-checkout.dto';
 import { AddCartItemDto, UpdateCartItemDto } from './dto/cart-item.dto';
 import { CheckoutCartDto } from './dto/checkout.dto';
 import { CreateCartDto } from './dto/create-cart.dto';
@@ -244,6 +245,96 @@ export class CartsService {
 
     // Re-fetch so the returned order includes the payment just recorded.
     return this.orders.findById(order.id);
+  }
+
+  // ---- Customer-scoped ("my cart") operations for the mobile app ----
+  // The cart id is always derived from the authenticated customer, never taken
+  // from the client, so a customer can only ever touch their own cart.
+
+  /** The customer's current OPEN cart, created on first access. */
+  async getOrCreateOpenCart(customerId: string) {
+    const existing = await this.prisma.cart.findFirst({
+      where: { customerId, status: 'OPEN' },
+      orderBy: { createdAt: 'desc' },
+    });
+    if (existing) return this.findById(existing.id);
+    const created = await this.prisma.cart.create({
+      data: { customerId, status: 'OPEN' },
+    });
+    return this.findById(created.id);
+  }
+
+  private async openCartId(customerId: string) {
+    return (await this.getOrCreateOpenCart(customerId)).id;
+  }
+
+  async addItemForCustomer(customerId: string, dto: AddCartItemDto) {
+    return this.addItem(await this.openCartId(customerId), dto);
+  }
+
+  async updateItemForCustomer(customerId: string, itemId: string, dto: UpdateCartItemDto) {
+    return this.updateItem(await this.openCartId(customerId), itemId, dto);
+  }
+
+  async removeItemForCustomer(customerId: string, itemId: string) {
+    return this.removeItem(await this.openCartId(customerId), itemId);
+  }
+
+  async applyCouponForCustomer(customerId: string, code: string) {
+    return this.applyCoupon(await this.openCartId(customerId), code);
+  }
+
+  async removeCouponForCustomer(customerId: string) {
+    return this.removeCoupon(await this.openCartId(customerId));
+  }
+
+  /** Dry-run the money breakdown (subtotal/discount/tax/fees/total) for the cart. */
+  async previewForCustomer(customerId: string) {
+    const cart = await this.getOrCreateOpenCart(customerId);
+    if (cart.items.length === 0) {
+      return {
+        subtotalCents: 0,
+        discountCents: 0,
+        couponCode: cart.coupon?.code ?? null,
+        taxCents: 0,
+        shippingCents: 0,
+        feesCents: 0,
+        feesLabel: null,
+        totalCents: 0,
+        currency: 'IQD',
+      };
+    }
+    return this.orders.preview({
+      customerId,
+      items: cart.items.map((i) => ({
+        productId: i.productId,
+        variantId: i.variantId ?? undefined,
+        quantity: i.quantity,
+      })),
+      couponCode: cart.coupon?.code,
+    });
+  }
+
+  /**
+   * Place the customer's order from their open cart. Tax + fees are resolved
+   * server-side; the payment is recorded PENDING (settled manually in v1). No
+   * staff actor — the customer initiated it.
+   */
+  async checkoutForCustomer(customerId: string, dto: AppCheckoutDto) {
+    const cart = await this.getOrCreateOpenCart(customerId);
+    if (cart.items.length === 0) {
+      throw new BadRequestException('Your cart is empty');
+    }
+    return this.checkout(
+      cart.id,
+      {
+        addressId: dto.addressId,
+        paymentMethod: dto.paymentMethod,
+        notes: dto.notes,
+        markPaid: false,
+      },
+      undefined,
+    );
   }
 
   // Keep the cart's stored discount in sync after items change; drop the coupon

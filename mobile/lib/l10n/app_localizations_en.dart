@@ -246,6 +246,124 @@ class AppLocalizationsEn extends AppLocalizations {
   String get makeDefault => 'Make default';
 
   @override
+  String get cartTitle => 'Cart';
+
+  @override
+  String get cartEmpty => 'Your cart is empty';
+
+  @override
+  String get startShopping => 'Start shopping';
+
+  @override
+  String get cartLoadError => 'Couldn\'t load your cart.';
+
+  @override
+  String get couponCode => 'Coupon code';
+
+  @override
+  String get apply => 'Apply';
+
+  @override
+  String get remove => 'Remove';
+
+  @override
+  String get subtotal => 'Subtotal';
+
+  @override
+  String get discount => 'Discount';
+
+  @override
+  String get taxesFeesAtCheckout => 'Taxes and fees calculated at checkout.';
+
+  @override
+  String get proceedToCheckout => 'Proceed to checkout';
+
+  @override
+  String get selectAddress => 'Select address';
+
+  @override
+  String get noAddressForCheckout => 'You need a delivery address to continue.';
+
+  @override
+  String get addAnotherAddress => 'Add another address';
+
+  @override
+  String get continueToReview => 'Continue';
+
+  @override
+  String get checkout => 'Checkout';
+
+  @override
+  String get deliveryAddress => 'Delivery address';
+
+  @override
+  String get change => 'Change';
+
+  @override
+  String get orderItems => 'Items';
+
+  @override
+  String get notesOptional => 'Notes (optional)';
+
+  @override
+  String get notesHint => 'Any delivery instructions?';
+
+  @override
+  String get paymentMethod => 'Payment method';
+
+  @override
+  String get orderSummary => 'Order summary';
+
+  @override
+  String get tax => 'Tax';
+
+  @override
+  String get fees => 'Fees';
+
+  @override
+  String get shipping => 'Shipping';
+
+  @override
+  String get total => 'Total';
+
+  @override
+  String get placeOrder => 'Place order';
+
+  @override
+  String get orderPlaced => 'Order placed!';
+
+  @override
+  String get orderPlacedSubtitle =>
+      'Thank you. We\'ve received your order and will contact you to confirm.';
+
+  @override
+  String get orderNumber => 'Order number';
+
+  @override
+  String get continueShopping => 'Continue shopping';
+
+  @override
+  String get payCod => 'Cash on delivery';
+
+  @override
+  String get payZainCash => 'Zain Cash';
+
+  @override
+  String get payFib => 'FIB';
+
+  @override
+  String get payTransfer => 'Bank transfer';
+
+  @override
+  String get payCard => 'Card';
+
+  @override
+  String get payWallet => 'Wallet';
+
+  @override
+  String get addedToCart => 'Added to cart';
+
+  @override
   String productsCount(int count) {
     return '$count products';
   }

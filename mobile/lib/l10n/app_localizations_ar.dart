@@ -243,6 +243,124 @@ class AppLocalizationsAr extends AppLocalizations {
   String get makeDefault => 'جعله افتراضيًا';
 
   @override
+  String get cartTitle => 'السلة';
+
+  @override
+  String get cartEmpty => 'سلتك فارغة';
+
+  @override
+  String get startShopping => 'ابدأ التسوّق';
+
+  @override
+  String get cartLoadError => 'تعذّر تحميل سلتك.';
+
+  @override
+  String get couponCode => 'رمز الخصم';
+
+  @override
+  String get apply => 'تطبيق';
+
+  @override
+  String get remove => 'إزالة';
+
+  @override
+  String get subtotal => 'المجموع الفرعي';
+
+  @override
+  String get discount => 'الخصم';
+
+  @override
+  String get taxesFeesAtCheckout => 'تُحتسب الضرائب والرسوم عند الدفع.';
+
+  @override
+  String get proceedToCheckout => 'المتابعة للدفع';
+
+  @override
+  String get selectAddress => 'اختر العنوان';
+
+  @override
+  String get noAddressForCheckout => 'تحتاج إلى عنوان توصيل للمتابعة.';
+
+  @override
+  String get addAnotherAddress => 'إضافة عنوان آخر';
+
+  @override
+  String get continueToReview => 'متابعة';
+
+  @override
+  String get checkout => 'الدفع';
+
+  @override
+  String get deliveryAddress => 'عنوان التوصيل';
+
+  @override
+  String get change => 'تغيير';
+
+  @override
+  String get orderItems => 'العناصر';
+
+  @override
+  String get notesOptional => 'ملاحظات (اختياري)';
+
+  @override
+  String get notesHint => 'أي تعليمات للتوصيل؟';
+
+  @override
+  String get paymentMethod => 'طريقة الدفع';
+
+  @override
+  String get orderSummary => 'ملخّص الطلب';
+
+  @override
+  String get tax => 'الضريبة';
+
+  @override
+  String get fees => 'الرسوم';
+
+  @override
+  String get shipping => 'الشحن';
+
+  @override
+  String get total => 'الإجمالي';
+
+  @override
+  String get placeOrder => 'تأكيد الطلب';
+
+  @override
+  String get orderPlaced => 'تم تأكيد الطلب!';
+
+  @override
+  String get orderPlacedSubtitle =>
+      'شكرًا لك. استلمنا طلبك وسنتواصل معك للتأكيد.';
+
+  @override
+  String get orderNumber => 'رقم الطلب';
+
+  @override
+  String get continueShopping => 'متابعة التسوّق';
+
+  @override
+  String get payCod => 'الدفع عند الاستلام';
+
+  @override
+  String get payZainCash => 'زين كاش';
+
+  @override
+  String get payFib => 'FIB';
+
+  @override
+  String get payTransfer => 'تحويل بنكي';
+
+  @override
+  String get payCard => 'بطاقة';
+
+  @override
+  String get payWallet => 'محفظة';
+
+  @override
+  String get addedToCart => 'أُضيف إلى السلة';
+
+  @override
   String productsCount(int count) {
     return '$count منتج';
   }
