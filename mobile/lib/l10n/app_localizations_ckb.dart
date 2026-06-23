@@ -364,6 +364,45 @@ class AppLocalizationsCkb extends AppLocalizations {
   String get addedToCart => 'زیادکرا بۆ سەبەتە';
 
   @override
+  String get addToCart => 'زیادکردن بۆ سەبەتە';
+
+  @override
+  String get outOfStock => 'نەماوە';
+
+  @override
+  String get options => 'هەڵبژاردەکان';
+
+  @override
+  String get productDescription => 'وەسف';
+
+  @override
+  String reviewsCount(int count) {
+    return '$count هەڵسەنگاندن';
+  }
+
+  @override
+  String get productLoadError => 'نەتوانرا ئەم بەرهەمە باربکرێت.';
+
+  @override
+  String get addedToFavorites => 'زیادکرا بۆ دڵخوازەکان';
+
+  @override
+  String get removedFromFavorites => 'لابرا لە دڵخوازەکان';
+
+  @override
+  String get myFavorites => 'دڵخوازەکانم';
+
+  @override
+  String get noFavoritesYet => 'هێشتا هیچ دڵخوازێک نییە';
+
+  @override
+  String get favoritesHint =>
+      'دەست بنێ بە دڵی هەر بەرهەمێک بۆ پاشەکەوتکردنی لێرە.';
+
+  @override
+  String get favoritesLoadError => 'نەتوانرا دڵخوازەکانت باربکرێن.';
+
+  @override
   String productsCount(int count) {
     return '$count بەرهەم';
   }

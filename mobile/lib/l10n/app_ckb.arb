@@ -126,5 +126,18 @@
   "payWallet": "جزدان",
   "addedToCart": "زیادکرا بۆ سەبەتە",
 
+  "addToCart": "زیادکردن بۆ سەبەتە",
+  "outOfStock": "نەماوە",
+  "options": "هەڵبژاردەکان",
+  "productDescription": "وەسف",
+  "reviewsCount": "{count} هەڵسەنگاندن",
+  "productLoadError": "نەتوانرا ئەم بەرهەمە باربکرێت.",
+  "addedToFavorites": "زیادکرا بۆ دڵخوازەکان",
+  "removedFromFavorites": "لابرا لە دڵخوازەکان",
+  "myFavorites": "دڵخوازەکانم",
+  "noFavoritesYet": "هێشتا هیچ دڵخوازێک نییە",
+  "favoritesHint": "دەست بنێ بە دڵی هەر بەرهەمێک بۆ پاشەکەوتکردنی لێرە.",
+  "favoritesLoadError": "نەتوانرا دڵخوازەکانت باربکرێن.",
+
   "productsCount": "{count} بەرهەم"
 }

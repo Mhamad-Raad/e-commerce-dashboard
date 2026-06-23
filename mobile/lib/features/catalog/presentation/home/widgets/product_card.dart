@@ -9,6 +9,7 @@ import '../../../../../core/network/api_result.dart';
 import '../../../../../core/widgets/app_network_image.dart';
 import '../../../../auth/presentation/widgets/auth_widgets.dart';
 import '../../../../cart/presentation/providers/cart_controller.dart';
+import '../../../../favorites/presentation/widgets/favorite_button.dart';
 import '../../../domain/catalog_product.dart';
 import 'pill_badge.dart';
 
@@ -54,6 +55,13 @@ class ProductCard extends StatelessWidget {
                         ),
                       ),
                     ),
+                  Align(
+                    alignment: AlignmentDirectional.topEnd,
+                    child: Padding(
+                      padding: const EdgeInsets.all(AppSpacing.sm),
+                      child: FavoriteButton(productId: product.id, compact: true),
+                    ),
+                  ),
                   Align(
                     alignment: AlignmentDirectional.bottomEnd,
                     child: Padding(

@@ -131,6 +131,24 @@
   "payWallet": "Wallet",
   "addedToCart": "Added to cart",
 
+  "addToCart": "Add to cart",
+  "outOfStock": "Out of stock",
+  "options": "Options",
+  "productDescription": "Description",
+  "reviewsCount": "{count} reviews",
+  "@reviewsCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "productLoadError": "Couldn't load this product.",
+  "addedToFavorites": "Added to favorites",
+  "removedFromFavorites": "Removed from favorites",
+  "myFavorites": "My favorites",
+  "noFavoritesYet": "No favorites yet",
+  "favoritesHint": "Tap the heart on a product to save it here.",
+  "favoritesLoadError": "Couldn't load your favorites.",
+
   "productsCount": "{count} products",
   "@productsCount": {
     "placeholders": {

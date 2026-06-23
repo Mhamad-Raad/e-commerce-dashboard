@@ -126,5 +126,18 @@
   "payWallet": "محفظة",
   "addedToCart": "أُضيف إلى السلة",
 
+  "addToCart": "أضف إلى السلة",
+  "outOfStock": "غير متوفر",
+  "options": "الخيارات",
+  "productDescription": "الوصف",
+  "reviewsCount": "{count} تقييم",
+  "productLoadError": "تعذّر تحميل هذا المنتج.",
+  "addedToFavorites": "أُضيف إلى المفضلة",
+  "removedFromFavorites": "أُزيل من المفضلة",
+  "myFavorites": "مفضلتي",
+  "noFavoritesYet": "لا توجد مفضلة بعد",
+  "favoritesHint": "اضغط على القلب في أي منتج لحفظه هنا.",
+  "favoritesLoadError": "تعذّر تحميل مفضلتك.",
+
   "productsCount": "{count} منتج"
 }

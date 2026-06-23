@@ -13,6 +13,9 @@ class Routes {
   static const addresses = '/addresses';
   static const addressNew = '/addresses/new';
   static String addressEdit(String id) => '/addresses/$id/edit';
+  // Product detail + favorites (pushed over the tab shell; require auth).
+  static String productDetail(String id) => '/product/$id';
+  static const favorites = '/favorites';
   // Cart → checkout flow (pushed over the tab shell; require auth).
   static const cart = '/cart';
   static const checkoutAddress = '/checkout/address';

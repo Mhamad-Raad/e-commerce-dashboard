@@ -361,6 +361,44 @@ class AppLocalizationsAr extends AppLocalizations {
   String get addedToCart => 'أُضيف إلى السلة';
 
   @override
+  String get addToCart => 'أضف إلى السلة';
+
+  @override
+  String get outOfStock => 'غير متوفر';
+
+  @override
+  String get options => 'الخيارات';
+
+  @override
+  String get productDescription => 'الوصف';
+
+  @override
+  String reviewsCount(int count) {
+    return '$count تقييم';
+  }
+
+  @override
+  String get productLoadError => 'تعذّر تحميل هذا المنتج.';
+
+  @override
+  String get addedToFavorites => 'أُضيف إلى المفضلة';
+
+  @override
+  String get removedFromFavorites => 'أُزيل من المفضلة';
+
+  @override
+  String get myFavorites => 'مفضلتي';
+
+  @override
+  String get noFavoritesYet => 'لا توجد مفضلة بعد';
+
+  @override
+  String get favoritesHint => 'اضغط على القلب في أي منتج لحفظه هنا.';
+
+  @override
+  String get favoritesLoadError => 'تعذّر تحميل مفضلتك.';
+
+  @override
   String productsCount(int count) {
     return '$count منتج';
   }

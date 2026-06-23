@@ -52,11 +52,22 @@ class ProfileScreen extends ConsumerWidget {
           const SizedBox(height: AppSpacing.sm),
           Card(
             margin: EdgeInsets.zero,
-            child: ListTile(
-              leading: const Icon(Icons.location_on_outlined),
-              title: Text(l10n.myAddresses),
-              trailing: const Icon(Icons.chevron_right),
-              onTap: () => context.push(Routes.addresses),
+            child: Column(
+              children: [
+                ListTile(
+                  leading: const Icon(Icons.favorite_border),
+                  title: Text(l10n.myFavorites),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => context.push(Routes.favorites),
+                ),
+                const Divider(height: 1),
+                ListTile(
+                  leading: const Icon(Icons.location_on_outlined),
+                  title: Text(l10n.myAddresses),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => context.push(Routes.addresses),
+                ),
+              ],
             ),
           ),
           const SizedBox(height: AppSpacing.xl),

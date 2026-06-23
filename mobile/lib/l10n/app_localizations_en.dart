@@ -364,6 +364,44 @@ class AppLocalizationsEn extends AppLocalizations {
   String get addedToCart => 'Added to cart';
 
   @override
+  String get addToCart => 'Add to cart';
+
+  @override
+  String get outOfStock => 'Out of stock';
+
+  @override
+  String get options => 'Options';
+
+  @override
+  String get productDescription => 'Description';
+
+  @override
+  String reviewsCount(int count) {
+    return '$count reviews';
+  }
+
+  @override
+  String get productLoadError => 'Couldn\'t load this product.';
+
+  @override
+  String get addedToFavorites => 'Added to favorites';
+
+  @override
+  String get removedFromFavorites => 'Removed from favorites';
+
+  @override
+  String get myFavorites => 'My favorites';
+
+  @override
+  String get noFavoritesYet => 'No favorites yet';
+
+  @override
+  String get favoritesHint => 'Tap the heart on a product to save it here.';
+
+  @override
+  String get favoritesLoadError => 'Couldn\'t load your favorites.';
+
+  @override
   String productsCount(int count) {
     return '$count products';
   }

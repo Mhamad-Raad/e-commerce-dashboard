@@ -13,8 +13,11 @@ void navigateToHomeTarget(BuildContext context, HomeSectionItem item) {
   if (target == HomeTargetType.blog) {
     final id = item.blog?.id;
     if (id != null) context.push('${Routes.blog}/$id');
+  } else if (target == HomeTargetType.product) {
+    final id = item.product?.id;
+    if (id != null) context.push(Routes.productDetail(id));
   } else if (target != HomeTargetType.none) {
-    // product / category / store / url — not built yet.
+    // category / store / url — not built yet.
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
       ..showSnackBar(SnackBar(content: Text(context.l10n.comingSoon)));

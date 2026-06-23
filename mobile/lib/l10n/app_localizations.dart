@@ -790,6 +790,78 @@ abstract class AppLocalizations {
   /// **'Added to cart'**
   String get addedToCart;
 
+  /// No description provided for @addToCart.
+  ///
+  /// In en, this message translates to:
+  /// **'Add to cart'**
+  String get addToCart;
+
+  /// No description provided for @outOfStock.
+  ///
+  /// In en, this message translates to:
+  /// **'Out of stock'**
+  String get outOfStock;
+
+  /// No description provided for @options.
+  ///
+  /// In en, this message translates to:
+  /// **'Options'**
+  String get options;
+
+  /// No description provided for @productDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Description'**
+  String get productDescription;
+
+  /// No description provided for @reviewsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} reviews'**
+  String reviewsCount(int count);
+
+  /// No description provided for @productLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t load this product.'**
+  String get productLoadError;
+
+  /// No description provided for @addedToFavorites.
+  ///
+  /// In en, this message translates to:
+  /// **'Added to favorites'**
+  String get addedToFavorites;
+
+  /// No description provided for @removedFromFavorites.
+  ///
+  /// In en, this message translates to:
+  /// **'Removed from favorites'**
+  String get removedFromFavorites;
+
+  /// No description provided for @myFavorites.
+  ///
+  /// In en, this message translates to:
+  /// **'My favorites'**
+  String get myFavorites;
+
+  /// No description provided for @noFavoritesYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No favorites yet'**
+  String get noFavoritesYet;
+
+  /// No description provided for @favoritesHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap the heart on a product to save it here.'**
+  String get favoritesHint;
+
+  /// No description provided for @favoritesLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t load your favorites.'**
+  String get favoritesLoadError;
+
   /// No description provided for @productsCount.
   ///
   /// In en, this message translates to:
