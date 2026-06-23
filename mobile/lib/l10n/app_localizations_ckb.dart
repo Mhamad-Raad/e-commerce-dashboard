@@ -403,6 +403,74 @@ class AppLocalizationsCkb extends AppLocalizations {
   String get favoritesLoadError => 'نەتوانرا دڵخوازەکانت باربکرێن.';
 
   @override
+  String get myOrders => 'داواکارییەکانم';
+
+  @override
+  String get orderDetailTitle => 'وردەکارییەکانی داواکاری';
+
+  @override
+  String get noOrdersYet => 'هێشتا هیچ داواکارییەک نییە';
+
+  @override
+  String get ordersHint => 'داواکارییەکانت لێرە دەردەکەون.';
+
+  @override
+  String get ordersLoadError => 'نەتوانرا داواکارییەکانت باربکرێن.';
+
+  @override
+  String get orderLoadError => 'نەتوانرا ئەم داواکارییە باربکرێت.';
+
+  @override
+  String itemsCount(int count) {
+    return '$count ئایتم';
+  }
+
+  @override
+  String get trackingNumber => 'ژمارەی شوێنکەوتن';
+
+  @override
+  String get notes => 'تێبینییەکان';
+
+  @override
+  String get viewMyOrders => 'بینینی داواکارییەکانم';
+
+  @override
+  String get orderStatusPending => 'چاوەڕوان';
+
+  @override
+  String get orderStatusPaid => 'پارەدراو';
+
+  @override
+  String get orderStatusProcessing => 'ئامادەکردن';
+
+  @override
+  String get orderStatusShipped => 'نێردرا';
+
+  @override
+  String get orderStatusOutForDelivery => 'لە ڕێگەی گەیاندندایە';
+
+  @override
+  String get orderStatusDelivered => 'گەیەنرا';
+
+  @override
+  String get orderStatusCancelled => 'هەڵوەشێنرایەوە';
+
+  @override
+  String get orderStatusRefunded => 'گەڕێنرایەوە';
+
+  @override
+  String get payStatusPending => 'چاوەڕوان';
+
+  @override
+  String get payStatusPaid => 'پارەدراو';
+
+  @override
+  String get payStatusFailed => 'سەرکەوتوو نەبوو';
+
+  @override
+  String get payStatusRefunded => 'گەڕێنرایەوە';
+
+  @override
   String productsCount(int count) {
     return '$count بەرهەم';
   }

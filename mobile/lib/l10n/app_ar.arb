@@ -139,5 +139,28 @@
   "favoritesHint": "اضغط على القلب في أي منتج لحفظه هنا.",
   "favoritesLoadError": "تعذّر تحميل مفضلتك.",
 
+  "myOrders": "طلباتي",
+  "orderDetailTitle": "تفاصيل الطلب",
+  "noOrdersYet": "لا توجد طلبات بعد",
+  "ordersHint": "ستظهر طلباتك هنا.",
+  "ordersLoadError": "تعذّر تحميل طلباتك.",
+  "orderLoadError": "تعذّر تحميل هذا الطلب.",
+  "itemsCount": "{count} عنصر",
+  "trackingNumber": "رقم التتبّع",
+  "notes": "ملاحظات",
+  "viewMyOrders": "عرض طلباتي",
+  "orderStatusPending": "قيد الانتظار",
+  "orderStatusPaid": "مدفوع",
+  "orderStatusProcessing": "قيد التجهيز",
+  "orderStatusShipped": "تم الشحن",
+  "orderStatusOutForDelivery": "قيد التوصيل",
+  "orderStatusDelivered": "تم التوصيل",
+  "orderStatusCancelled": "ملغى",
+  "orderStatusRefunded": "مُسترَد",
+  "payStatusPending": "قيد الانتظار",
+  "payStatusPaid": "مدفوع",
+  "payStatusFailed": "فشل",
+  "payStatusRefunded": "مُسترَد",
+
   "productsCount": "{count} منتج"
 }

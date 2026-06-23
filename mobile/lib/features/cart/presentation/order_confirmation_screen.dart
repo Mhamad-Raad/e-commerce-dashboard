@@ -70,6 +70,11 @@ class OrderConfirmationScreen extends StatelessWidget {
                     child: Text(l10n.continueShopping),
                   ),
                 ),
+                const SizedBox(height: AppSpacing.sm),
+                TextButton(
+                  onPressed: () => context.go(Routes.orders),
+                  child: Text(l10n.viewMyOrders),
+                ),
               ],
             ),
           ),

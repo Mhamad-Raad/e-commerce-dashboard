@@ -862,6 +862,138 @@ abstract class AppLocalizations {
   /// **'Couldn\'t load your favorites.'**
   String get favoritesLoadError;
 
+  /// No description provided for @myOrders.
+  ///
+  /// In en, this message translates to:
+  /// **'My orders'**
+  String get myOrders;
+
+  /// No description provided for @orderDetailTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Order details'**
+  String get orderDetailTitle;
+
+  /// No description provided for @noOrdersYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No orders yet'**
+  String get noOrdersYet;
+
+  /// No description provided for @ordersHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Your placed orders will appear here.'**
+  String get ordersHint;
+
+  /// No description provided for @ordersLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t load your orders.'**
+  String get ordersLoadError;
+
+  /// No description provided for @orderLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t load this order.'**
+  String get orderLoadError;
+
+  /// No description provided for @itemsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} items'**
+  String itemsCount(int count);
+
+  /// No description provided for @trackingNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Tracking number'**
+  String get trackingNumber;
+
+  /// No description provided for @notes.
+  ///
+  /// In en, this message translates to:
+  /// **'Notes'**
+  String get notes;
+
+  /// No description provided for @viewMyOrders.
+  ///
+  /// In en, this message translates to:
+  /// **'View my orders'**
+  String get viewMyOrders;
+
+  /// No description provided for @orderStatusPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending'**
+  String get orderStatusPending;
+
+  /// No description provided for @orderStatusPaid.
+  ///
+  /// In en, this message translates to:
+  /// **'Paid'**
+  String get orderStatusPaid;
+
+  /// No description provided for @orderStatusProcessing.
+  ///
+  /// In en, this message translates to:
+  /// **'Processing'**
+  String get orderStatusProcessing;
+
+  /// No description provided for @orderStatusShipped.
+  ///
+  /// In en, this message translates to:
+  /// **'Shipped'**
+  String get orderStatusShipped;
+
+  /// No description provided for @orderStatusOutForDelivery.
+  ///
+  /// In en, this message translates to:
+  /// **'Out for delivery'**
+  String get orderStatusOutForDelivery;
+
+  /// No description provided for @orderStatusDelivered.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivered'**
+  String get orderStatusDelivered;
+
+  /// No description provided for @orderStatusCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelled'**
+  String get orderStatusCancelled;
+
+  /// No description provided for @orderStatusRefunded.
+  ///
+  /// In en, this message translates to:
+  /// **'Refunded'**
+  String get orderStatusRefunded;
+
+  /// No description provided for @payStatusPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending'**
+  String get payStatusPending;
+
+  /// No description provided for @payStatusPaid.
+  ///
+  /// In en, this message translates to:
+  /// **'Paid'**
+  String get payStatusPaid;
+
+  /// No description provided for @payStatusFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed'**
+  String get payStatusFailed;
+
+  /// No description provided for @payStatusRefunded.
+  ///
+  /// In en, this message translates to:
+  /// **'Refunded'**
+  String get payStatusRefunded;
+
   /// No description provided for @productsCount.
   ///
   /// In en, this message translates to:

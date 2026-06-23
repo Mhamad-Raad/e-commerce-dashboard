@@ -399,6 +399,74 @@ class AppLocalizationsAr extends AppLocalizations {
   String get favoritesLoadError => 'تعذّر تحميل مفضلتك.';
 
   @override
+  String get myOrders => 'طلباتي';
+
+  @override
+  String get orderDetailTitle => 'تفاصيل الطلب';
+
+  @override
+  String get noOrdersYet => 'لا توجد طلبات بعد';
+
+  @override
+  String get ordersHint => 'ستظهر طلباتك هنا.';
+
+  @override
+  String get ordersLoadError => 'تعذّر تحميل طلباتك.';
+
+  @override
+  String get orderLoadError => 'تعذّر تحميل هذا الطلب.';
+
+  @override
+  String itemsCount(int count) {
+    return '$count عنصر';
+  }
+
+  @override
+  String get trackingNumber => 'رقم التتبّع';
+
+  @override
+  String get notes => 'ملاحظات';
+
+  @override
+  String get viewMyOrders => 'عرض طلباتي';
+
+  @override
+  String get orderStatusPending => 'قيد الانتظار';
+
+  @override
+  String get orderStatusPaid => 'مدفوع';
+
+  @override
+  String get orderStatusProcessing => 'قيد التجهيز';
+
+  @override
+  String get orderStatusShipped => 'تم الشحن';
+
+  @override
+  String get orderStatusOutForDelivery => 'قيد التوصيل';
+
+  @override
+  String get orderStatusDelivered => 'تم التوصيل';
+
+  @override
+  String get orderStatusCancelled => 'ملغى';
+
+  @override
+  String get orderStatusRefunded => 'مُسترَد';
+
+  @override
+  String get payStatusPending => 'قيد الانتظار';
+
+  @override
+  String get payStatusPaid => 'مدفوع';
+
+  @override
+  String get payStatusFailed => 'فشل';
+
+  @override
+  String get payStatusRefunded => 'مُسترَد';
+
+  @override
   String productsCount(int count) {
     return '$count منتج';
   }

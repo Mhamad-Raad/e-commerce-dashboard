@@ -22,6 +22,8 @@ import '../../features/cart/presentation/select_address_screen.dart';
 import '../../features/catalog/presentation/home/home_screen.dart';
 import '../../features/catalog/presentation/shop/shop_screen.dart';
 import '../../features/favorites/presentation/favorites_screen.dart';
+import '../../features/orders/presentation/order_detail_screen.dart';
+import '../../features/orders/presentation/orders_screen.dart';
 import '../../features/product/presentation/product_detail_screen.dart';
 import '../../features/search/presentation/search_screen.dart';
 import '../shell/main_shell.dart';
@@ -100,6 +102,13 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: Routes.favorites,
         builder: (_, _) => const FavoritesScreen(),
+      ),
+      // Orders.
+      GoRoute(path: Routes.orders, builder: (_, _) => const OrdersScreen()),
+      GoRoute(
+        path: '/orders/:id',
+        builder: (_, state) =>
+            OrderDetailScreen(id: state.pathParameters['id']!),
       ),
       // Cart → checkout flow.
       GoRoute(path: Routes.cart, builder: (_, _) => const CartScreen()),

@@ -55,6 +55,13 @@ class ProfileScreen extends ConsumerWidget {
             child: Column(
               children: [
                 ListTile(
+                  leading: const Icon(Icons.receipt_long_outlined),
+                  title: Text(l10n.myOrders),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => context.push(Routes.orders),
+                ),
+                const Divider(height: 1),
+                ListTile(
                   leading: const Icon(Icons.favorite_border),
                   title: Text(l10n.myFavorites),
                   trailing: const Icon(Icons.chevron_right),

@@ -139,5 +139,28 @@
   "favoritesHint": "دەست بنێ بە دڵی هەر بەرهەمێک بۆ پاشەکەوتکردنی لێرە.",
   "favoritesLoadError": "نەتوانرا دڵخوازەکانت باربکرێن.",
 
+  "myOrders": "داواکارییەکانم",
+  "orderDetailTitle": "وردەکارییەکانی داواکاری",
+  "noOrdersYet": "هێشتا هیچ داواکارییەک نییە",
+  "ordersHint": "داواکارییەکانت لێرە دەردەکەون.",
+  "ordersLoadError": "نەتوانرا داواکارییەکانت باربکرێن.",
+  "orderLoadError": "نەتوانرا ئەم داواکارییە باربکرێت.",
+  "itemsCount": "{count} ئایتم",
+  "trackingNumber": "ژمارەی شوێنکەوتن",
+  "notes": "تێبینییەکان",
+  "viewMyOrders": "بینینی داواکارییەکانم",
+  "orderStatusPending": "چاوەڕوان",
+  "orderStatusPaid": "پارەدراو",
+  "orderStatusProcessing": "ئامادەکردن",
+  "orderStatusShipped": "نێردرا",
+  "orderStatusOutForDelivery": "لە ڕێگەی گەیاندندایە",
+  "orderStatusDelivered": "گەیەنرا",
+  "orderStatusCancelled": "هەڵوەشێنرایەوە",
+  "orderStatusRefunded": "گەڕێنرایەوە",
+  "payStatusPending": "چاوەڕوان",
+  "payStatusPaid": "پارەدراو",
+  "payStatusFailed": "سەرکەوتوو نەبوو",
+  "payStatusRefunded": "گەڕێنرایەوە",
+
   "productsCount": "{count} بەرهەم"
 }

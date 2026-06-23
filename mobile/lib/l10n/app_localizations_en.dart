@@ -402,6 +402,74 @@ class AppLocalizationsEn extends AppLocalizations {
   String get favoritesLoadError => 'Couldn\'t load your favorites.';
 
   @override
+  String get myOrders => 'My orders';
+
+  @override
+  String get orderDetailTitle => 'Order details';
+
+  @override
+  String get noOrdersYet => 'No orders yet';
+
+  @override
+  String get ordersHint => 'Your placed orders will appear here.';
+
+  @override
+  String get ordersLoadError => 'Couldn\'t load your orders.';
+
+  @override
+  String get orderLoadError => 'Couldn\'t load this order.';
+
+  @override
+  String itemsCount(int count) {
+    return '$count items';
+  }
+
+  @override
+  String get trackingNumber => 'Tracking number';
+
+  @override
+  String get notes => 'Notes';
+
+  @override
+  String get viewMyOrders => 'View my orders';
+
+  @override
+  String get orderStatusPending => 'Pending';
+
+  @override
+  String get orderStatusPaid => 'Paid';
+
+  @override
+  String get orderStatusProcessing => 'Processing';
+
+  @override
+  String get orderStatusShipped => 'Shipped';
+
+  @override
+  String get orderStatusOutForDelivery => 'Out for delivery';
+
+  @override
+  String get orderStatusDelivered => 'Delivered';
+
+  @override
+  String get orderStatusCancelled => 'Cancelled';
+
+  @override
+  String get orderStatusRefunded => 'Refunded';
+
+  @override
+  String get payStatusPending => 'Pending';
+
+  @override
+  String get payStatusPaid => 'Paid';
+
+  @override
+  String get payStatusFailed => 'Failed';
+
+  @override
+  String get payStatusRefunded => 'Refunded';
+
+  @override
   String productsCount(int count) {
     return '$count products';
   }

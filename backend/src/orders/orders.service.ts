@@ -90,6 +90,93 @@ export class OrdersService {
     return order;
   }
 
+  // ---- Customer-scoped reads for the mobile app ----
+  // Always filtered by the authenticated customer; a customer can only ever see
+  // their own orders.
+
+  async listForCustomer(customerId: string) {
+    const orders = await this.prisma.order.findMany({
+      where: { customerId },
+      orderBy: { placedAt: 'desc' },
+      select: {
+        id: true,
+        number: true,
+        status: true,
+        placedAt: true,
+        totalCents: true,
+        currency: true,
+        _count: { select: { items: true } },
+      },
+    });
+    return orders.map((o) => ({
+      id: o.id,
+      number: o.number,
+      status: o.status,
+      placedAt: o.placedAt,
+      totalCents: o.totalCents,
+      currency: o.currency,
+      itemCount: o._count.items,
+    }));
+  }
+
+  async getForCustomer(customerId: string, id: string) {
+    const order = await this.prisma.order.findUnique({
+      where: { id },
+      include: {
+        items: {
+          orderBy: { id: 'asc' },
+          include: { product: { select: { imageUrl: true } } },
+        },
+        payments: {
+          orderBy: { createdAt: 'asc' },
+          select: { method: true, status: true, amountCents: true },
+        },
+      },
+    });
+    if (!order || order.customerId !== customerId) {
+      throw new NotFoundException('Order not found');
+    }
+    return {
+      id: order.id,
+      number: order.number,
+      status: order.status,
+      placedAt: order.placedAt,
+      subtotalCents: order.subtotalCents,
+      discountCents: order.discountCents,
+      couponCode: order.couponCode,
+      taxCents: order.taxCents,
+      shippingCents: order.shippingCents,
+      feesCents: order.feesCents,
+      feesLabel: order.feesLabel,
+      totalCents: order.totalCents,
+      currency: order.currency,
+      notes: order.notes,
+      trackingNumber: order.trackingNumber,
+      ship: {
+        name: order.shipName,
+        phone: order.shipPhone,
+        governorate: order.shipGovernorate,
+        city: order.shipCity,
+        district: order.shipDistrict,
+        street: order.shipStreet,
+        landmark: order.shipLandmark,
+      },
+      items: order.items.map((i) => ({
+        id: i.id,
+        name: i.name,
+        variantName: i.variantName,
+        quantity: i.quantity,
+        priceCents: i.priceCents,
+        imageUrl: i.product?.imageUrl ?? null,
+      })),
+      payments: order.payments.map((p) => ({
+        method: p.method,
+        status: p.status,
+        amountCents: p.amountCents,
+      })),
+    };
+  }
+
   async exportCsv(query: ListOrdersQueryDto) {
     const where = this.listWhere(query);
 

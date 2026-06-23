@@ -149,6 +149,34 @@
   "favoritesHint": "Tap the heart on a product to save it here.",
   "favoritesLoadError": "Couldn't load your favorites.",
 
+  "myOrders": "My orders",
+  "orderDetailTitle": "Order details",
+  "noOrdersYet": "No orders yet",
+  "ordersHint": "Your placed orders will appear here.",
+  "ordersLoadError": "Couldn't load your orders.",
+  "orderLoadError": "Couldn't load this order.",
+  "itemsCount": "{count} items",
+  "@itemsCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "trackingNumber": "Tracking number",
+  "notes": "Notes",
+  "viewMyOrders": "View my orders",
+  "orderStatusPending": "Pending",
+  "orderStatusPaid": "Paid",
+  "orderStatusProcessing": "Processing",
+  "orderStatusShipped": "Shipped",
+  "orderStatusOutForDelivery": "Out for delivery",
+  "orderStatusDelivered": "Delivered",
+  "orderStatusCancelled": "Cancelled",
+  "orderStatusRefunded": "Refunded",
+  "payStatusPending": "Pending",
+  "payStatusPaid": "Paid",
+  "payStatusFailed": "Failed",
+  "payStatusRefunded": "Refunded",
+
   "productsCount": "{count} products",
   "@productsCount": {
     "placeholders": {
