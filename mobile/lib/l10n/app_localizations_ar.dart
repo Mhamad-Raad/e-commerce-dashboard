@@ -544,6 +544,33 @@ class AppLocalizationsAr extends AppLocalizations {
   String get theme => 'السمة';
 
   @override
+  String get saveChanges => 'حفظ التغييرات';
+
+  @override
+  String get changePhoto => 'تغيير الصورة';
+
+  @override
+  String get currentPassword => 'كلمة المرور الحالية';
+
+  @override
+  String get confirmPassword => 'تأكيد كلمة المرور الجديدة';
+
+  @override
+  String get passwordsDontMatch => 'كلمتا المرور غير متطابقتين.';
+
+  @override
+  String get passwordChanged => 'تم تغيير كلمة المرور.';
+
+  @override
+  String get profileUpdated => 'تم تحديث الملف الشخصي.';
+
+  @override
+  String get avatarUpdated => 'تم تحديث الصورة.';
+
+  @override
+  String get nameRequired => 'الاسم مطلوب.';
+
+  @override
   String productsCount(int count) {
     return '$count منتج';
   }

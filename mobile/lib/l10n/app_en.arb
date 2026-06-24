@@ -207,6 +207,15 @@
   "changePassword": "Change password",
   "preferences": "Preferences",
   "theme": "Theme",
+  "saveChanges": "Save changes",
+  "changePhoto": "Change photo",
+  "currentPassword": "Current password",
+  "confirmPassword": "Confirm new password",
+  "passwordsDontMatch": "Passwords don't match.",
+  "passwordChanged": "Password changed.",
+  "profileUpdated": "Profile updated.",
+  "avatarUpdated": "Photo updated.",
+  "nameRequired": "Name is required.",
 
   "productsCount": "{count} products",
   "@productsCount": {

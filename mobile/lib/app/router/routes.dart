@@ -22,6 +22,9 @@ class Routes {
   // Orders (pushed over the tab shell; require auth).
   static const orders = '/orders';
   static String orderDetail(String id) => '/orders/$id';
+  // Account settings.
+  static const editProfile = '/profile/edit';
+  static const changePassword = '/profile/change-password';
   // Cart → checkout flow (pushed over the tab shell; require auth).
   static const cart = '/cart';
   static const checkoutAddress = '/checkout/address';

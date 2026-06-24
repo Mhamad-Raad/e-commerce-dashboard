@@ -67,6 +67,22 @@ class AuthRepository {
   Future<Result<Customer>> me() =>
       _guard(() async => Customer.fromJson(await _api.me()));
 
+  Future<Result<Customer>> updateProfile({String? name, String? email}) =>
+      _guard(() async =>
+          Customer.fromJson(await _api.updateProfile(name: name, email: email)));
+
+  Future<Result<void>> changePassword({
+    required String currentPassword,
+    required String newPassword,
+  }) =>
+      _guardVoid(() => _api.changePassword(
+            currentPassword: currentPassword,
+            newPassword: newPassword,
+          ));
+
+  Future<Result<Customer>> uploadAvatar(String filePath) =>
+      _guard(() async => Customer.fromJson(await _api.uploadAvatar(filePath)));
+
   Future<Result<void>> logout(String? refreshToken) =>
       _guardVoid(() => _api.logout(refreshToken));
 

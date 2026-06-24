@@ -9,6 +9,8 @@ import '../../features/auth/presentation/providers/auth_controller.dart';
 import '../../features/auth/presentation/reset/reset_password_screen.dart';
 import '../../features/auth/presentation/signup/signup_screen.dart';
 import '../../features/auth/presentation/splash/splash_screen.dart';
+import '../../features/account/presentation/change_password_screen.dart';
+import '../../features/account/presentation/edit_profile_screen.dart';
 import '../../features/account/presentation/profile_screen.dart';
 import '../../features/addresses/domain/address.dart';
 import '../../features/addresses/presentation/address_form_screen.dart';
@@ -115,6 +117,15 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: '/store/:id',
         builder: (_, state) =>
             StoreDetailScreen(id: state.pathParameters['id']!),
+      ),
+      // Account settings.
+      GoRoute(
+        path: Routes.editProfile,
+        builder: (_, _) => const EditProfileScreen(),
+      ),
+      GoRoute(
+        path: Routes.changePassword,
+        builder: (_, _) => const ChangePasswordScreen(),
       ),
       // Orders.
       GoRoute(path: Routes.orders, builder: (_, _) => const OrdersScreen()),

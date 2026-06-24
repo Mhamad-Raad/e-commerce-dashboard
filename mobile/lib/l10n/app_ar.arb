@@ -187,6 +187,15 @@
   "changePassword": "تغيير كلمة المرور",
   "preferences": "التفضيلات",
   "theme": "السمة",
+  "saveChanges": "حفظ التغييرات",
+  "changePhoto": "تغيير الصورة",
+  "currentPassword": "كلمة المرور الحالية",
+  "confirmPassword": "تأكيد كلمة المرور الجديدة",
+  "passwordsDontMatch": "كلمتا المرور غير متطابقتين.",
+  "passwordChanged": "تم تغيير كلمة المرور.",
+  "profileUpdated": "تم تحديث الملف الشخصي.",
+  "avatarUpdated": "تم تحديث الصورة.",
+  "nameRequired": "الاسم مطلوب.",
 
   "productsCount": "{count} منتج"
 }

@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -41,11 +42,16 @@ class ProfileScreen extends ConsumerWidget {
             children: [
               CircleAvatar(
                 radius: 28,
-                child: Text(
-                  (customer?.name.isNotEmpty ?? false)
-                      ? customer!.name[0].toUpperCase()
-                      : '?',
-                ),
+                backgroundImage: (customer?.avatarUrl?.isNotEmpty ?? false)
+                    ? CachedNetworkImageProvider(customer!.avatarUrl!)
+                    : null,
+                child: (customer?.avatarUrl?.isNotEmpty ?? false)
+                    ? null
+                    : Text(
+                        (customer?.name.isNotEmpty ?? false)
+                            ? customer!.name[0].toUpperCase()
+                            : '?',
+                      ),
               ),
               const SizedBox(width: AppSpacing.md),
               Expanded(
@@ -83,12 +89,12 @@ class ProfileScreen extends ConsumerWidget {
           _Tile(
             icon: Icons.person_outline,
             title: l10n.editProfile,
-            onTap: () => _soon(context),
+            onTap: () => context.push(Routes.editProfile),
           ),
           _Tile(
             icon: Icons.lock_outline,
             title: l10n.changePassword,
-            onTap: () => _soon(context),
+            onTap: () => context.push(Routes.changePassword),
           ),
           const SizedBox(height: AppSpacing.md),
 
@@ -116,12 +122,6 @@ class ProfileScreen extends ConsumerWidget {
         ],
       ),
     );
-  }
-
-  void _soon(BuildContext context) {
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(SnackBar(content: Text(context.l10n.comingSoon)));
   }
 
   Future<void> _pickLanguage(

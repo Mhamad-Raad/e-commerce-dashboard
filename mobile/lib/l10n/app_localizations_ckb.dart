@@ -548,6 +548,33 @@ class AppLocalizationsCkb extends AppLocalizations {
   String get theme => 'ڕووکار';
 
   @override
+  String get saveChanges => 'پاشەکەوتکردنی گۆڕانکارییەکان';
+
+  @override
+  String get changePhoto => 'گۆڕینی وێنە';
+
+  @override
+  String get currentPassword => 'وشەی نهێنی ئێستا';
+
+  @override
+  String get confirmPassword => 'دڵنیاکردنەوەی وشەی نهێنی نوێ';
+
+  @override
+  String get passwordsDontMatch => 'وشە نهێنییەکان وەک یەک نین.';
+
+  @override
+  String get passwordChanged => 'وشەی نهێنی گۆڕدرا.';
+
+  @override
+  String get profileUpdated => 'پرۆفایل نوێکرایەوە.';
+
+  @override
+  String get avatarUpdated => 'وێنە نوێکرایەوە.';
+
+  @override
+  String get nameRequired => 'ناو پێویستە.';
+
+  @override
   String productsCount(int count) {
     return '$count بەرهەم';
   }

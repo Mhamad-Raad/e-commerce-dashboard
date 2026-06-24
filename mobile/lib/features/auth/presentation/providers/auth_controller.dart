@@ -81,6 +81,32 @@ class AuthController extends Notifier<AuthState> {
   Future<Result<void>> resendVerification(String phone) =>
       _repo.resendOtp(phone: phone, purpose: 'PHONE_VERIFICATION');
 
+  Future<Result<void>> updateProfile({String? name, String? email}) async =>
+      _applyCustomer(await _repo.updateProfile(name: name, email: email));
+
+  Future<Result<void>> uploadAvatar(String filePath) async =>
+      _applyCustomer(await _repo.uploadAvatar(filePath));
+
+  Future<Result<void>> changePassword({
+    required String currentPassword,
+    required String newPassword,
+  }) =>
+      _repo.changePassword(
+        currentPassword: currentPassword,
+        newPassword: newPassword,
+      );
+
+  // Reflect an updated customer (profile/avatar) into the authenticated state.
+  Result<void> _applyCustomer(Result<Customer> result) {
+    switch (result) {
+      case Success(value: final customer):
+        state = AuthState(status: AuthStatus.authenticated, customer: customer);
+        return const Success(null);
+      case Failed(failure: final f):
+        return Failed(f);
+    }
+  }
+
   Future<void> logout() async {
     final refresh = await _tokens.refreshToken;
     await _repo.logout(refresh); // best-effort server-side revoke

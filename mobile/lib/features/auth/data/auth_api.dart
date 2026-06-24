@@ -66,6 +66,31 @@ class AuthApi {
     return _asMap(res.data);
   }
 
+  Future<Map<String, dynamic>> updateProfile({String? name, String? email}) async {
+    final res = await _dio.patch('/app/auth/profile', data: {
+      'name': ?name,
+      'email': ?email,
+    });
+    return _asMap(res.data);
+  }
+
+  Future<Map<String, dynamic>> changePassword({
+    required String currentPassword,
+    required String newPassword,
+  }) =>
+      _post('/app/auth/change-password', {
+        'currentPassword': currentPassword,
+        'newPassword': newPassword,
+      });
+
+  Future<Map<String, dynamic>> uploadAvatar(String filePath) async {
+    final form = FormData.fromMap({
+      'file': await MultipartFile.fromFile(filePath),
+    });
+    final res = await _dio.post('/app/auth/avatar', data: form);
+    return _asMap(res.data);
+  }
+
   Future<Map<String, dynamic>> _post(String path, Map<String, dynamic> body) async {
     final res = await _dio.post(path, data: body);
     return _asMap(res.data);

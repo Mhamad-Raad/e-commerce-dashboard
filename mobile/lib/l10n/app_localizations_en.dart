@@ -548,6 +548,33 @@ class AppLocalizationsEn extends AppLocalizations {
   String get theme => 'Theme';
 
   @override
+  String get saveChanges => 'Save changes';
+
+  @override
+  String get changePhoto => 'Change photo';
+
+  @override
+  String get currentPassword => 'Current password';
+
+  @override
+  String get confirmPassword => 'Confirm new password';
+
+  @override
+  String get passwordsDontMatch => 'Passwords don\'t match.';
+
+  @override
+  String get passwordChanged => 'Password changed.';
+
+  @override
+  String get profileUpdated => 'Profile updated.';
+
+  @override
+  String get avatarUpdated => 'Photo updated.';
+
+  @override
+  String get nameRequired => 'Name is required.';
+
+  @override
   String productsCount(int count) {
     return '$count products';
   }

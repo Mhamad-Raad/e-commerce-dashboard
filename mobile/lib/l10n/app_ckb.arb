@@ -187,6 +187,15 @@
   "changePassword": "گۆڕینی وشەی نهێنی",
   "preferences": "هەڵبژاردنەکان",
   "theme": "ڕووکار",
+  "saveChanges": "پاشەکەوتکردنی گۆڕانکارییەکان",
+  "changePhoto": "گۆڕینی وێنە",
+  "currentPassword": "وشەی نهێنی ئێستا",
+  "confirmPassword": "دڵنیاکردنەوەی وشەی نهێنی نوێ",
+  "passwordsDontMatch": "وشە نهێنییەکان وەک یەک نین.",
+  "passwordChanged": "وشەی نهێنی گۆڕدرا.",
+  "profileUpdated": "پرۆفایل نوێکرایەوە.",
+  "avatarUpdated": "وێنە نوێکرایەوە.",
+  "nameRequired": "ناو پێویستە.",
 
   "productsCount": "{count} بەرهەم"
 }
