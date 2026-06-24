@@ -177,6 +177,37 @@
   "payStatusFailed": "Failed",
   "payStatusRefunded": "Refunded",
 
+  "tabProducts": "Products",
+  "tabAssistant": "Assistant",
+  "searchProducts": "Search products",
+  "stores": "Stores",
+  "storesLoadError": "Couldn't load stores.",
+  "noResults": "No results",
+  "resultsCount": "{count} results",
+  "@resultsCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "filters": "Filters",
+  "reset": "Reset",
+  "sortBy": "Sort by",
+  "sortNewest": "Newest",
+  "sortPriceAsc": "Price: low to high",
+  "sortPriceDesc": "Price: high to low",
+  "sortRating": "Top rated",
+  "priceRange": "Price range",
+  "minPrice": "Min",
+  "maxPrice": "Max",
+  "inStockOnly": "In stock only",
+  "applyFilters": "Apply filters",
+  "assistantTitle": "Shopping assistant",
+  "assistantComingSoon": "Your AI shopping assistant is coming soon.",
+  "editProfile": "Edit profile",
+  "changePassword": "Change password",
+  "preferences": "Preferences",
+  "theme": "Theme",
+
   "productsCount": "{count} products",
   "@productsCount": {
     "placeholders": {

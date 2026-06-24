@@ -467,6 +467,83 @@ class AppLocalizationsAr extends AppLocalizations {
   String get payStatusRefunded => 'مُسترَد';
 
   @override
+  String get tabProducts => 'المنتجات';
+
+  @override
+  String get tabAssistant => 'المساعد';
+
+  @override
+  String get searchProducts => 'ابحث عن منتجات';
+
+  @override
+  String get stores => 'المتاجر';
+
+  @override
+  String get storesLoadError => 'تعذّر تحميل المتاجر.';
+
+  @override
+  String get noResults => 'لا توجد نتائج';
+
+  @override
+  String resultsCount(int count) {
+    return '$count نتيجة';
+  }
+
+  @override
+  String get filters => 'الفلاتر';
+
+  @override
+  String get reset => 'إعادة تعيين';
+
+  @override
+  String get sortBy => 'ترتيب حسب';
+
+  @override
+  String get sortNewest => 'الأحدث';
+
+  @override
+  String get sortPriceAsc => 'السعر: من الأقل للأعلى';
+
+  @override
+  String get sortPriceDesc => 'السعر: من الأعلى للأقل';
+
+  @override
+  String get sortRating => 'الأعلى تقييمًا';
+
+  @override
+  String get priceRange => 'نطاق السعر';
+
+  @override
+  String get minPrice => 'الأدنى';
+
+  @override
+  String get maxPrice => 'الأعلى';
+
+  @override
+  String get inStockOnly => 'المتوفر فقط';
+
+  @override
+  String get applyFilters => 'تطبيق الفلاتر';
+
+  @override
+  String get assistantTitle => 'مساعد التسوّق';
+
+  @override
+  String get assistantComingSoon => 'مساعد التسوّق الذكي قادم قريبًا.';
+
+  @override
+  String get editProfile => 'تعديل الملف الشخصي';
+
+  @override
+  String get changePassword => 'تغيير كلمة المرور';
+
+  @override
+  String get preferences => 'التفضيلات';
+
+  @override
+  String get theme => 'السمة';
+
+  @override
   String productsCount(int count) {
     return '$count منتج';
   }

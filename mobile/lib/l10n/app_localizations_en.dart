@@ -470,6 +470,84 @@ class AppLocalizationsEn extends AppLocalizations {
   String get payStatusRefunded => 'Refunded';
 
   @override
+  String get tabProducts => 'Products';
+
+  @override
+  String get tabAssistant => 'Assistant';
+
+  @override
+  String get searchProducts => 'Search products';
+
+  @override
+  String get stores => 'Stores';
+
+  @override
+  String get storesLoadError => 'Couldn\'t load stores.';
+
+  @override
+  String get noResults => 'No results';
+
+  @override
+  String resultsCount(int count) {
+    return '$count results';
+  }
+
+  @override
+  String get filters => 'Filters';
+
+  @override
+  String get reset => 'Reset';
+
+  @override
+  String get sortBy => 'Sort by';
+
+  @override
+  String get sortNewest => 'Newest';
+
+  @override
+  String get sortPriceAsc => 'Price: low to high';
+
+  @override
+  String get sortPriceDesc => 'Price: high to low';
+
+  @override
+  String get sortRating => 'Top rated';
+
+  @override
+  String get priceRange => 'Price range';
+
+  @override
+  String get minPrice => 'Min';
+
+  @override
+  String get maxPrice => 'Max';
+
+  @override
+  String get inStockOnly => 'In stock only';
+
+  @override
+  String get applyFilters => 'Apply filters';
+
+  @override
+  String get assistantTitle => 'Shopping assistant';
+
+  @override
+  String get assistantComingSoon =>
+      'Your AI shopping assistant is coming soon.';
+
+  @override
+  String get editProfile => 'Edit profile';
+
+  @override
+  String get changePassword => 'Change password';
+
+  @override
+  String get preferences => 'Preferences';
+
+  @override
+  String get theme => 'Theme';
+
+  @override
   String productsCount(int count) {
     return '$count products';
   }

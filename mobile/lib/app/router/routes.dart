@@ -3,11 +3,14 @@ class Routes {
   Routes._();
 
   static const splash = '/splash';
-  // Main tabs (inside the bottom-nav shell).
+  // Main tabs (inside the bottom-nav shell): Home · Products · Assistant · Profile.
   static const home = '/home';
-  static const shop = '/shop';
-  static const search = '/search';
+  static const products = '/products';
+  static const assistant = '/assistant';
   static const profile = '/profile';
+  // Stores showcase (pushed over the shell).
+  static const stores = '/stores';
+  static String storeDetail(String id) => '/store/$id';
   static const blog = '/blog'; // article route is '/blog/:id'
   // Addresses (pushed over the tab shell; require auth).
   static const addresses = '/addresses';

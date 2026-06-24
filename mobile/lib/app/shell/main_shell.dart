@@ -42,14 +42,14 @@ class MainShell extends StatelessWidget {
                 label: l10n.tabHome,
               ),
               NavigationDestination(
-                icon: const Icon(Icons.storefront_outlined),
-                selectedIcon: const Icon(Icons.storefront),
-                label: l10n.tabShop,
+                icon: const Icon(Icons.grid_view_outlined),
+                selectedIcon: const Icon(Icons.grid_view),
+                label: l10n.tabProducts,
               ),
               NavigationDestination(
-                icon: const Icon(Icons.search_outlined),
-                selectedIcon: const Icon(Icons.search),
-                label: l10n.tabSearch,
+                icon: const Icon(Icons.auto_awesome_outlined),
+                selectedIcon: const Icon(Icons.auto_awesome),
+                label: l10n.tabAssistant,
               ),
               NavigationDestination(
                 icon: const Icon(Icons.person_outline),

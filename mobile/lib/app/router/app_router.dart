@@ -19,13 +19,15 @@ import '../../features/cart/presentation/cart_screen.dart';
 import '../../features/cart/presentation/checkout_screen.dart';
 import '../../features/cart/presentation/order_confirmation_screen.dart';
 import '../../features/cart/presentation/select_address_screen.dart';
+import '../../features/assistant/presentation/assistant_screen.dart';
 import '../../features/catalog/presentation/home/home_screen.dart';
-import '../../features/catalog/presentation/shop/shop_screen.dart';
+import '../../features/catalog/presentation/products_screen.dart';
+import '../../features/catalog/presentation/store_detail_screen.dart';
+import '../../features/catalog/presentation/stores_screen.dart';
 import '../../features/favorites/presentation/favorites_screen.dart';
 import '../../features/orders/presentation/order_detail_screen.dart';
 import '../../features/orders/presentation/orders_screen.dart';
 import '../../features/product/presentation/product_detail_screen.dart';
-import '../../features/search/presentation/search_screen.dart';
 import '../shell/main_shell.dart';
 import 'routes.dart';
 
@@ -63,10 +65,14 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             GoRoute(path: Routes.home, builder: (_, _) => const HomeScreen()),
           ]),
           StatefulShellBranch(routes: [
-            GoRoute(path: Routes.shop, builder: (_, _) => const ShopScreen()),
+            GoRoute(
+                path: Routes.products,
+                builder: (_, _) => const ProductsScreen()),
           ]),
           StatefulShellBranch(routes: [
-            GoRoute(path: Routes.search, builder: (_, _) => const SearchScreen()),
+            GoRoute(
+                path: Routes.assistant,
+                builder: (_, _) => const AssistantScreen()),
           ]),
           StatefulShellBranch(routes: [
             GoRoute(path: Routes.profile, builder: (_, _) => const ProfileScreen()),
@@ -102,6 +108,13 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: Routes.favorites,
         builder: (_, _) => const FavoritesScreen(),
+      ),
+      // Stores showcase.
+      GoRoute(path: Routes.stores, builder: (_, _) => const StoresScreen()),
+      GoRoute(
+        path: '/store/:id',
+        builder: (_, state) =>
+            StoreDetailScreen(id: state.pathParameters['id']!),
       ),
       // Orders.
       GoRoute(path: Routes.orders, builder: (_, _) => const OrdersScreen()),

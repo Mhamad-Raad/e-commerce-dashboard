@@ -471,6 +471,83 @@ class AppLocalizationsCkb extends AppLocalizations {
   String get payStatusRefunded => 'گەڕێنرایەوە';
 
   @override
+  String get tabProducts => 'بەرهەمەکان';
+
+  @override
+  String get tabAssistant => 'یاریدەدەر';
+
+  @override
+  String get searchProducts => 'گەڕان بۆ بەرهەم';
+
+  @override
+  String get stores => 'فرۆشگاکان';
+
+  @override
+  String get storesLoadError => 'نەتوانرا فرۆشگاکان باربکرێن.';
+
+  @override
+  String get noResults => 'هیچ ئەنجامێک نییە';
+
+  @override
+  String resultsCount(int count) {
+    return '$count ئەنجام';
+  }
+
+  @override
+  String get filters => 'فلتەرەکان';
+
+  @override
+  String get reset => 'ڕێکخستنەوە';
+
+  @override
+  String get sortBy => 'ڕیزکردن بەپێی';
+
+  @override
+  String get sortNewest => 'نوێترین';
+
+  @override
+  String get sortPriceAsc => 'نرخ: لە کەمەوە بۆ زۆر';
+
+  @override
+  String get sortPriceDesc => 'نرخ: لە زۆرەوە بۆ کەم';
+
+  @override
+  String get sortRating => 'بەرزترین هەڵسەنگاندن';
+
+  @override
+  String get priceRange => 'مەودای نرخ';
+
+  @override
+  String get minPrice => 'کەمترین';
+
+  @override
+  String get maxPrice => 'زۆرترین';
+
+  @override
+  String get inStockOnly => 'تەنها ئەوەی بەردەستە';
+
+  @override
+  String get applyFilters => 'جێبەجێکردنی فلتەر';
+
+  @override
+  String get assistantTitle => 'یاریدەدەری کڕین';
+
+  @override
+  String get assistantComingSoon => 'یاریدەدەری زیرەکی کڕینت بەمزووانە دێت.';
+
+  @override
+  String get editProfile => 'دەستکاری پرۆفایل';
+
+  @override
+  String get changePassword => 'گۆڕینی وشەی نهێنی';
+
+  @override
+  String get preferences => 'هەڵبژاردنەکان';
+
+  @override
+  String get theme => 'ڕووکار';
+
+  @override
   String productsCount(int count) {
     return '$count بەرهەم';
   }

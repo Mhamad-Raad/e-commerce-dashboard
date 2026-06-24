@@ -31,7 +31,7 @@ class CartScreen extends ConsumerWidget {
           onRetry: () => ref.invalidate(cartControllerProvider),
         ),
         data: (cart) => cart.isEmpty
-            ? _CartEmpty(onBrowse: () => context.go(Routes.shop))
+            ? _CartEmpty(onBrowse: () => context.go(Routes.products))
             : _CartBody(cart: cart),
       ),
     );

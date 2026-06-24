@@ -17,75 +17,97 @@ const _languages = [
   (code: 'ar', label: 'العربية'),
 ];
 
-/// Profile tab — account, orders, settings (to be built). For now it hosts the
-/// language switcher + dev helpers (theme toggle + logout).
+/// Profile tab — an Akkooo-style settings hub: account (orders, wishlist,
+/// addresses, profile, password) and preferences (theme, language).
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
-    final current = ref.watch(localeControllerProvider).languageCode;
+    final customer = ref.watch(authControllerProvider).customer;
+    final brightness = Theme.of(context).brightness;
+    final currentLang = ref.watch(localeControllerProvider).languageCode;
+    final langLabel =
+        _languages.firstWhere((l) => l.code == currentLang, orElse: () => _languages.first).label;
 
     return Scaffold(
       appBar: const RozhnaAppBar(),
       body: ListView(
         padding: const EdgeInsets.all(AppSpacing.margin),
         children: [
-          Text(l10n.language, style: Theme.of(context).textTheme.titleLarge),
-          const SizedBox(height: AppSpacing.sm),
-          Wrap(
-            spacing: AppSpacing.sm,
+          // Header — avatar + name + phone.
+          Row(
             children: [
-              for (final lang in _languages)
-                ChoiceChip(
-                  label: Text(lang.label),
-                  selected: current == lang.code,
-                  onSelected: (_) => ref
-                      .read(localeControllerProvider.notifier)
-                      .set(Locale(lang.code)),
+              CircleAvatar(
+                radius: 28,
+                child: Text(
+                  (customer?.name.isNotEmpty ?? false)
+                      ? customer!.name[0].toUpperCase()
+                      : '?',
                 ),
+              ),
+              const SizedBox(width: AppSpacing.md),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(customer?.name ?? '—',
+                        style: Theme.of(context).textTheme.titleMedium),
+                    if (customer?.phone != null)
+                      Text(customer!.phone!,
+                          style: Theme.of(context).textTheme.bodySmall),
+                  ],
+                ),
+              ),
             ],
           ),
           const SizedBox(height: AppSpacing.lg),
-          Text(l10n.account, style: Theme.of(context).textTheme.titleLarge),
-          const SizedBox(height: AppSpacing.sm),
-          Card(
-            margin: EdgeInsets.zero,
-            child: Column(
-              children: [
-                ListTile(
-                  leading: const Icon(Icons.receipt_long_outlined),
-                  title: Text(l10n.myOrders),
-                  trailing: const Icon(Icons.chevron_right),
-                  onTap: () => context.push(Routes.orders),
-                ),
-                const Divider(height: 1),
-                ListTile(
-                  leading: const Icon(Icons.favorite_border),
-                  title: Text(l10n.myFavorites),
-                  trailing: const Icon(Icons.chevron_right),
-                  onTap: () => context.push(Routes.favorites),
-                ),
-                const Divider(height: 1),
-                ListTile(
-                  leading: const Icon(Icons.location_on_outlined),
-                  title: Text(l10n.myAddresses),
-                  trailing: const Icon(Icons.chevron_right),
-                  onTap: () => context.push(Routes.addresses),
-                ),
-              ],
-            ),
+
+          _SectionLabel(l10n.account),
+          _Tile(
+            icon: Icons.receipt_long_outlined,
+            title: l10n.myOrders,
+            onTap: () => context.push(Routes.orders),
+          ),
+          _Tile(
+            icon: Icons.favorite_border,
+            title: l10n.myFavorites,
+            onTap: () => context.push(Routes.favorites),
+          ),
+          _Tile(
+            icon: Icons.location_on_outlined,
+            title: l10n.myAddresses,
+            onTap: () => context.push(Routes.addresses),
+          ),
+          _Tile(
+            icon: Icons.person_outline,
+            title: l10n.editProfile,
+            onTap: () => _soon(context),
+          ),
+          _Tile(
+            icon: Icons.lock_outline,
+            title: l10n.changePassword,
+            onTap: () => _soon(context),
+          ),
+          const SizedBox(height: AppSpacing.md),
+
+          _SectionLabel(l10n.preferences),
+          _Tile(
+            icon: Icons.brightness_6_outlined,
+            title: l10n.theme,
+            trailingText: brightness == Brightness.dark ? 'Dark' : 'Light',
+            onTap: () =>
+                ref.read(themeControllerProvider.notifier).toggle(brightness),
+          ),
+          _Tile(
+            icon: Icons.language_outlined,
+            title: l10n.language,
+            trailingText: langLabel,
+            onTap: () => _pickLanguage(context, ref, currentLang),
           ),
           const SizedBox(height: AppSpacing.xl),
-          FilledButton.tonalIcon(
-            onPressed: () => ref
-                .read(themeControllerProvider.notifier)
-                .toggle(Theme.of(context).brightness),
-            icon: const Icon(Icons.brightness_6_outlined),
-            label: Text(l10n.toggleTheme),
-          ),
-          const SizedBox(height: AppSpacing.sm),
+
           TextButton.icon(
             onPressed: () => ref.read(authControllerProvider.notifier).logout(),
             icon: const Icon(Icons.logout),
@@ -93,6 +115,97 @@ class ProfileScreen extends ConsumerWidget {
           ),
         ],
       ),
+    );
+  }
+
+  void _soon(BuildContext context) {
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(content: Text(context.l10n.comingSoon)));
+  }
+
+  Future<void> _pickLanguage(
+      BuildContext context, WidgetRef ref, String current) async {
+    await showModalBottomSheet<void>(
+      context: context,
+      showDragHandle: true,
+      builder: (ctx) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            for (final lang in _languages)
+              ListTile(
+                title: Text(lang.label),
+                trailing: current == lang.code
+                    ? Icon(Icons.check,
+                        color: Theme.of(ctx).colorScheme.primary)
+                    : null,
+                onTap: () {
+                  ref
+                      .read(localeControllerProvider.notifier)
+                      .set(Locale(lang.code));
+                  Navigator.pop(ctx);
+                },
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _SectionLabel extends StatelessWidget {
+  const _SectionLabel(this.label);
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: AppSpacing.xs, top: AppSpacing.xs),
+      child: Text(
+        label.toUpperCase(),
+        style: Theme.of(context).textTheme.labelMedium?.copyWith(
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+              letterSpacing: 0.8,
+            ),
+      ),
+    );
+  }
+}
+
+class _Tile extends StatelessWidget {
+  const _Tile({
+    required this.icon,
+    required this.title,
+    required this.onTap,
+    this.trailingText,
+  });
+
+  final IconData icon;
+  final String title;
+  final VoidCallback onTap;
+  final String? trailingText;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return ListTile(
+      contentPadding: EdgeInsets.zero,
+      leading: Icon(icon, color: scheme.primary),
+      title: Text(title),
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (trailingText != null)
+            Text(trailingText!,
+                style: Theme.of(context)
+                    .textTheme
+                    .bodySmall
+                    ?.copyWith(color: scheme.onSurfaceVariant)),
+          const Icon(Icons.chevron_right),
+        ],
+      ),
+      onTap: onTap,
     );
   }
 }
