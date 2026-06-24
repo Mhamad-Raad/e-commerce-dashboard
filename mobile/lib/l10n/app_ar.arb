@@ -196,6 +196,10 @@
   "profileUpdated": "تم تحديث الملف الشخصي.",
   "avatarUpdated": "تم تحديث الصورة.",
   "nameRequired": "الاسم مطلوب.",
+  "themeLight": "فاتح",
+  "themeDark": "داكن",
+  "fillAllFields": "الرجاء تعبئة جميع الحقول.",
+  "passwordTooShort": "يجب أن تكون كلمة المرور 8 أحرف على الأقل.",
 
   "productsCount": "{count} منتج"
 }

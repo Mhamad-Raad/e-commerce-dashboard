@@ -196,6 +196,10 @@
   "profileUpdated": "پرۆفایل نوێکرایەوە.",
   "avatarUpdated": "وێنە نوێکرایەوە.",
   "nameRequired": "ناو پێویستە.",
+  "themeLight": "ڕووناک",
+  "themeDark": "تاریک",
+  "fillAllFields": "تکایە هەموو خانەکان پڕبکەرەوە.",
+  "passwordTooShort": "وشەی نهێنی دەبێت لانیکەم ٨ پیت بێت.",
 
   "productsCount": "{count} بەرهەم"
 }

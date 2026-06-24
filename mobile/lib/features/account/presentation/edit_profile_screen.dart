@@ -67,9 +67,12 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
       return;
     }
     setState(() => _saving = true);
+    final email = _email.text.trim();
     final result = await ref.read(authControllerProvider.notifier).updateProfile(
           name: _name.text.trim(),
-          email: _email.text.trim(),
+          // Omit when blank: the backend's @IsEmail rejects an empty string, and
+          // a null simply leaves the email unchanged.
+          email: email.isEmpty ? null : email,
         );
     if (!mounted) return;
     setState(() => _saving = false);

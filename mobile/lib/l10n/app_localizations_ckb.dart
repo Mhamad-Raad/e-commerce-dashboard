@@ -575,6 +575,18 @@ class AppLocalizationsCkb extends AppLocalizations {
   String get nameRequired => 'ناو پێویستە.';
 
   @override
+  String get themeLight => 'ڕووناک';
+
+  @override
+  String get themeDark => 'تاریک';
+
+  @override
+  String get fillAllFields => 'تکایە هەموو خانەکان پڕبکەرەوە.';
+
+  @override
+  String get passwordTooShort => 'وشەی نهێنی دەبێت لانیکەم ٨ پیت بێت.';
+
+  @override
   String productsCount(int count) {
     return '$count بەرهەم';
   }

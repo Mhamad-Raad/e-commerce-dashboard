@@ -34,11 +34,11 @@ class _ChangePasswordScreenState extends ConsumerState<ChangePasswordScreen> {
   Future<void> _submit() async {
     final l10n = context.l10n;
     if (_current.text.isEmpty || _next.text.isEmpty) {
-      showMessage(context, l10n.fillCodeAndPassword);
+      showMessage(context, l10n.fillAllFields);
       return;
     }
     if (_next.text.length < 8) {
-      showMessage(context, l10n.passwordMin8);
+      showMessage(context, l10n.passwordTooShort);
       return;
     }
     if (_next.text != _confirm.text) {

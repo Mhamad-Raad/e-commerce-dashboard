@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 
 import '../../../app/theme/app_radii.dart';
 import '../../../app/theme/app_spacing.dart';
+import '../../../core/l10n/intl_locale.dart';
 import '../../../core/l10n/l10n_ext.dart';
 import '../../../core/money/money.dart';
 import '../../../core/widgets/app_network_image.dart';
@@ -73,7 +74,9 @@ class _Body extends StatelessWidget {
                   Text(order.number, style: text.titleMedium),
                   const SizedBox(height: 2),
                   Text(
-                    DateFormat.yMMMd(locale).add_jm().format(order.placedAt),
+                    DateFormat.yMMMd(intlLocale(locale))
+                        .add_jm()
+                        .format(order.placedAt),
                     style: text.bodySmall
                         ?.copyWith(color: scheme.onSurfaceVariant),
                   ),

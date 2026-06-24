@@ -571,6 +571,18 @@ class AppLocalizationsAr extends AppLocalizations {
   String get nameRequired => 'الاسم مطلوب.';
 
   @override
+  String get themeLight => 'فاتح';
+
+  @override
+  String get themeDark => 'داكن';
+
+  @override
+  String get fillAllFields => 'الرجاء تعبئة جميع الحقول.';
+
+  @override
+  String get passwordTooShort => 'يجب أن تكون كلمة المرور 8 أحرف على الأقل.';
+
+  @override
   String productsCount(int count) {
     return '$count منتج';
   }

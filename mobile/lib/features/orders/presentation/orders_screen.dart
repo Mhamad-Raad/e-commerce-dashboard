@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 import '../../../app/router/routes.dart';
 import '../../../app/theme/app_radii.dart';
 import '../../../app/theme/app_spacing.dart';
+import '../../../core/l10n/intl_locale.dart';
 import '../../../core/l10n/l10n_ext.dart';
 import '../data/orders_repository.dart';
 import '../domain/order_summary.dart';
@@ -96,7 +97,7 @@ class _OrderRow extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  DateFormat.yMMMd(locale).format(order.placedAt),
+                  DateFormat.yMMMd(intlLocale(locale)).format(order.placedAt),
                   style: text.bodySmall
                       ?.copyWith(color: scheme.onSurfaceVariant),
                 ),

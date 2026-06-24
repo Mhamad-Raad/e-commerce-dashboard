@@ -216,6 +216,10 @@
   "profileUpdated": "Profile updated.",
   "avatarUpdated": "Photo updated.",
   "nameRequired": "Name is required.",
+  "themeLight": "Light",
+  "themeDark": "Dark",
+  "fillAllFields": "Please fill in all fields.",
+  "passwordTooShort": "Password must be at least 8 characters.",
 
   "productsCount": "{count} products",
   "@productsCount": {

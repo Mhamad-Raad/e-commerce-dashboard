@@ -102,7 +102,8 @@ class ProfileScreen extends ConsumerWidget {
           _Tile(
             icon: Icons.brightness_6_outlined,
             title: l10n.theme,
-            trailingText: brightness == Brightness.dark ? 'Dark' : 'Light',
+            trailingText:
+                brightness == Brightness.dark ? l10n.themeDark : l10n.themeLight,
             onTap: () =>
                 ref.read(themeControllerProvider.notifier).toggle(brightness),
           ),

@@ -575,6 +575,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get nameRequired => 'Name is required.';
 
   @override
+  String get themeLight => 'Light';
+
+  @override
+  String get themeDark => 'Dark';
+
+  @override
+  String get fillAllFields => 'Please fill in all fields.';
+
+  @override
+  String get passwordTooShort => 'Password must be at least 8 characters.';
+
+  @override
   String productsCount(int count) {
     return '$count products';
   }

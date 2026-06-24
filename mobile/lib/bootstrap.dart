@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'app/app.dart';
@@ -20,6 +21,9 @@ Future<void> bootstrap(AppConfig config) async {
         FlutterError.presentError(details);
         debugPrint('FlutterError: ${details.exceptionAsString()}');
       };
+
+      // Load locale date symbols so DateFormat works for ar (ckb maps to ar).
+      await initializeDateFormatting();
 
       final sharedPrefs = await SharedPreferences.getInstance();
 
