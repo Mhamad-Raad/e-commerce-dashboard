@@ -15,6 +15,7 @@ import { createHash, randomBytes, randomUUID } from 'crypto';
 import { PrismaService } from '../prisma/prisma.service';
 import { OtpService } from '../otp/otp.service';
 import { normalizeIraqiPhone } from '../otp/phone.util';
+import { UploadsService } from '../uploads/uploads.service';
 import { CustomerJwtPayload } from './strategies/customer-jwt.strategy';
 
 interface SessionContext {
@@ -35,6 +36,7 @@ export class CustomerAuthService {
     private jwt: JwtService,
     private config: ConfigService,
     private otp: OtpService,
+    private uploads: UploadsService,
   ) {
     const days = Number(this.config.get('CUSTOMER_REFRESH_TTL_DAYS'));
     const validDays = Number.isFinite(days) && days > 0 ? days : 30;
@@ -254,6 +256,79 @@ export class CustomerAuthService {
       where: { id: customerId },
     });
     if (!customer || !customer.isActive) throw new UnauthorizedException();
+    return this.publicCustomer(customer);
+  }
+
+  // ── Profile (logged-in self-service) ──────────────────────────────────────
+
+  /** Update the customer's own name/email. Sessions are left intact. */
+  async updateProfile(
+    customerId: string,
+    input: { name?: string; email?: string },
+  ) {
+    const data: Prisma.CustomerUpdateInput = {};
+    if (input.name !== undefined) data.name = input.name;
+    if (input.email !== undefined) data.email = input.email;
+
+    try {
+      const customer = await this.prisma.customer.update({
+        where: { id: customerId },
+        data,
+      });
+      return this.publicCustomer(customer);
+    } catch (err) {
+      if (
+        err instanceof Prisma.PrismaClientKnownRequestError &&
+        err.code === 'P2002'
+      ) {
+        throw new ConflictException('That email is already in use.');
+      }
+      throw err;
+    }
+  }
+
+  /**
+   * Change the password while authenticated (knows the current one). Sessions
+   * are kept — unlike the OTP reset path, which revokes everything because it
+   * implies a possible compromise.
+   */
+  async changePassword(
+    customerId: string,
+    input: { currentPassword: string; newPassword: string },
+  ) {
+    const customer = await this.prisma.customer.findUnique({
+      where: { id: customerId },
+    });
+    if (!customer || !customer.isActive) throw new UnauthorizedException();
+    if (!customer.passwordHash) {
+      throw new BadRequestException('No password is set for this account.');
+    }
+    const ok = await bcrypt.compare(input.currentPassword, customer.passwordHash);
+    if (!ok) throw new UnauthorizedException('Current password is incorrect.');
+
+    const passwordHash = await bcrypt.hash(input.newPassword, 12);
+    await this.prisma.customer.update({
+      where: { id: customerId },
+      data: { passwordHash },
+    });
+    return { success: true };
+  }
+
+  /** Upload + set the customer's avatar, deleting the previous one. */
+  async updateAvatar(customerId: string, file?: Express.Multer.File) {
+    const current = await this.prisma.customer.findUnique({
+      where: { id: customerId },
+      select: { avatarUrl: true, isActive: true },
+    });
+    if (!current || !current.isActive) throw new UnauthorizedException();
+
+    const { url } = await this.uploads.upload(file, 'customers');
+    const customer = await this.prisma.customer.update({
+      where: { id: customerId },
+      data: { avatarUrl: url },
+    });
+    // Best-effort cleanup of the replaced image.
+    await this.uploads.deleteByUrl(current.avatarUrl);
     return this.publicCustomer(customer);
   }
 

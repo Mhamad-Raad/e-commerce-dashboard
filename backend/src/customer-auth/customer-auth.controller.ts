@@ -1,16 +1,28 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Get,
   HttpCode,
   HttpStatus,
+  Patch,
   Post,
   Req,
+  UploadedFile,
+  UseFilters,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { Throttle } from '@nestjs/throttler';
 import { Request } from 'express';
+import { memoryStorage } from 'multer';
 import { Public } from '../auth/decorators/public.decorator';
+import {
+  ACCEPTED_MIME,
+  MAX_UPLOAD_BYTES,
+} from '../uploads/uploads.service';
+import { MulterExceptionFilter } from '../uploads/multer-exception.filter';
 import { CustomerAuthService } from './customer-auth.service';
 import {
   CurrentCustomer,
@@ -25,6 +37,8 @@ import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { RefreshDto } from './dto/refresh.dto';
 import { CustomerLogoutDto } from './dto/logout.dto';
+import { ChangePasswordDto } from './dto/change-password.dto';
+import { UpdateProfileDto } from './dto/update-profile.dto';
 
 // Mobile customer auth. Every route is @Public() so the global admin JwtAuthGuard
 // skips it; protected routes apply CustomerJwtGuard explicitly. Lives under
@@ -105,6 +119,58 @@ export class CustomerAuthController {
   @Get('me')
   me(@CurrentCustomer() customer: CurrentCustomerPayload) {
     return this.auth.me(customer.id);
+  }
+
+  @Public()
+  @UseGuards(CustomerJwtGuard)
+  @Patch('profile')
+  updateProfile(
+    @CurrentCustomer() customer: CurrentCustomerPayload,
+    @Body() dto: UpdateProfileDto,
+  ) {
+    return this.auth.updateProfile(customer.id, dto);
+  }
+
+  @Throttle({ default: { limit: 5, ttl: 60_000 } })
+  @Public()
+  @UseGuards(CustomerJwtGuard)
+  @Post('change-password')
+  @HttpCode(HttpStatus.OK)
+  changePassword(
+    @CurrentCustomer() customer: CurrentCustomerPayload,
+    @Body() dto: ChangePasswordDto,
+  ) {
+    return this.auth.changePassword(customer.id, dto);
+  }
+
+  @Throttle({ default: { limit: 10, ttl: 60_000 } })
+  @Public()
+  @UseGuards(CustomerJwtGuard)
+  @Post('avatar')
+  @UseFilters(MulterExceptionFilter)
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: memoryStorage(),
+      limits: { fileSize: MAX_UPLOAD_BYTES, files: 1 },
+      fileFilter: (_req, file, cb) => {
+        if (ACCEPTED_MIME.has(file.mimetype)) {
+          cb(null, true);
+        } else {
+          cb(
+            new BadRequestException(
+              'Only JPEG, PNG, and WebP images are allowed.',
+            ),
+            false,
+          );
+        }
+      },
+    }),
+  )
+  uploadAvatar(
+    @CurrentCustomer() customer: CurrentCustomerPayload,
+    @UploadedFile() file: Express.Multer.File | undefined,
+  ) {
+    return this.auth.updateAvatar(customer.id, file);
   }
 
   private ctx(req: Request) {
