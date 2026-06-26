@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../app/locale/locale_controller.dart';
 import '../../../../core/network/api_result.dart';
 import '../../data/notifications_repository.dart';
 import '../../domain/app_notification.dart';
@@ -8,18 +9,26 @@ import '../../domain/app_notification.dart';
 /// state in place and refresh the unread badge.
 final notificationsControllerProvider =
     AsyncNotifierProvider<NotificationsController, List<AppNotification>>(
-  NotificationsController.new,
-);
+      NotificationsController.new,
+    );
 
 class NotificationsController extends AsyncNotifier<List<AppNotification>> {
-  NotificationsRepository get _repo => ref.read(notificationsRepositoryProvider);
+  NotificationsRepository get _repo =>
+      ref.read(notificationsRepositoryProvider);
+
+  String get _lang => ref.read(localeControllerProvider).languageCode;
 
   @override
-  Future<List<AppNotification>> build() async =>
-      (await _repo.list()).unwrapOrThrow();
+  Future<List<AppNotification>> build() async {
+    // Re-fetch on language switch so announcement text re-resolves.
+    final lang = ref.watch(localeControllerProvider).languageCode;
+    return (await _repo.list(lang)).unwrapOrThrow();
+  }
 
   Future<void> refresh() async {
-    state = await AsyncValue.guard(() async => (await _repo.list()).unwrapOrThrow());
+    state = await AsyncValue.guard(
+      () async => (await _repo.list(_lang)).unwrapOrThrow(),
+    );
     ref.invalidate(unreadCountProvider);
   }
 

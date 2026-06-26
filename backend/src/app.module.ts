@@ -3,6 +3,7 @@ import { ConfigModule } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
 import { ScheduleModule } from '@nestjs/schedule';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
+import { AnnouncementsModule } from './announcements/announcements.module';
 import { AppCatalogModule } from './app-catalog/app-catalog.module';
 import { AssistantModule } from './assistant/assistant.module';
 import { AuthModule } from './auth/auth.module';
@@ -50,6 +51,7 @@ import { UsersModule } from './users/users.module';
     CustomersModule,
     CustomerAuthModule,
     CustomerNotificationsModule,
+    AnnouncementsModule,
     CartsModule,
     OrdersModule,
     CouponsModule,

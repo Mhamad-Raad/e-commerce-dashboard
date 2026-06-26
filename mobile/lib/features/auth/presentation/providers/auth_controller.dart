@@ -23,8 +23,9 @@ class AuthState {
   static const loggedOut = AuthState(status: AuthStatus.unauthenticated);
 }
 
-final authControllerProvider =
-    NotifierProvider<AuthController, AuthState>(AuthController.new);
+final authControllerProvider = NotifierProvider<AuthController, AuthState>(
+  AuthController.new,
+);
 
 class AuthController extends Notifier<AuthState> {
   @override
@@ -66,8 +67,12 @@ class AuthController extends Notifier<AuthState> {
     required String phone,
     required String password,
     String? email,
-  }) =>
-      _repo.register(name: name, phone: phone, password: password, email: email);
+  }) => _repo.register(
+    name: name,
+    phone: phone,
+    password: password,
+    email: email,
+  );
 
   Future<Result<void>> forgotPassword(String phone) =>
       _repo.forgotPassword(phone);
@@ -76,8 +81,7 @@ class AuthController extends Notifier<AuthState> {
     required String phone,
     required String code,
     required String newPassword,
-  }) =>
-      _repo.resetPassword(phone: phone, code: code, newPassword: newPassword);
+  }) => _repo.resetPassword(phone: phone, code: code, newPassword: newPassword);
 
   Future<Result<void>> resendVerification(String phone) =>
       _repo.resendOtp(phone: phone, purpose: 'PHONE_VERIFICATION');
@@ -91,11 +95,10 @@ class AuthController extends Notifier<AuthState> {
   Future<Result<void>> changePassword({
     required String currentPassword,
     required String newPassword,
-  }) =>
-      _repo.changePassword(
-        currentPassword: currentPassword,
-        newPassword: newPassword,
-      );
+  }) => _repo.changePassword(
+    currentPassword: currentPassword,
+    newPassword: newPassword,
+  );
 
   // Reflect an updated customer (profile/avatar) into the authenticated state.
   Result<void> _applyCustomer(Result<Customer> result) {

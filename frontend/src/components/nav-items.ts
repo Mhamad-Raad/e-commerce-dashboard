@@ -16,6 +16,7 @@ import {
   ReceiptText,
   Settings,
   Bot,
+  Megaphone,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -51,6 +52,7 @@ export const navGroups: NavGroup[] = [
       { to: '/products', labelKey: 'nav.products', icon: Package },
       { to: '/categories', labelKey: 'nav.categories', icon: Tags },
       { to: '/customers', labelKey: 'nav.customers', icon: Users },
+      { to: '/announcements', labelKey: 'nav.announcements', icon: Megaphone },
       { to: '/carts', labelKey: 'nav.carts', icon: ShoppingCart },
       { to: '/orders', labelKey: 'nav.orders', icon: ClipboardList },
       { to: '/refunds', labelKey: 'nav.refunds', icon: ReceiptText },

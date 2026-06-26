@@ -12,6 +12,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { Public } from '../auth/decorators/public.decorator';
+import { toLang } from '../common/i18n';
 import {
   CurrentCustomer,
   CurrentCustomerPayload,
@@ -38,8 +39,9 @@ export class AppNotificationsController {
   list(
     @CurrentCustomer() customer: CurrentCustomerPayload,
     @Query() query: ListCustomerNotificationsQueryDto,
+    @Query('lang') lang?: string,
   ) {
-    return this.notifications.list(customer.id, query);
+    return this.notifications.list(customer.id, query, toLang(lang));
   }
 
   @Get('unread-count')

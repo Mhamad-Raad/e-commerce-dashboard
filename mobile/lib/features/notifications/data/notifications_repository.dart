@@ -15,15 +15,23 @@ class NotificationsRepository {
   NotificationsRepository(this._dio);
   final Dio _dio;
 
-  Future<Result<List<AppNotification>>> list() async {
+  Future<Result<List<AppNotification>>> list(String lang) async {
     try {
-      final res = await _dio.get('/app/notifications');
+      // lang resolves ANNOUNCEMENT title/body server-side (orders render locally).
+      final res = await _dio.get(
+        '/app/notifications',
+        queryParameters: {'lang': lang},
+      );
       // Endpoint returns a paginated { items, total, ... } envelope.
-      final raw = res.data is Map ? (res.data['items'] as List? ?? const []) : const [];
-      return Success(raw
-          .whereType<Map>()
-          .map((e) => AppNotification.fromJson(Map<String, dynamic>.from(e)))
-          .toList());
+      final raw = res.data is Map
+          ? (res.data['items'] as List? ?? const [])
+          : const [];
+      return Success(
+        raw
+            .whereType<Map>()
+            .map((e) => AppNotification.fromJson(Map<String, dynamic>.from(e)))
+            .toList(),
+      );
     } catch (e) {
       return Failed(mapError(e));
     }
@@ -64,11 +72,10 @@ class NotificationsRepository {
     required String platform,
     required String locale,
   }) async {
-    await _dio.post('/app/notifications/devices', data: {
-      'token': token,
-      'platform': platform,
-      'locale': locale,
-    });
+    await _dio.post(
+      '/app/notifications/devices',
+      data: {'token': token, 'platform': platform, 'locale': locale},
+    );
   }
 
   Future<void> unregisterDevice(String token) async {

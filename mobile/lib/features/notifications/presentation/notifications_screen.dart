@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -9,6 +10,7 @@ import '../../../core/l10n/intl_locale.dart';
 import '../../../core/l10n/l10n_ext.dart';
 import '../domain/app_notification.dart';
 import 'notification_presentation.dart';
+import 'notification_target_nav.dart';
 import 'providers/notifications_controller.dart';
 
 /// The in-app notification centre. Lists the customer's notifications newest
@@ -31,8 +33,9 @@ class NotificationsScreen extends ConsumerWidget {
         actions: [
           if (hasUnread)
             TextButton(
-              onPressed: () =>
-                  ref.read(notificationsControllerProvider.notifier).markAllRead(),
+              onPressed: () => ref
+                  .read(notificationsControllerProvider.notifier)
+                  .markAllRead(),
               child: Text(l10n.notifMarkAllRead),
             ),
         ],
@@ -46,8 +49,9 @@ class NotificationsScreen extends ConsumerWidget {
               Text(l10n.notificationsLoadError),
               const SizedBox(height: AppSpacing.md),
               FilledButton(
-                onPressed: () =>
-                    ref.read(notificationsControllerProvider.notifier).refresh(),
+                onPressed: () => ref
+                    .read(notificationsControllerProvider.notifier)
+                    .refresh(),
                 child: Text(l10n.retry),
               ),
             ],
@@ -56,13 +60,16 @@ class NotificationsScreen extends ConsumerWidget {
         data: (items) => items.isEmpty
             ? const _Empty()
             : RefreshIndicator(
-                onRefresh: () =>
-                    ref.read(notificationsControllerProvider.notifier).refresh(),
+                onRefresh: () => ref
+                    .read(notificationsControllerProvider.notifier)
+                    .refresh(),
                 child: ListView.separated(
                   padding: const EdgeInsets.all(AppSpacing.margin),
                   itemCount: items.length,
-                  separatorBuilder: (_, _) => const SizedBox(height: AppSpacing.sm),
-                  itemBuilder: (_, i) => _NotificationRow(notification: items[i]),
+                  separatorBuilder: (_, _) =>
+                      const SizedBox(height: AppSpacing.sm),
+                  itemBuilder: (_, i) =>
+                      _NotificationRow(notification: items[i]),
                 ),
               ),
       ),
@@ -82,13 +89,26 @@ class _NotificationRow extends ConsumerWidget {
     final scheme = Theme.of(context).colorScheme;
     final locale = Localizations.localeOf(context).languageCode;
     final unread = !notification.isRead;
+    final imageUrl = notification.announcement?.imageUrl;
 
     return InkWell(
       borderRadius: AppRadii.cardRadius,
       onTap: () {
-        ref.read(notificationsControllerProvider.notifier).markRead(notification.id);
-        final route = notificationRoute(notification);
-        if (route != null) context.push(route);
+        ref
+            .read(notificationsControllerProvider.notifier)
+            .markRead(notification.id);
+        final ann = notification.announcement;
+        if (ann != null) {
+          openNotificationTarget(
+            context,
+            ann.targetType,
+            ann.targetId,
+            ann.url,
+          );
+        } else {
+          final route = notificationRoute(notification);
+          if (route != null) context.push(route);
+        }
       },
       child: Container(
         padding: const EdgeInsets.all(AppSpacing.md),
@@ -97,46 +117,75 @@ class _NotificationRow extends ConsumerWidget {
           color: unread ? scheme.primary.withValues(alpha: 0.06) : null,
           borderRadius: AppRadii.cardRadius,
           border: Border.all(
-            color: unread ? scheme.primary.withValues(alpha: 0.35) : scheme.outlineVariant,
+            color: unread
+                ? scheme.primary.withValues(alpha: 0.35)
+                : scheme.outlineVariant,
           ),
         ),
-        child: Row(
+        child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Icon(notificationIcon(notification), color: scheme.primary),
-            const SizedBox(width: AppSpacing.md),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    notificationTitle(l10n, notification),
-                    style: text.titleSmall?.copyWith(
-                      fontWeight: unread ? FontWeight.w700 : FontWeight.w500,
-                    ),
+            if (imageUrl != null && imageUrl.isNotEmpty) ...[
+              ClipRRect(
+                borderRadius: AppRadii.cardRadius,
+                child: AspectRatio(
+                  aspectRatio: 3,
+                  child: CachedNetworkImage(
+                    imageUrl: imageUrl,
+                    fit: BoxFit.cover,
+                    errorWidget: (_, _, _) =>
+                        ColoredBox(color: scheme.surfaceContainerHighest),
                   ),
-                  const SizedBox(height: 2),
-                  Text(notificationBody(l10n, notification), style: text.bodyMedium),
-                  const SizedBox(height: AppSpacing.xs),
-                  Text(
-                    DateFormat.yMMMd(intlLocale(locale))
-                        .add_jm()
-                        .format(notification.createdAt.toLocal()),
-                    style: text.bodySmall?.copyWith(color: scheme.onSurfaceVariant),
-                  ),
-                ],
-              ),
-            ),
-            if (unread)
-              Container(
-                margin: const EdgeInsets.only(top: 6),
-                width: 8,
-                height: 8,
-                decoration: BoxDecoration(
-                  color: scheme.primary,
-                  shape: BoxShape.circle,
                 ),
               ),
+              const SizedBox(height: AppSpacing.sm),
+            ],
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(notificationIcon(notification), color: scheme.primary),
+                const SizedBox(width: AppSpacing.md),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        notificationTitle(l10n, notification),
+                        style: text.titleSmall?.copyWith(
+                          fontWeight: unread
+                              ? FontWeight.w700
+                              : FontWeight.w500,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        notificationBody(l10n, notification),
+                        style: text.bodyMedium,
+                      ),
+                      const SizedBox(height: AppSpacing.xs),
+                      Text(
+                        DateFormat.yMMMd(
+                          intlLocale(locale),
+                        ).add_jm().format(notification.createdAt.toLocal()),
+                        style: text.bodySmall?.copyWith(
+                          color: scheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                if (unread)
+                  Container(
+                    margin: const EdgeInsets.only(top: 6),
+                    width: 8,
+                    height: 8,
+                    decoration: BoxDecoration(
+                      color: scheme.primary,
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+              ],
+            ),
           ],
         ),
       ),
@@ -157,11 +206,16 @@ class _Empty extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.notifications_none_outlined,
-                size: 48, color: scheme.onSurfaceVariant),
+            Icon(
+              Icons.notifications_none_outlined,
+              size: 48,
+              color: scheme.onSurfaceVariant,
+            ),
             const SizedBox(height: AppSpacing.md),
-            Text(l10n.noNotificationsYet,
-                style: Theme.of(context).textTheme.titleMedium),
+            Text(
+              l10n.noNotificationsYet,
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
             const SizedBox(height: AppSpacing.sm),
             Text(l10n.notificationsHint, textAlign: TextAlign.center),
           ],

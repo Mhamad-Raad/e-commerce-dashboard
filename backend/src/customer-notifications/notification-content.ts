@@ -1,4 +1,5 @@
-import { CustomerNotificationType, OrderStatus } from '@prisma/client';
+import { CustomerNotificationType, HomeTargetType, OrderStatus } from '@prisma/client';
+import { pick } from '../common/i18n';
 import { PushPayload } from '../fcm/fcm.service';
 
 // The push TRAY text (title/body) must be rendered server-side because the OS
@@ -94,4 +95,42 @@ export function renderPush(
     default:
       return null;
   }
+}
+
+export interface AnnouncementPushInput {
+  id: string;
+  titleEn: string;
+  titleAr: string | null;
+  titleCkb: string | null;
+  bodyEn: string;
+  bodyAr: string | null;
+  bodyCkb: string | null;
+  targetType: HomeTargetType;
+  targetId: string | null;
+  url: string | null;
+}
+
+/**
+ * Tray text for an admin-authored announcement, in the device's language. The
+ * text is the authored title/body (not a template); the data carries the target
+ * so the app can deep-link on tap.
+ */
+export function renderAnnouncementPush(
+  a: AnnouncementPushInput,
+  locale: string,
+): PushPayload {
+  const lang = asLang(locale);
+  const title = pick(lang, a.titleEn, a.titleAr, a.titleCkb) ?? a.titleEn;
+  const body = pick(lang, a.bodyEn, a.bodyAr, a.bodyCkb) ?? a.bodyEn;
+  return {
+    title,
+    body,
+    data: {
+      type: 'ANNOUNCEMENT',
+      announcementId: a.id,
+      targetType: a.targetType,
+      ...(a.targetId ? { targetId: a.targetId } : {}),
+      ...(a.url ? { url: a.url } : {}),
+    },
+  };
 }

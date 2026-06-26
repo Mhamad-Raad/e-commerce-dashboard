@@ -12,6 +12,7 @@ import '../../../app/router/routes.dart';
 import '../../../core/push/push_messaging.dart';
 import '../../auth/presentation/providers/auth_controller.dart';
 import 'notifications_repository.dart';
+import '../presentation/notification_target_nav.dart';
 import '../presentation/providers/notifications_controller.dart';
 
 final pushServiceProvider = Provider<PushService>((ref) => PushService(ref));
@@ -51,7 +52,9 @@ class PushService {
     try {
       final token = await FirebaseMessaging.instance.getToken();
       if (token != null) {
-        await _ref.read(notificationsRepositoryProvider).unregisterDevice(token);
+        await _ref
+            .read(notificationsRepositoryProvider)
+            .unregisterDevice(token);
       }
     } catch (e) {
       debugPrint('FCM unregister failed: $e');
@@ -72,10 +75,13 @@ class PushService {
         android: AndroidInitializationSettings('@mipmap/ic_launcher'),
         iOS: DarwinInitializationSettings(),
       ),
-      onDidReceiveNotificationResponse: (resp) => _routeFromPayload(resp.payload),
+      onDidReceiveNotificationResponse: (resp) =>
+          _routeFromPayload(resp.payload),
     );
     await _local
-        .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
+        .resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin
+        >()
         ?.createNotificationChannel(_channel);
 
     // Foreground: draw the message ourselves + refresh badge/list.
@@ -100,8 +106,8 @@ class PushService {
       final platform = Platform.isIOS
           ? 'IOS'
           : Platform.isAndroid
-              ? 'ANDROID'
-              : 'WEB';
+          ? 'ANDROID'
+          : 'WEB';
       await _ref
           .read(notificationsRepositoryProvider)
           .registerDevice(token: token, platform: platform, locale: locale);
@@ -150,8 +156,14 @@ class PushService {
     final orderId = data['orderId'];
     if (orderId is String && orderId.isNotEmpty) {
       router.push(Routes.orderDetail(orderId));
-    } else {
-      router.push(Routes.notifications);
+      return;
     }
+    // Announcement tap: route to its target if deep-linkable, else the centre.
+    final route = notificationTargetRoute(
+      data['targetType'] as String?,
+      data['targetId'] as String?,
+      data['url'] as String?,
+    );
+    router.push(route ?? Routes.notifications);
   }
 }

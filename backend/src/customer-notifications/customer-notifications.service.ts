@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { CustomerNotificationType, Prisma } from '@prisma/client';
+import { Lang, pick } from '../common/i18n';
 import { buildPaginated, paginate } from '../common/pagination';
 import { FcmService } from '../fcm/fcm.service';
 import { PrismaService } from '../prisma/prisma.service';
@@ -8,12 +9,22 @@ import {
   ListCustomerNotificationsQueryDto,
   RegisterDeviceDto,
 } from './dto/customer-notification.dto';
-import { renderPush } from './notification-content';
+import {
+  AnnouncementPushInput,
+  renderAnnouncementPush,
+  renderPush,
+} from './notification-content';
 
 // Read notifications older than this are pruned daily so the table stays bounded.
 const RETENTION_DAYS = 60;
 // Devices silent this long are pruned (token almost certainly dead/reinstalled).
 const DEVICE_STALE_DAYS = 90;
+// FCM multicast accepts at most 500 tokens per call.
+const FCM_BATCH = 500;
+
+type NotificationWithAnnouncement = Prisma.CustomerNotificationGetPayload<{
+  include: { announcement: true };
+}>;
 
 @Injectable()
 export class CustomerNotificationsService {
@@ -81,7 +92,7 @@ export class CustomerNotificationsService {
 
   // ---- In-app notification centre (customer-scoped reads) ----
 
-  async list(customerId: string, query: ListCustomerNotificationsQueryDto) {
+  async list(customerId: string, query: ListCustomerNotificationsQueryDto, lang: Lang) {
     const page = query.page ?? 1;
     const pageSize = query.pageSize ?? 20;
     const where: Prisma.CustomerNotificationWhereInput = {
@@ -93,11 +104,89 @@ export class CustomerNotificationsService {
       this.prisma.customerNotification.findMany({
         where,
         orderBy: { createdAt: 'desc' },
+        include: { announcement: true },
         ...paginate(page, pageSize),
       }),
       this.prisma.customerNotification.count({ where }),
     ]);
-    return buildPaginated(items, total, page, pageSize);
+    const shaped = items.map((n) => this.shape(n, lang));
+    return buildPaginated(shaped, total, page, pageSize);
+  }
+
+  /** Shape a feed row; ANNOUNCEMENT rows carry their authored content (by lang). */
+  private shape(n: NotificationWithAnnouncement, lang: Lang) {
+    const base = {
+      id: n.id,
+      type: n.type,
+      data: n.data,
+      isRead: n.isRead,
+      createdAt: n.createdAt,
+    };
+    const a = n.announcement;
+    if (n.type !== 'ANNOUNCEMENT' || !a) return base;
+    return {
+      ...base,
+      announcement: {
+        title: pick(lang, a.titleEn, a.titleAr, a.titleCkb),
+        body: pick(lang, a.bodyEn, a.bodyAr, a.bodyCkb),
+        imageUrl: a.imageUrl,
+        // The app routes by type+id on tap (no entity resolution needed here).
+        targetType: a.targetType,
+        targetId: a.targetId ?? undefined,
+        url: a.url ?? undefined,
+      },
+    };
+  }
+
+  /**
+   * Fan an announcement out to many recipients: bulk-insert one feed row per
+   * customer, then push to all their devices (per-locale tray text, batched to
+   * FCM's 500-token limit). Best-effort push — never throws.
+   */
+  async dispatchAnnouncement(
+    announcement: AnnouncementPushInput,
+    customerIds: string[],
+  ): Promise<void> {
+    if (customerIds.length === 0) return;
+
+    await this.prisma.customerNotification.createMany({
+      data: customerIds.map((customerId) => ({
+        customerId,
+        type: 'ANNOUNCEMENT' as const,
+        announcementId: announcement.id,
+        data: { announcementId: announcement.id } as Prisma.InputJsonValue,
+      })),
+    });
+
+    if (!this.fcm.enabled) return;
+    try {
+      const devices = await this.prisma.customerDevice.findMany({
+        where: { customerId: { in: customerIds } },
+        select: { token: true, locale: true },
+      });
+      if (devices.length === 0) return;
+
+      const byLocale = new Map<string, string[]>();
+      for (const d of devices) {
+        const list = byLocale.get(d.locale) ?? [];
+        list.push(d.token);
+        byLocale.set(d.locale, list);
+      }
+
+      const deadTokens: string[] = [];
+      for (const [locale, tokens] of byLocale) {
+        const payload = renderAnnouncementPush(announcement, locale);
+        for (let i = 0; i < tokens.length; i += FCM_BATCH) {
+          const res = await this.fcm.sendToTokens(tokens.slice(i, i + FCM_BATCH), payload);
+          deadTokens.push(...res.invalidTokens);
+        }
+      }
+      if (deadTokens.length > 0) {
+        await this.prisma.customerDevice.deleteMany({ where: { token: { in: deadTokens } } });
+      }
+    } catch (err) {
+      this.logger.error(`Announcement push dispatch failed: ${String(err)}`);
+    }
   }
 
   async unreadCount(customerId: string) {

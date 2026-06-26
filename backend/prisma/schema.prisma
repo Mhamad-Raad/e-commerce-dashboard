@@ -241,6 +241,13 @@ enum NotificationType {
 enum CustomerNotificationType {
   ORDER_PLACED         // their checkout succeeded
   ORDER_STATUS_CHANGED // an admin moved their order to a new status
+  ANNOUNCEMENT         // an admin-authored broadcast/direct message
+}
+
+// Who an admin-authored Announcement goes to.
+enum AnnouncementAudience {
+  ALL    // every active customer (broadcast)
+  SINGLE // one specific customer (direct)
 }
 
 enum DevicePlatform {
@@ -676,6 +683,7 @@ model Customer {
   sessions      CustomerSession[]
   devices       CustomerDevice[]
   notifications CustomerNotification[]
+  announcements Announcement[]         @relation("AnnouncementRecipient")
 
   @@index([isActive])
   @@index([createdAt])
@@ -716,8 +724,44 @@ model CustomerNotification {
   isRead     Boolean                  @default(false)
   createdAt  DateTime                 @default(now())
 
+  // Set for ANNOUNCEMENT rows: the authored content lives once on Announcement
+  // and is fanned out to one row per recipient. Deleting the announcement
+  // cascades these rows out of every customer's feed.
+  announcementId String?
+  announcement   Announcement? @relation(fields: [announcementId], references: [id], onDelete: Cascade)
+
   @@index([customerId, createdAt])
   @@index([customerId, isRead])
+}
+
+// An admin-authored notification. The content is stored ONCE here (trilingual
+// title/body + image + a single tappable target, reusing HomeTargetType) and
+// fanned out to a CustomerNotification per recipient on send. Target ids are
+// plain columns (no FK) resolved at read time, so deleting a linked product
+// just leaves a dead link rather than nuking history.
+model Announcement {
+  id         String              @id @default(cuid())
+  titleEn    String
+  titleAr    String?
+  titleCkb   String?
+  bodyEn     String
+  bodyAr     String?
+  bodyCkb    String?
+  imageUrl   String?
+  targetType HomeTargetType      @default(NONE)
+  targetId   String? // product/category/store/blog id, by targetType
+  url        String? // when targetType = URL
+  audience   AnnouncementAudience @default(ALL)
+  // The recipient when audience = SINGLE (null for broadcasts). SetNull keeps
+  // the announcement record if that customer is later deleted.
+  customerId String?
+  customer   Customer? @relation("AnnouncementRecipient", fields: [customerId], references: [id], onDelete: SetNull)
+  recipientCount Int    @default(0) // how many customers it was sent to
+  createdAt  DateTime   @default(now())
+
+  notifications CustomerNotification[]
+
+  @@index([createdAt])
 }
 
 // One pending/used OTP code for a phone number. Single table for every
