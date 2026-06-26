@@ -41,18 +41,23 @@ class AuthController extends Notifier<AuthState> {
   // On launch: if we hold a refresh token, fetch /me (the interceptor refreshes
   // the access token if it has expired). Any failure → treat as logged out.
   Future<void> _restore() async {
-    final refresh = await _tokens.refreshToken;
-    if (refresh == null) {
-      state = AuthState.loggedOut;
-      return;
-    }
-    final result = await _repo.me();
-    switch (result) {
-      case Success(value: final customer):
-        state = AuthState(status: AuthStatus.authenticated, customer: customer);
-      case Failed():
-        await _tokens.clear();
+    try {
+      final refresh = await _tokens.refreshToken;
+      if (refresh == null) {
         state = AuthState.loggedOut;
+        return;
+      }
+      final result = await _repo.me();
+      switch (result) {
+        case Success(value: final customer):
+          state = AuthState(status: AuthStatus.authenticated, customer: customer);
+        case Failed():
+          await _tokens.clear();
+          state = AuthState.loggedOut;
+      }
+    } catch (_) {
+      // Never strand the app on the splash if token storage misbehaves.
+      state = AuthState.loggedOut;
     }
   }
 

@@ -46,16 +46,21 @@ final appRouterProvider = Provider<GoRouter>((ref) {
     redirect: (context, state) {
       final status = ref.read(authControllerProvider).status;
       final location = state.matchedLocation;
-      final inAuthArea =
-          location.startsWith('/auth') || location == Routes.splash;
+      final onSplash = location == Routes.splash;
+      final inAuth = location.startsWith('/auth');
 
+      // Still restoring the session: hold on the splash.
       if (status == AuthStatus.unknown) {
-        return location == Routes.splash ? null : Routes.splash;
+        return onSplash ? null : Routes.splash;
       }
-      final loggedIn = status == AuthStatus.authenticated;
-      if (!loggedIn && !inAuthArea) return Routes.login;
-      if (loggedIn && inAuthArea) return Routes.home;
-      return null;
+      if (status == AuthStatus.authenticated) {
+        // Logged in: leave the splash / auth screens for home.
+        return (onSplash || inAuth) ? Routes.home : null;
+      }
+      // Resolved + logged out: leave the splash, allow the auth screens,
+      // gate everything else to login. (Splash is NOT an auth screen — a
+      // logged-out user sitting on it must be sent to login, not left there.)
+      return (onSplash || !inAuth) ? Routes.login : null;
     },
     routes: [
       GoRoute(path: Routes.splash, builder: (_, _) => const SplashScreen()),
