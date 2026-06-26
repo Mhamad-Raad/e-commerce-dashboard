@@ -28,17 +28,12 @@ export class AnnouncementsService {
       ? { titleEn: { contains: query.search, mode: 'insensitive' } }
       : {};
 
+    // The list shows audience + recipientCount (a column) only — no need to join
+    // the recipients/customers, so the query stays a single cheap table read.
     const [items, total] = await this.prisma.$transaction([
       this.prisma.announcement.findMany({
         where,
         orderBy: { createdAt: 'desc' },
-        // A small preview of named recipients for the list (full count is stored).
-        include: {
-          recipients: {
-            take: 3,
-            include: { customer: { select: { id: true, name: true } } },
-          },
-        },
         ...paginate(page, pageSize),
       }),
       this.prisma.announcement.count({ where }),

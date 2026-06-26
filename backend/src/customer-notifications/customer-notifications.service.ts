@@ -3,7 +3,7 @@ import { Cron, CronExpression } from '@nestjs/schedule';
 import { CustomerNotificationType, Prisma } from '@prisma/client';
 import { Lang, pick } from '../common/i18n';
 import { buildPaginated, paginate } from '../common/pagination';
-import { FcmService } from '../fcm/fcm.service';
+import { FcmService, PushPayload } from '../fcm/fcm.service';
 import { PrismaService } from '../prisma/prisma.service';
 import {
   ListCustomerNotificationsQueryDto,
@@ -56,37 +56,47 @@ export class CustomerNotificationsService {
     }
 
     if (!this.fcm.enabled) return;
-
     try {
       const devices = await this.prisma.customerDevice.findMany({
         where: { customerId },
         select: { token: true, locale: true },
       });
-      if (devices.length === 0) return;
-
-      // Group tokens by locale so each device gets tray text in its language.
-      const byLocale = new Map<string, string[]>();
-      for (const d of devices) {
-        const list = byLocale.get(d.locale) ?? [];
-        list.push(d.token);
-        byLocale.set(d.locale, list);
-      }
-
-      const deadTokens: string[] = [];
-      for (const [locale, tokens] of byLocale) {
-        const payload = renderPush(type, data, locale);
-        if (!payload) continue; // unsupported type — in-app row already stored
-        const res = await this.fcm.sendToTokens(tokens, payload);
-        deadTokens.push(...res.invalidTokens);
-      }
-
-      if (deadTokens.length > 0) {
-        await this.prisma.customerDevice.deleteMany({
-          where: { token: { in: deadTokens } },
-        });
-      }
+      await this.pushToDevices(devices, (locale) => renderPush(type, data, locale));
     } catch (err) {
       this.logger.error(`Push dispatch failed for ${customerId}: ${String(err)}`);
+    }
+  }
+
+  /**
+   * Send a per-locale push to a set of devices and prune any tokens Firebase
+   * reports as dead. Tokens are grouped by locale (each device gets tray text in
+   * its language) and chunked to FCM's 500-token multicast limit. Best-effort.
+   */
+  private async pushToDevices(
+    devices: { token: string; locale: string }[],
+    payloadFor: (locale: string) => PushPayload | null,
+  ): Promise<void> {
+    if (devices.length === 0) return;
+
+    const byLocale = new Map<string, string[]>();
+    for (const d of devices) {
+      const list = byLocale.get(d.locale) ?? [];
+      list.push(d.token);
+      byLocale.set(d.locale, list);
+    }
+
+    const deadTokens: string[] = [];
+    for (const [locale, tokens] of byLocale) {
+      const payload = payloadFor(locale);
+      if (!payload) continue; // unsupported type — in-app row already stored
+      for (let i = 0; i < tokens.length; i += FCM_BATCH) {
+        const res = await this.fcm.sendToTokens(tokens.slice(i, i + FCM_BATCH), payload);
+        deadTokens.push(...res.invalidTokens);
+      }
+    }
+
+    if (deadTokens.length > 0) {
+      await this.prisma.customerDevice.deleteMany({ where: { token: { in: deadTokens } } });
     }
   }
 
@@ -164,26 +174,9 @@ export class CustomerNotificationsService {
         where: { customerId: { in: customerIds } },
         select: { token: true, locale: true },
       });
-      if (devices.length === 0) return;
-
-      const byLocale = new Map<string, string[]>();
-      for (const d of devices) {
-        const list = byLocale.get(d.locale) ?? [];
-        list.push(d.token);
-        byLocale.set(d.locale, list);
-      }
-
-      const deadTokens: string[] = [];
-      for (const [locale, tokens] of byLocale) {
-        const payload = renderAnnouncementPush(announcement, locale);
-        for (let i = 0; i < tokens.length; i += FCM_BATCH) {
-          const res = await this.fcm.sendToTokens(tokens.slice(i, i + FCM_BATCH), payload);
-          deadTokens.push(...res.invalidTokens);
-        }
-      }
-      if (deadTokens.length > 0) {
-        await this.prisma.customerDevice.deleteMany({ where: { token: { in: deadTokens } } });
-      }
+      await this.pushToDevices(devices, (locale) =>
+        renderAnnouncementPush(announcement, locale),
+      );
     } catch (err) {
       this.logger.error(`Announcement push dispatch failed: ${String(err)}`);
     }

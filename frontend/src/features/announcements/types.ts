@@ -15,8 +15,6 @@ export interface Announcement {
   targetId: string | null;
   url: string | null;
   audience: AnnouncementAudience;
-  // A small preview of named recipients (full count is recipientCount).
-  recipients?: { customer: { id: string; name: string } }[];
   recipientCount: number;
   createdAt: string;
 }

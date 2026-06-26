@@ -117,8 +117,8 @@ class PushService {
   }
 
   void _onForegroundMessage(RemoteMessage message) {
-    // Keep the badge + centre live without waiting for the next screen open.
-    _ref.invalidate(unreadCountProvider);
+    // Keep the centre + badge live without waiting for the next screen open.
+    // refresh() also invalidates unreadCountProvider, so don't double-invalidate.
     _ref.read(notificationsControllerProvider.notifier).refresh();
 
     final n = message.notification;
