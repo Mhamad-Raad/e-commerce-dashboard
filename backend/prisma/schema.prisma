@@ -683,7 +683,7 @@ model Customer {
   sessions      CustomerSession[]
   devices       CustomerDevice[]
   notifications CustomerNotification[]
-  announcements Announcement[]         @relation("AnnouncementRecipient")
+  announcementRecipients AnnouncementRecipient[]
 
   @@index([isActive])
   @@index([createdAt])
@@ -752,16 +752,28 @@ model Announcement {
   targetId   String? // product/category/store/blog id, by targetType
   url        String? // when targetType = URL
   audience   AnnouncementAudience @default(ALL)
-  // The recipient when audience = SINGLE (null for broadcasts). SetNull keeps
-  // the announcement record if that customer is later deleted.
-  customerId String?
-  customer   Customer? @relation("AnnouncementRecipient", fields: [customerId], references: [id], onDelete: SetNull)
-  recipientCount Int    @default(0) // how many customers it was sent to
-  createdAt  DateTime   @default(now())
+  // For audience = SINGLE: the explicitly chosen recipients (one or more). Empty
+  // for ALL broadcasts. recipientCount snapshots how many it was sent to.
+  recipients     AnnouncementRecipient[]
+  recipientCount Int                     @default(0)
+  createdAt      DateTime                @default(now())
 
   notifications CustomerNotification[]
 
   @@index([createdAt])
+}
+
+// Join: which specific customers an Announcement targeted (audience = SINGLE).
+// Broadcasts (ALL) store no rows here.
+model AnnouncementRecipient {
+  id             String       @id @default(cuid())
+  announcementId String
+  announcement   Announcement @relation(fields: [announcementId], references: [id], onDelete: Cascade)
+  customerId     String
+  customer       Customer     @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  @@unique([announcementId, customerId])
+  @@index([customerId])
 }
 
 // One pending/used OTP code for a phone number. Single table for every

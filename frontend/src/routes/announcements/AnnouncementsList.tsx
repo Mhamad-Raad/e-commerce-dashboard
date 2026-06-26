@@ -61,7 +61,7 @@ export function AnnouncementsList() {
           <StatusBadge label={t('announcements.audience_all')} tone="green" />
         ) : (
           <span className="text-muted-foreground">
-            {a.customer?.name ?? t('announcements.audience_single')}
+            {t('announcements.audience_specific_count', { count: a.recipientCount })}
           </span>
         ),
     },

@@ -32,7 +32,13 @@ export class AnnouncementsService {
       this.prisma.announcement.findMany({
         where,
         orderBy: { createdAt: 'desc' },
-        include: { customer: { select: { id: true, name: true } } },
+        // A small preview of named recipients for the list (full count is stored).
+        include: {
+          recipients: {
+            take: 3,
+            include: { customer: { select: { id: true, name: true } } },
+          },
+        },
         ...paginate(page, pageSize),
       }),
       this.prisma.announcement.count({ where }),
@@ -70,8 +76,12 @@ export class AnnouncementsService {
         targetId: isEntityTarget(targetType) ? dto.targetId : null,
         url: targetType === HomeTargetType.URL ? dto.url : null,
         audience: dto.audience,
-        customerId: dto.audience === 'SINGLE' ? dto.customerId : null,
         recipientCount: customerIds.length,
+        // Record the explicitly chosen recipients (none for an ALL broadcast).
+        recipients:
+          dto.audience === 'SINGLE'
+            ? { createMany: { data: customerIds.map((customerId) => ({ customerId })) } }
+            : undefined,
       },
     });
 
@@ -89,12 +99,15 @@ export class AnnouncementsService {
 
   private async resolveRecipients(dto: CreateAnnouncementDto): Promise<string[]> {
     if (dto.audience === 'SINGLE') {
-      if (!dto.customerId) {
-        throw new BadRequestException('Select a customer for a direct notification.');
+      const ids = [...new Set(dto.customerIds ?? [])]; // de-dupe the selection
+      if (ids.length === 0) {
+        throw new BadRequestException('Select at least one customer.');
       }
-      const found = await this.prisma.customer.count({ where: { id: dto.customerId } });
-      if (!found) throw new BadRequestException('The selected customer no longer exists.');
-      return [dto.customerId];
+      const found = await this.prisma.customer.count({ where: { id: { in: ids } } });
+      if (found !== ids.length) {
+        throw new BadRequestException('One or more selected customers no longer exist.');
+      }
+      return ids;
     }
     // Broadcast: every active customer.
     const customers = await this.prisma.customer.findMany({

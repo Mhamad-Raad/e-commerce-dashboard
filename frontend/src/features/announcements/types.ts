@@ -15,8 +15,8 @@ export interface Announcement {
   targetId: string | null;
   url: string | null;
   audience: AnnouncementAudience;
-  customerId: string | null;
-  customer?: { id: string; name: string } | null;
+  // A small preview of named recipients (full count is recipientCount).
+  recipients?: { customer: { id: string; name: string } }[];
   recipientCount: number;
   createdAt: string;
 }
@@ -40,5 +40,5 @@ export interface CreateAnnouncementPayload {
   targetId?: string;
   url?: string;
   audience: AnnouncementAudience;
-  customerId?: string;
+  customerIds?: string[];
 }

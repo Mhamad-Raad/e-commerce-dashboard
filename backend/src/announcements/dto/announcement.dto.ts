@@ -1,5 +1,12 @@
 import { AnnouncementAudience, HomeTargetType } from '@prisma/client';
-import { IsEnum, IsOptional, IsString, MaxLength } from 'class-validator';
+import {
+  ArrayNotEmpty,
+  IsArray,
+  IsEnum,
+  IsOptional,
+  IsString,
+  MaxLength,
+} from 'class-validator';
 import { PaginationQueryDto } from '../../common/dto/pagination-query.dto';
 
 export class ListAnnouncementsQueryDto extends PaginationQueryDto {}
@@ -50,11 +57,14 @@ export class CreateAnnouncementDto {
   @IsString()
   url?: string;
 
-  // ALL = broadcast to every active customer; SINGLE = one customer (customerId).
+  // ALL = broadcast to every active customer; SINGLE = the chosen customerIds.
   @IsEnum(AnnouncementAudience)
   audience!: AnnouncementAudience;
 
+  // One or more recipients when audience = SINGLE.
   @IsOptional()
-  @IsString()
-  customerId?: string;
+  @IsArray()
+  @ArrayNotEmpty()
+  @IsString({ each: true })
+  customerIds?: string[];
 }

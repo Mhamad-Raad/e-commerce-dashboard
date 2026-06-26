@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
+import { Plus, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { announcementsApi } from '@/features/announcements/api';
 import type { AnnouncementAudience } from '@/features/announcements/types';
@@ -44,7 +45,7 @@ export function AnnouncementForm({ open, onOpenChange }: AnnouncementFormProps) 
   const queryClient = useQueryClient();
 
   const [audience, setAudience] = useState<AnnouncementAudience>('ALL');
-  const [recipient, setRecipient] = useState<Recipient | null>(null);
+  const [recipients, setRecipients] = useState<Recipient[]>([]);
   const [title, setTitle] = useState<Trilingual>(emptyTrilingual());
   const [body, setBody] = useState<Trilingual>(emptyTrilingual());
   const [imageUrl, setImageUrl] = useState('');
@@ -57,7 +58,7 @@ export function AnnouncementForm({ open, onOpenChange }: AnnouncementFormProps) 
 
   const reset = () => {
     setAudience('ALL');
-    setRecipient(null);
+    setRecipients([]);
     setTitle(emptyTrilingual());
     setBody(emptyTrilingual());
     setImageUrl('');
@@ -81,7 +82,7 @@ export function AnnouncementForm({ open, onOpenChange }: AnnouncementFormProps) 
         targetId: isEntityKind(targetType) ? targetRef?.id : undefined,
         url: targetType === 'URL' ? url.trim() : undefined,
         audience,
-        customerId: audience === 'SINGLE' ? recipient?.id : undefined,
+        customerIds: audience === 'SINGLE' ? recipients.map((r) => r.id) : undefined,
       }),
     onSuccess: (a) => {
       queryClient.invalidateQueries({ queryKey: ['announcements'] });
@@ -98,7 +99,7 @@ export function AnnouncementForm({ open, onOpenChange }: AnnouncementFormProps) 
       setError(t('announcements.title_body_required'));
       return;
     }
-    if (audience === 'SINGLE' && !recipient) {
+    if (audience === 'SINGLE' && recipients.length === 0) {
       setError(t('announcements.recipient_required'));
       return;
     }
@@ -147,15 +148,40 @@ export function AnnouncementForm({ open, onOpenChange }: AnnouncementFormProps) 
             </FormField>
 
             {audience === 'SINGLE' && (
-              <FormField label={t('announcements.recipient')}>
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="w-full justify-start"
-                  onClick={() => setRecipientPickerOpen(true)}
-                >
-                  {recipient?.name ?? t('announcements.pick_recipient')}
-                </Button>
+              <FormField label={t('announcements.recipients')}>
+                <div className="space-y-2">
+                  {recipients.length > 0 && (
+                    <div className="flex flex-wrap gap-2">
+                      {recipients.map((r) => (
+                        <span
+                          key={r.id}
+                          className="inline-flex items-center gap-1 rounded-full bg-muted px-2.5 py-1 text-sm"
+                        >
+                          {r.name}
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setRecipients((list) => list.filter((x) => x.id !== r.id))
+                            }
+                            className="text-muted-foreground hover:text-destructive"
+                            aria-label={t('common.delete')}
+                          >
+                            <X className="h-3.5 w-3.5" />
+                          </button>
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="w-full justify-start"
+                    onClick={() => setRecipientPickerOpen(true)}
+                  >
+                    <Plus className="h-4 w-4" />
+                    {t('announcements.add_recipients')}
+                  </Button>
+                </div>
               </FormField>
             )}
 
@@ -233,7 +259,11 @@ export function AnnouncementForm({ open, onOpenChange }: AnnouncementFormProps) 
       <RecipientPicker
         open={recipientPickerOpen}
         onOpenChange={setRecipientPickerOpen}
-        onPick={setRecipient}
+        onPick={(r) =>
+          setRecipients((list) =>
+            list.some((x) => x.id === r.id) ? list : [...list, r],
+          )
+        }
       />
       {isEntityKind(targetType) && (
         <EntityPicker
