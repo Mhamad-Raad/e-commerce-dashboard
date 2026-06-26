@@ -6,6 +6,12 @@ export class ListCustomerNotificationsQueryDto extends PaginationQueryDto {
   @IsOptional()
   @IsBooleanString()
   unreadOnly?: string;
+
+  // Resolves ANNOUNCEMENT title/body server-side. Must be declared so the
+  // global whitelist validation doesn't 400 on `?lang=`.
+  @IsOptional()
+  @IsIn(['en', 'ar', 'ckb'])
+  lang?: string;
 }
 
 export class RegisterDeviceDto {
