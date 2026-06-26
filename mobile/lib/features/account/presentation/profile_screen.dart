@@ -33,7 +33,7 @@ class ProfileScreen extends ConsumerWidget {
         _languages.firstWhere((l) => l.code == currentLang, orElse: () => _languages.first).label;
 
     return Scaffold(
-      appBar: const RozhnaAppBar(),
+      appBar: const RozhnaAppBar(showNotifications: true),
       body: ListView(
         padding: const EdgeInsets.all(AppSpacing.margin),
         children: [
@@ -75,6 +75,11 @@ class ProfileScreen extends ConsumerWidget {
             icon: Icons.receipt_long_outlined,
             title: l10n.myOrders,
             onTap: () => context.push(Routes.orders),
+          ),
+          _Tile(
+            icon: Icons.notifications_outlined,
+            title: l10n.notifications,
+            onTap: () => context.push(Routes.notifications),
           ),
           _Tile(
             icon: Icons.favorite_border,

@@ -8,6 +8,7 @@ import { couponApplicabilityError, couponDiscountCents } from '../common/coupon'
 import { CSV_MAX_ROWS, toCsv } from '../common/csv';
 import { buildPaginated, paginate } from '../common/pagination';
 import { effectivePriceCents } from '../common/pricing';
+import { CustomerNotificationsService } from '../customer-notifications/customer-notifications.service';
 import { FeeGroupsService } from '../feegroups/feegroups.service';
 import { InventoryService } from '../inventory/inventory.service';
 import { NotificationsService } from '../notifications/notifications.service';
@@ -43,6 +44,7 @@ export class OrdersService {
     private events: OrderEventsService,
     private feeGroups: FeeGroupsService,
     private notifications: NotificationsService,
+    private customerNotifications: CustomerNotificationsService,
   ) {}
 
   listEvents(orderId: string) {
@@ -453,6 +455,17 @@ export class OrdersService {
         await this.events.record(tx, id, OrderEventType.NOTE_UPDATED);
       }
     });
+
+    // Notify the customer of a status change — only after the tx has committed,
+    // and best-effort (notify() never throws) so push can't fail the update.
+    if (dto.status !== undefined && dto.status !== existing.status) {
+      void this.customerNotifications.notify(existing.customerId, 'ORDER_STATUS_CHANGED', {
+        orderId: id,
+        number: existing.number,
+        status: dto.status,
+      });
+    }
+
     return this.findById(id);
   }
 

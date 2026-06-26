@@ -201,5 +201,15 @@
   "fillAllFields": "تکایە هەموو خانەکان پڕبکەرەوە.",
   "passwordTooShort": "وشەی نهێنی دەبێت لانیکەم ٨ پیت بێت.",
 
-  "productsCount": "{count} بەرهەم"
+  "productsCount": "{count} بەرهەم",
+
+  "notifications": "ئاگادارکردنەوەکان",
+  "notifMarkAllRead": "هەموو وەک خوێندراوە دیاریبکە",
+  "noNotificationsYet": "هێشتا هیچ ئاگادارکردنەوەیەک نییە",
+  "notificationsHint": "نوێکردنەوەی داواکاریەکانت لێرە دەردەکەون.",
+  "notificationsLoadError": "نەتوانرا ئاگادارکردنەوەکان باربکرێن.",
+  "notifOrderPlacedTitle": "داواکاری تۆمارکرا",
+  "notifOrderPlacedBody": "داواکاریەکەت {number} تۆمارکرا.",
+  "notifOrderUpdateTitle": "نوێکردنەوەی داواکاری",
+  "notifOrderStatusBody": "داواکاری {number} ئێستا {status}ـە."
 }

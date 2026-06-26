@@ -236,6 +236,19 @@ enum NotificationType {
   REFUND_REQUESTED
 }
 
+// Push/notification-centre event kinds shown to CUSTOMERS in the mobile app
+// (distinct from the staff-facing NotificationType above).
+enum CustomerNotificationType {
+  ORDER_PLACED         // their checkout succeeded
+  ORDER_STATUS_CHANGED // an admin moved their order to a new status
+}
+
+enum DevicePlatform {
+  ANDROID
+  IOS
+  WEB
+}
+
 // Why an OTP is being sent. One column lets sign-up verification and
 // forgot-password reuse a single challenge table + code path.
 enum OtpPurpose {
@@ -661,9 +674,50 @@ model Customer {
   favorites     Favorite[]
   conversations Conversation[]
   sessions      CustomerSession[]
+  devices       CustomerDevice[]
+  notifications CustomerNotification[]
 
   @@index([isActive])
   @@index([createdAt])
+}
+
+// A registered push (FCM) device for a customer. The token is the FCM
+// registration token; it rotates independently of the auth session (Firebase
+// can refresh it any time) so it is NOT tied to a CustomerSession row — the app
+// re-registers whenever the token changes and unregisters on logout. `locale`
+// is the device's app language at registration, used to render the push tray
+// text (title/body) server-side in the right language. One token = one row.
+model CustomerDevice {
+  id         String         @id @default(cuid())
+  customerId String
+  customer   Customer       @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  token      String         @unique // FCM registration token
+  platform   DevicePlatform
+  locale     String         @default("en") // en | ar | ckb — for push text
+  lastSeenAt DateTime       @default(now())
+  createdAt  DateTime       @default(now())
+  updatedAt  DateTime       @updatedAt
+
+  @@index([customerId])
+}
+
+// A customer-facing notification, persisted so the in-app notification centre
+// shows history even if the push was never delivered (offline / permission
+// denied). Like the admin Notification, it stores only `type` + structured
+// `data` — the human text is rendered CLIENT-side from the app's current
+// language (trilingual), so the same row reads correctly in EN/AR/CKB. The push
+// tray text is rendered separately server-side per device locale at send time.
+model CustomerNotification {
+  id         String                   @id @default(cuid())
+  customerId String
+  customer   Customer                 @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  type       CustomerNotificationType
+  data       Json // e.g. { orderId, number, status }
+  isRead     Boolean                  @default(false)
+  createdAt  DateTime                 @default(now())
+
+  @@index([customerId, createdAt])
+  @@index([customerId, isRead])
 }
 
 // One pending/used OTP code for a phone number. Single table for every

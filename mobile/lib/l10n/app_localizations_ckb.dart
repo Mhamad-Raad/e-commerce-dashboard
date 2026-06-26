@@ -590,4 +590,35 @@ class AppLocalizationsCkb extends AppLocalizations {
   String productsCount(int count) {
     return '$count بەرهەم';
   }
+
+  @override
+  String get notifications => 'ئاگادارکردنەوەکان';
+
+  @override
+  String get notifMarkAllRead => 'هەموو وەک خوێندراوە دیاریبکە';
+
+  @override
+  String get noNotificationsYet => 'هێشتا هیچ ئاگادارکردنەوەیەک نییە';
+
+  @override
+  String get notificationsHint => 'نوێکردنەوەی داواکاریەکانت لێرە دەردەکەون.';
+
+  @override
+  String get notificationsLoadError => 'نەتوانرا ئاگادارکردنەوەکان باربکرێن.';
+
+  @override
+  String get notifOrderPlacedTitle => 'داواکاری تۆمارکرا';
+
+  @override
+  String notifOrderPlacedBody(String number) {
+    return 'داواکاریەکەت $number تۆمارکرا.';
+  }
+
+  @override
+  String get notifOrderUpdateTitle => 'نوێکردنەوەی داواکاری';
+
+  @override
+  String notifOrderStatusBody(String number, String status) {
+    return 'داواکاری $number ئێستا $statusـە.';
+  }
 }

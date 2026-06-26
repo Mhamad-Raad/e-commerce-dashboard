@@ -12,6 +12,7 @@ import { CartsModule } from './carts/carts.module';
 import { CategoriesModule } from './categories/categories.module';
 import { CouponsModule } from './coupons/coupons.module';
 import { CustomerAuthModule } from './customer-auth/customer-auth.module';
+import { CustomerNotificationsModule } from './customer-notifications/customer-notifications.module';
 import { CustomersModule } from './customers/customers.module';
 import { FeeGroupsModule } from './feegroups/feegroups.module';
 import { HealthController } from './health/health.controller';
@@ -48,6 +49,7 @@ import { UsersModule } from './users/users.module';
     StoresModule,
     CustomersModule,
     CustomerAuthModule,
+    CustomerNotificationsModule,
     CartsModule,
     OrdersModule,
     CouponsModule,

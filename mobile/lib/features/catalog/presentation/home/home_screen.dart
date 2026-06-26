@@ -19,7 +19,7 @@ class HomeScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final layout = ref.watch(homeProvider);
     return Scaffold(
-      appBar: const RozhnaAppBar(showCart: true),
+      appBar: const RozhnaAppBar(showNotifications: true, showCart: true),
       body: layout.when(
         loading: () => const HomeSkeleton(),
         error: (error, _) => _HomeError(

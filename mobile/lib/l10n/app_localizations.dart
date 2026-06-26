@@ -1227,6 +1227,60 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count} products'**
   String productsCount(int count);
+
+  /// No description provided for @notifications.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications'**
+  String get notifications;
+
+  /// No description provided for @notifMarkAllRead.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark all read'**
+  String get notifMarkAllRead;
+
+  /// No description provided for @noNotificationsYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No notifications yet'**
+  String get noNotificationsYet;
+
+  /// No description provided for @notificationsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Updates about your orders will appear here.'**
+  String get notificationsHint;
+
+  /// No description provided for @notificationsLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t load your notifications.'**
+  String get notificationsLoadError;
+
+  /// No description provided for @notifOrderPlacedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Order placed'**
+  String get notifOrderPlacedTitle;
+
+  /// No description provided for @notifOrderPlacedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Your order {number} has been placed.'**
+  String notifOrderPlacedBody(String number);
+
+  /// No description provided for @notifOrderUpdateTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Order update'**
+  String get notifOrderUpdateTitle;
+
+  /// No description provided for @notifOrderStatusBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Order {number} is now {status}.'**
+  String notifOrderStatusBody(String number, String status);
 }
 
 class _AppLocalizationsDelegate

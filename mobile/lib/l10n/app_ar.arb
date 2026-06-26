@@ -201,5 +201,15 @@
   "fillAllFields": "الرجاء تعبئة جميع الحقول.",
   "passwordTooShort": "يجب أن تكون كلمة المرور 8 أحرف على الأقل.",
 
-  "productsCount": "{count} منتج"
+  "productsCount": "{count} منتج",
+
+  "notifications": "الإشعارات",
+  "notifMarkAllRead": "تحديد الكل كمقروء",
+  "noNotificationsYet": "لا توجد إشعارات بعد",
+  "notificationsHint": "ستظهر تحديثات طلباتك هنا.",
+  "notificationsLoadError": "تعذّر تحميل الإشعارات.",
+  "notifOrderPlacedTitle": "تم تقديم الطلب",
+  "notifOrderPlacedBody": "تم تقديم طلبك {number}.",
+  "notifOrderUpdateTitle": "تحديث الطلب",
+  "notifOrderStatusBody": "طلبك {number} الآن {status}."
 }

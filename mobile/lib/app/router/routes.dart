@@ -22,6 +22,8 @@ class Routes {
   // Orders (pushed over the tab shell; require auth).
   static const orders = '/orders';
   static String orderDetail(String id) => '/orders/$id';
+  // Notification centre (pushed over the tab shell; require auth).
+  static const notifications = '/notifications';
   // Account settings.
   static const editProfile = '/profile/edit';
   static const changePassword = '/profile/change-password';

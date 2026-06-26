@@ -8,6 +8,7 @@ import { Prisma } from '@prisma/client';
 import { couponApplicabilityError, couponDiscountCents } from '../common/coupon';
 import { buildPaginated, paginate } from '../common/pagination';
 import { effectivePriceCents } from '../common/pricing';
+import { CustomerNotificationsService } from '../customer-notifications/customer-notifications.service';
 import { OrdersService } from '../orders/orders.service';
 import { PaymentsService } from '../orders/payments.service';
 import { PrismaService } from '../prisma/prisma.service';
@@ -35,6 +36,7 @@ export class CartsService {
     private prisma: PrismaService,
     private orders: OrdersService,
     private payments: PaymentsService,
+    private customerNotifications: CustomerNotificationsService,
   ) {}
 
   async list(query: ListCartsQueryDto) {
@@ -325,7 +327,7 @@ export class CartsService {
     if (cart.items.length === 0) {
       throw new BadRequestException('Your cart is empty');
     }
-    return this.checkout(
+    const order = await this.checkout(
       cart.id,
       {
         addressId: dto.addressId,
@@ -335,6 +337,14 @@ export class CartsService {
       },
       undefined,
     );
+
+    // Best-effort order-confirmation push (never throws / never blocks checkout).
+    void this.customerNotifications.notify(customerId, 'ORDER_PLACED', {
+      orderId: order.id,
+      number: order.number,
+    });
+
+    return order;
   }
 
   // Keep the cart's stored discount in sync after items change; drop the coupon

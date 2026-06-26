@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { CustomerNotificationsModule } from '../customer-notifications/customer-notifications.module';
 import { FeeGroupsModule } from '../feegroups/feegroups.module';
 import { InventoryModule } from '../inventory/inventory.module';
 import { NotificationsModule } from '../notifications/notifications.module';
@@ -10,7 +11,12 @@ import { PaymentsController } from './payments.controller';
 import { PaymentsService } from './payments.service';
 
 @Module({
-  imports: [InventoryModule, FeeGroupsModule, NotificationsModule],
+  imports: [
+    InventoryModule,
+    FeeGroupsModule,
+    NotificationsModule,
+    CustomerNotificationsModule,
+  ],
   controllers: [OrdersController, PaymentsController, AppOrdersController],
   providers: [OrdersService, PaymentsService, OrderEventsService],
   exports: [OrdersService, PaymentsService, OrderEventsService],

@@ -226,5 +226,26 @@
     "placeholders": {
       "count": { "type": "int" }
     }
+  },
+
+  "notifications": "Notifications",
+  "notifMarkAllRead": "Mark all read",
+  "noNotificationsYet": "No notifications yet",
+  "notificationsHint": "Updates about your orders will appear here.",
+  "notificationsLoadError": "Couldn't load your notifications.",
+  "notifOrderPlacedTitle": "Order placed",
+  "notifOrderPlacedBody": "Your order {number} has been placed.",
+  "@notifOrderPlacedBody": {
+    "placeholders": {
+      "number": { "type": "String" }
+    }
+  },
+  "notifOrderUpdateTitle": "Order update",
+  "notifOrderStatusBody": "Order {number} is now {status}.",
+  "@notifOrderStatusBody": {
+    "placeholders": {
+      "number": { "type": "String" },
+      "status": { "type": "String" }
+    }
   }
 }

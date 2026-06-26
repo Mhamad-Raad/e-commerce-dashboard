@@ -7,6 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'app/app.dart';
 import 'app/env/env.dart';
+import 'core/push/push_messaging.dart';
 import 'core/storage/prefs.dart';
 
 /// Shared startup for both flavors. Loads prefs, wires DI overrides, runs the app,
@@ -24,6 +25,10 @@ Future<void> bootstrap(AppConfig config) async {
 
       // Load locale date symbols so DateFormat works for ar (ckb maps to ar).
       await initializeDateFormatting();
+
+      // Initialise Firebase for push. No-op (push stays dormant) until the
+      // native Firebase config is added — see PushService / FcmService.
+      await initFirebaseMessaging();
 
       final sharedPrefs = await SharedPreferences.getInstance();
 

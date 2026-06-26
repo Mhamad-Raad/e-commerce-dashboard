@@ -590,4 +590,35 @@ class AppLocalizationsEn extends AppLocalizations {
   String productsCount(int count) {
     return '$count products';
   }
+
+  @override
+  String get notifications => 'Notifications';
+
+  @override
+  String get notifMarkAllRead => 'Mark all read';
+
+  @override
+  String get noNotificationsYet => 'No notifications yet';
+
+  @override
+  String get notificationsHint => 'Updates about your orders will appear here.';
+
+  @override
+  String get notificationsLoadError => 'Couldn\'t load your notifications.';
+
+  @override
+  String get notifOrderPlacedTitle => 'Order placed';
+
+  @override
+  String notifOrderPlacedBody(String number) {
+    return 'Your order $number has been placed.';
+  }
+
+  @override
+  String get notifOrderUpdateTitle => 'Order update';
+
+  @override
+  String notifOrderStatusBody(String number, String status) {
+    return 'Order $number is now $status.';
+  }
 }

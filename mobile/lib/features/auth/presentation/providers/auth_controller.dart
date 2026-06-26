@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/network/api_result.dart';
 import '../../../../core/storage/token_store.dart';
+import '../../../notifications/data/push_service.dart';
 import '../../data/auth_repository.dart';
 import '../../data/models/auth_session.dart';
 import '../../domain/customer.dart';
@@ -108,6 +109,9 @@ class AuthController extends Notifier<AuthState> {
   }
 
   Future<void> logout() async {
+    // Unregister this device for push WHILE still authenticated (the request
+    // needs the access token, which clear() is about to drop). Best-effort.
+    await ref.read(pushServiceProvider).onLogout();
     final refresh = await _tokens.refreshToken;
     await _repo.logout(refresh); // best-effort server-side revoke
     await _tokens.clear();

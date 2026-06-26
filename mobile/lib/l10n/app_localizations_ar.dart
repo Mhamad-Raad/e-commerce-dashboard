@@ -586,4 +586,35 @@ class AppLocalizationsAr extends AppLocalizations {
   String productsCount(int count) {
     return '$count منتج';
   }
+
+  @override
+  String get notifications => 'الإشعارات';
+
+  @override
+  String get notifMarkAllRead => 'تحديد الكل كمقروء';
+
+  @override
+  String get noNotificationsYet => 'لا توجد إشعارات بعد';
+
+  @override
+  String get notificationsHint => 'ستظهر تحديثات طلباتك هنا.';
+
+  @override
+  String get notificationsLoadError => 'تعذّر تحميل الإشعارات.';
+
+  @override
+  String get notifOrderPlacedTitle => 'تم تقديم الطلب';
+
+  @override
+  String notifOrderPlacedBody(String number) {
+    return 'تم تقديم طلبك $number.';
+  }
+
+  @override
+  String get notifOrderUpdateTitle => 'تحديث الطلب';
+
+  @override
+  String notifOrderStatusBody(String number, String status) {
+    return 'طلبك $number الآن $status.';
+  }
 }

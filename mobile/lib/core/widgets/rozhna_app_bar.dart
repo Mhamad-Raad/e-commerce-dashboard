@@ -1,21 +1,24 @@
 import 'package:flutter/material.dart';
 
 import '../../features/cart/presentation/widgets/cart_button.dart';
+import '../../features/notifications/presentation/widgets/notification_bell.dart';
 import '../l10n/l10n_ext.dart';
 
 /// The shared app bar used across the app: "Rozhna's Store" wordmark centered,
-/// optional back (left) and cart (right). Uses colorScheme.primary so the
-/// wordmark stays readable in dark mode. When [showCart] is set, the cart action
-/// carries a live item-count badge and opens the cart.
+/// optional back (left) and notification/cart actions (right). Uses
+/// colorScheme.primary so the wordmark stays readable in dark mode. When
+/// [showNotifications]/[showCart] are set, those actions carry a live badge.
 class RozhnaAppBar extends StatelessWidget implements PreferredSizeWidget {
   const RozhnaAppBar({
     super.key,
     this.showBack = false,
     this.showCart = false,
+    this.showNotifications = false,
   });
 
   final bool showBack;
   final bool showCart;
+  final bool showNotifications;
 
   @override
   Widget build(BuildContext context) {
@@ -30,6 +33,7 @@ class RozhnaAppBar extends StatelessWidget implements PreferredSizeWidget {
             ),
       ),
       actions: [
+        if (showNotifications) const NotificationBell(),
         if (showCart) const CartButton(),
       ],
     );
