@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "828029137266",
+    "project_id": "rozhna-ecommerce",
+    "storage_bucket": "rozhna-ecommerce.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:828029137266:android:2732f48714ca21f3712deb",
+        "android_client_info": {
+          "package_name": "com.rozhna.rozhna_store"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBY394ook7IJ3pq76ES12I8KKHI4e4sEu0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
