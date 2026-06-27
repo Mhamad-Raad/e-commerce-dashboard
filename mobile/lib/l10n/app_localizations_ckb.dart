@@ -157,6 +157,9 @@ class AppLocalizationsCkb extends AppLocalizations {
   String get comingSoon => 'بەمزووانە';
 
   @override
+  String get linkOpenError => 'نەتوانرا لینکەکە بکرێتەوە.';
+
+  @override
   String get toggleTheme => 'گۆڕینی ڕووکار';
 
   @override
@@ -534,6 +537,26 @@ class AppLocalizationsCkb extends AppLocalizations {
 
   @override
   String get assistantComingSoon => 'یاریدەدەری زیرەکی کڕینت بەمزووانە دێت.';
+
+  @override
+  String get assistantEmptyTitle => 'چۆن یارمەتیت بدەم؟';
+
+  @override
+  String get assistantEmptyBody =>
+      'داوام لێبکە بەرهەم بدۆزمەوە، هەڵبژاردەکان بەراورد بکەم، یان ڕاسپاردە پێشکەش بکەم.';
+
+  @override
+  String get assistantInputHint => 'پرسیار لەسەر بەرهەمەکان بکە…';
+
+  @override
+  String get assistantUnavailable =>
+      'یاریدەدەر ئێستا بەردەست نییە. تکایە دواتر هەوڵبدەرەوە.';
+
+  @override
+  String get assistantError => 'هەڵەیەک ڕوویدا. تکایە دووبارە هەوڵبدەرەوە.';
+
+  @override
+  String get assistantNewChat => 'گفتوگۆی نوێ';
 
   @override
   String get editProfile => 'دەستکاری پرۆفایل';

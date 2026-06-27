@@ -382,6 +382,12 @@ abstract class AppLocalizations {
   /// **'Coming soon'**
   String get comingSoon;
 
+  /// No description provided for @linkOpenError.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t open the link.'**
+  String get linkOpenError;
+
   /// No description provided for @toggleTheme.
   ///
   /// In en, this message translates to:
@@ -1119,6 +1125,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Your AI shopping assistant is coming soon.'**
   String get assistantComingSoon;
+
+  /// No description provided for @assistantEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'How can I help?'**
+  String get assistantEmptyTitle;
+
+  /// No description provided for @assistantEmptyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask me to find products, compare options, or get recommendations.'**
+  String get assistantEmptyBody;
+
+  /// No description provided for @assistantInputHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask about products…'**
+  String get assistantInputHint;
+
+  /// No description provided for @assistantUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'The assistant isn\'t available right now. Please try again later.'**
+  String get assistantUnavailable;
+
+  /// No description provided for @assistantError.
+  ///
+  /// In en, this message translates to:
+  /// **'Something went wrong. Please try again.'**
+  String get assistantError;
+
+  /// No description provided for @assistantNewChat.
+  ///
+  /// In en, this message translates to:
+  /// **'New chat'**
+  String get assistantNewChat;
 
   /// No description provided for @editProfile.
   ///

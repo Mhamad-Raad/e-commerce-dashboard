@@ -158,6 +158,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get comingSoon => 'Coming soon';
 
   @override
+  String get linkOpenError => 'Couldn\'t open the link.';
+
+  @override
   String get toggleTheme => 'Toggle theme';
 
   @override
@@ -534,6 +537,26 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get assistantComingSoon =>
       'Your AI shopping assistant is coming soon.';
+
+  @override
+  String get assistantEmptyTitle => 'How can I help?';
+
+  @override
+  String get assistantEmptyBody =>
+      'Ask me to find products, compare options, or get recommendations.';
+
+  @override
+  String get assistantInputHint => 'Ask about products…';
+
+  @override
+  String get assistantUnavailable =>
+      'The assistant isn\'t available right now. Please try again later.';
+
+  @override
+  String get assistantError => 'Something went wrong. Please try again.';
+
+  @override
+  String get assistantNewChat => 'New chat';
 
   @override
   String get editProfile => 'Edit profile';

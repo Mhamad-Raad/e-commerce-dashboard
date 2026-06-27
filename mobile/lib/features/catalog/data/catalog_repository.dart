@@ -93,3 +93,18 @@ final storeDetailProvider =
   final result = await ref.watch(catalogRepositoryProvider).store(id, lang);
   return result.unwrapOrThrow();
 });
+
+/// Products within a single category (first page) — the storefront category
+/// page reached by tapping a CATEGORY home item. No pagination yet (capped at
+/// one page); revisit if categories grow large.
+final categoryProductsProvider = FutureProvider.autoDispose
+    .family<ProductPage, String>((ref, categoryId) async {
+  final lang = ref.watch(_langProvider);
+  final result = await ref.watch(catalogRepositoryProvider).searchProducts(
+        ProductQuery(categoryId: categoryId),
+        lang,
+        page: 1,
+        pageSize: 50,
+      );
+  return result.unwrapOrThrow();
+});

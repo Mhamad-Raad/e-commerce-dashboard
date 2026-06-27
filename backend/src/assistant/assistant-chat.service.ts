@@ -14,6 +14,7 @@ import { AssistantToolsService } from './assistant-tools.service';
 import { CENTS_TO_MICROS, costMicros } from './pricing';
 import { ASSISTANT_PROVIDER, AssistantProvider } from './provider/assistant-provider.interface';
 import { ChatDto } from './dto/chat.dto';
+import { AppChatDto } from './dto/app-chat.dto';
 
 const HISTORY_LIMIT = 20; // prior turns sent as context
 const MAX_OUTPUT_TOKENS = 1024;
@@ -98,6 +99,22 @@ export class AssistantChatService {
     await this.lockIfOverBudget(cfg);
 
     return { conversationId: conversation.id, message: result.text };
+  }
+
+  // ---- Customer app (scoped to the authenticated customer) ----
+
+  // Same engine as chat(), but the customer comes from the JWT, never the body.
+  chatForCustomer(customerId: string, dto: AppChatDto) {
+    return this.chat({ customerId, ...dto });
+  }
+
+  // A conversation, but only if it belongs to this customer (else 404).
+  async getConversationForCustomer(customerId: string, id: string) {
+    const conversation = await this.getConversation(id);
+    if (conversation.customerId !== customerId) {
+      throw new NotFoundException('Conversation not found.');
+    }
+    return conversation;
   }
 
   // ---- Admin viewing ----

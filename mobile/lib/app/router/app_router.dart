@@ -22,6 +22,7 @@ import '../../features/cart/presentation/checkout_screen.dart';
 import '../../features/cart/presentation/order_confirmation_screen.dart';
 import '../../features/cart/presentation/select_address_screen.dart';
 import '../../features/assistant/presentation/assistant_screen.dart';
+import '../../features/catalog/presentation/category_products_screen.dart';
 import '../../features/catalog/presentation/home/home_screen.dart';
 import '../../features/catalog/presentation/products_screen.dart';
 import '../../features/catalog/presentation/store_detail_screen.dart';
@@ -123,6 +124,14 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: '/store/:id',
         builder: (_, state) =>
             StoreDetailScreen(id: state.pathParameters['id']!),
+      ),
+      // Products filtered to one category (category name passed via `extra`).
+      GoRoute(
+        path: '/category/:id',
+        builder: (_, state) => CategoryProductsScreen(
+          id: state.pathParameters['id']!,
+          name: state.extra as String?,
+        ),
       ),
       // Account settings.
       GoRoute(

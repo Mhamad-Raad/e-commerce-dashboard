@@ -11,6 +11,8 @@ class Routes {
   // Stores showcase (pushed over the shell).
   static const stores = '/stores';
   static String storeDetail(String id) => '/store/$id';
+  // Products filtered to one category (pushed over the shell).
+  static String categoryProducts(String id) => '/category/$id';
   static const blog = '/blog'; // article route is '/blog/:id'
   // Addresses (pushed over the tab shell; require auth).
   static const addresses = '/addresses';

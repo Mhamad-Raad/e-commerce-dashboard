@@ -156,6 +156,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get comingSoon => 'قريبًا';
 
   @override
+  String get linkOpenError => 'تعذّر فتح الرابط.';
+
+  @override
   String get toggleTheme => 'تبديل السمة';
 
   @override
@@ -530,6 +533,26 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get assistantComingSoon => 'مساعد التسوّق الذكي قادم قريبًا.';
+
+  @override
+  String get assistantEmptyTitle => 'كيف يمكنني المساعدة؟';
+
+  @override
+  String get assistantEmptyBody =>
+      'اطلب مني إيجاد منتجات أو مقارنة الخيارات أو الحصول على توصيات.';
+
+  @override
+  String get assistantInputHint => 'اسأل عن المنتجات…';
+
+  @override
+  String get assistantUnavailable =>
+      'المساعد غير متاح حاليًا. يرجى المحاولة لاحقًا.';
+
+  @override
+  String get assistantError => 'حدث خطأ ما. يرجى المحاولة مرة أخرى.';
+
+  @override
+  String get assistantNewChat => 'محادثة جديدة';
 
   @override
   String get editProfile => 'تعديل الملف الشخصي';
