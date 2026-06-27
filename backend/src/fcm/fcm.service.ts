@@ -12,6 +12,8 @@ import { getMessaging, Messaging } from 'firebase-admin/messaging';
 export interface PushPayload {
   title: string;
   body: string;
+  /** Optional notification image (big picture). Must be a public HTTPS URL. */
+  image?: string;
   /** Extra string key/values delivered to the app (deep-link target, ids). */
   data?: Record<string, string>;
 }
@@ -93,7 +95,13 @@ export class FcmService {
     try {
       const res = await messaging.sendEachForMulticast({
         tokens,
-        notification: { title: payload.title, body: payload.body },
+        notification: {
+          title: payload.title,
+          body: payload.body,
+          // imageUrl on the cross-platform Notification delivers the big picture
+          // to Android + iOS (system-rendered when backgrounded).
+          ...(payload.image ? { imageUrl: payload.image } : {}),
+        },
         data: payload.data ?? {},
         android: { priority: 'high', notification: { sound: 'default' } },
         apns: { payload: { aps: { sound: 'default' } } },

@@ -105,6 +105,7 @@ export interface AnnouncementPushInput {
   bodyEn: string;
   bodyAr: string | null;
   bodyCkb: string | null;
+  imageUrl: string | null;
   targetType: HomeTargetType;
   targetId: string | null;
   url: string | null;
@@ -125,6 +126,7 @@ export function renderAnnouncementPush(
   return {
     title,
     body,
+    image: a.imageUrl ?? undefined,
     data: {
       type: 'ANNOUNCEMENT',
       announcementId: a.id,
