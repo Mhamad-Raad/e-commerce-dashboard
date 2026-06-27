@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'dart:io' show Platform;
+import 'dart:io' show HttpClient, Platform;
 
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
@@ -19,7 +19,8 @@ final pushServiceProvider = Provider<PushService>((ref) => PushService(ref));
 
 /// Drives the FCM lifecycle: requests permission, registers the device token
 /// with the backend on login, refreshes it on rotation, unregisters on logout,
-/// displays foreground messages, and deep-links notification taps to the order.
+/// displays foreground messages, and deep-links notification taps to their
+/// target (order detail, or an announcement's product/store/blog).
 ///
 /// Entirely inert when [firebaseReady] is false (no native Firebase config yet)
 /// so the app runs identically before any Firebase project exists.
@@ -30,10 +31,12 @@ class PushService {
   final _local = FlutterLocalNotificationsPlugin();
   bool _handlersReady = false;
 
+  // One general channel for every push (order updates AND admin announcements);
+  // its name is what users see in Android notification settings.
   static const _channel = AndroidNotificationChannel(
-    'order_updates',
-    'Order updates',
-    description: 'Notifications about your orders',
+    'rozhna_general',
+    'Notifications',
+    description: 'Order updates, announcements, and more.',
     importance: Importance.high,
   );
 
@@ -116,14 +119,30 @@ class PushService {
     }
   }
 
-  void _onForegroundMessage(RemoteMessage message) {
+  Future<void> _onForegroundMessage(RemoteMessage message) async {
     // Keep the centre + badge live without waiting for the next screen open.
     // refresh() also invalidates unreadCountProvider, so don't double-invalidate.
     _ref.read(notificationsControllerProvider.notifier).refresh();
 
     final n = message.notification;
     if (n == null) return; // data-only message — nothing to display
-    _local.show(
+
+    // The OS auto-renders the image when backgrounded; in the foreground WE draw
+    // the notification, so fetch the image and use a big-picture style to match.
+    final imageUrl = n.android?.imageUrl ?? n.apple?.imageUrl;
+    StyleInformation? style;
+    if (imageUrl != null && imageUrl.isNotEmpty) {
+      final bytes = await _downloadBytes(imageUrl);
+      if (bytes != null) {
+        style = BigPictureStyleInformation(
+          ByteArrayAndroidBitmap(bytes),
+          contentTitle: n.title,
+          summaryText: n.body,
+        );
+      }
+    }
+
+    await _local.show(
       id: n.hashCode,
       title: n.title,
       body: n.body,
@@ -134,11 +153,28 @@ class PushService {
           channelDescription: _channel.description,
           importance: Importance.high,
           priority: Priority.high,
+          styleInformation: style,
         ),
         iOS: const DarwinNotificationDetails(),
       ),
       payload: jsonEncode(message.data),
     );
+  }
+
+  /// Fetch image bytes for a foreground big-picture notification. Returns null
+  /// on any failure (the notification then just shows as text).
+  Future<Uint8List?> _downloadBytes(String url) async {
+    final client = HttpClient();
+    try {
+      final resp = await (await client.getUrl(Uri.parse(url))).close();
+      if (resp.statusCode != 200) return null;
+      return await consolidateHttpClientResponseBytes(resp);
+    } catch (e) {
+      debugPrint('notif image download failed: $e');
+      return null;
+    } finally {
+      client.close();
+    }
   }
 
   void _routeFromPayload(String? payload) {
