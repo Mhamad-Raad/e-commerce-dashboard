@@ -35,19 +35,11 @@ class NotificationsController extends AsyncNotifier<List<AppNotification>> {
   Future<void> markRead(String id) async {
     final current = state.maybeWhen(data: (v) => v, orElse: () => null);
     if (current == null) return;
-    // Optimistic: flip the row locally, then tell the server.
+    // Optimistic: flip the row locally, then tell the server. copyWith keeps
+    // the announcement payload so the content doesn't disappear.
     state = AsyncData([
       for (final n in current)
-        if (n.id == id && !n.isRead)
-          AppNotification(
-            id: n.id,
-            type: n.type,
-            data: n.data,
-            isRead: true,
-            createdAt: n.createdAt,
-          )
-        else
-          n,
+        if (n.id == id && !n.isRead) n.copyWith(isRead: true) else n,
     ]);
     await _repo.markRead(id);
     ref.invalidate(unreadCountProvider);
@@ -56,16 +48,7 @@ class NotificationsController extends AsyncNotifier<List<AppNotification>> {
   Future<void> markAllRead() async {
     final current = state.maybeWhen(data: (v) => v, orElse: () => null);
     if (current != null) {
-      state = AsyncData([
-        for (final n in current)
-          AppNotification(
-            id: n.id,
-            type: n.type,
-            data: n.data,
-            isRead: true,
-            createdAt: n.createdAt,
-          ),
-      ]);
+      state = AsyncData([for (final n in current) n.copyWith(isRead: true)]);
     }
     await _repo.markAllRead();
     ref.invalidate(unreadCountProvider);

@@ -22,6 +22,17 @@ class AppNotification {
   /// Convenience: the order this notification points at, if any.
   String? get orderId => data['orderId'] as String?;
 
+  /// Copy with overrides — preserves [announcement] etc. so optimistic
+  /// read-state flips don't drop the row's content.
+  AppNotification copyWith({bool? isRead}) => AppNotification(
+        id: id,
+        type: type,
+        data: data,
+        isRead: isRead ?? this.isRead,
+        createdAt: createdAt,
+        announcement: announcement,
+      );
+
   factory AppNotification.fromJson(Map<String, dynamic> json) {
     final rawData = json['data'];
     final rawAnn = json['announcement'];
