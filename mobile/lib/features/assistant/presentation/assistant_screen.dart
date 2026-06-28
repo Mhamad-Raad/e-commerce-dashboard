@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
+import '../../../app/router/routes.dart';
 import '../../../app/theme/app_radii.dart';
 import '../../../app/theme/app_spacing.dart';
 import '../../../core/error/failure.dart';
 import '../../../core/l10n/l10n_ext.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../catalog/domain/catalog_product.dart';
+import '../../catalog/presentation/home/widgets/product_card.dart';
 import 'providers/assistant_chat_controller.dart';
 import 'widgets/message_bubble.dart';
 
@@ -99,7 +103,11 @@ class _AssistantScreenState extends ConsumerState<AssistantScreen> {
       controller: _scroll,
       padding: const EdgeInsets.all(AppSpacing.margin),
       children: [
-        for (final m in state.messages) MessageBubble(message: m),
+        for (final m in state.messages) ...[
+          MessageBubble(message: m),
+          if (!m.isUser && m.products.isNotEmpty)
+            _AssistantProducts(products: m.products),
+        ],
         if (state.sending) const _TypingIndicator(),
         if (state.error != null)
           _ErrorRow(
@@ -143,6 +151,38 @@ class _Empty extends StatelessWidget {
                 style: text.bodyMedium?.copyWith(color: scheme.onSurfaceVariant),
                 textAlign: TextAlign.center),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Horizontal strip of product cards under an assistant message. Reuses the
+/// catalog [ProductCard], so each card already carries tap-to-detail, add-to-cart,
+/// and wishlist — exactly the actions we want from the chat.
+class _AssistantProducts extends StatelessWidget {
+  const _AssistantProducts({required this.products});
+
+  final List<CatalogProduct> products;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+      child: SizedBox(
+        height: 280,
+        child: ListView.separated(
+          scrollDirection: Axis.horizontal,
+          padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
+          itemCount: products.length,
+          separatorBuilder: (_, _) => const SizedBox(width: AppSpacing.sm),
+          itemBuilder: (_, i) => SizedBox(
+            width: 160,
+            child: ProductCard(
+              product: products[i],
+              onTap: () => context.push(Routes.productDetail(products[i].id)),
+            ),
+          ),
         ),
       ),
     );

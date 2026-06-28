@@ -104,7 +104,10 @@ class AssistantChatController extends Notifier<AssistantChatState> {
     switch (result) {
       case Success(value: final reply):
         state = state.copyWith(
-          messages: [...state.messages, ChatMessage.assistant(reply.message)],
+          messages: [
+            ...state.messages,
+            ChatMessage.assistant(reply.message, products: reply.products),
+          ],
           conversationId: reply.conversationId,
           sending: false,
         );
