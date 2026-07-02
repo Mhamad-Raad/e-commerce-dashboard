@@ -27,6 +27,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
   final _phone = TextEditingController();
   final _email = TextEditingController();
   final _password = TextEditingController();
+  String? _gender; // 'FEMALE' | 'MALE' — required, no default.
   bool _loading = false;
 
   @override
@@ -45,9 +46,14 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
       showMessage(context, context.l10n.namePhonePasswordRequired);
       return;
     }
+    if (_gender == null) {
+      showMessage(context, context.l10n.genderRequired);
+      return;
+    }
     setState(() => _loading = true);
     final result = await ref.read(authControllerProvider.notifier).register(
           name: _name.text.trim(),
+          gender: _gender!,
           phone: _phone.text.trim(),
           password: _password.text,
           email: _email.text.trim(),
@@ -103,6 +109,11 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
           autofillHints: const [AutofillHints.email],
         ),
         const SizedBox(height: AppSpacing.md),
+        _GenderSelector(
+          value: _gender,
+          onChanged: (v) => setState(() => _gender = v),
+        ),
+        const SizedBox(height: AppSpacing.md),
         PasswordField(
           controller: _password,
           label: l10n.passwordMin8,
@@ -113,6 +124,53 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
           label: l10n.createAccount,
           loading: _loading,
           onPressed: _submit,
+        ),
+      ],
+    );
+  }
+}
+
+/// Required two-choice (Female / Male) gender picker, styled as a pair of
+/// ChoiceChips to match the app's pill aesthetic. No default selection.
+class _GenderSelector extends StatelessWidget {
+  const _GenderSelector({required this.value, required this.onChanged});
+
+  final String? value;
+  final ValueChanged<String> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final theme = Theme.of(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(l10n.gender, style: theme.textTheme.labelLarge),
+        const SizedBox(height: AppSpacing.sm),
+        Row(
+          children: [
+            Expanded(
+              child: ChoiceChip(
+                label: SizedBox(
+                  width: double.infinity,
+                  child: Text(l10n.genderFemale, textAlign: TextAlign.center),
+                ),
+                selected: value == 'FEMALE',
+                onSelected: (_) => onChanged('FEMALE'),
+              ),
+            ),
+            const SizedBox(width: AppSpacing.sm),
+            Expanded(
+              child: ChoiceChip(
+                label: SizedBox(
+                  width: double.infinity,
+                  child: Text(l10n.genderMale, textAlign: TextAlign.center),
+                ),
+                selected: value == 'MALE',
+                onSelected: (_) => onChanged('MALE'),
+              ),
+            ),
+          ],
         ),
       ],
     );

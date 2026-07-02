@@ -19,12 +19,14 @@ class AuthRepository {
 
   Future<Result<void>> register({
     required String name,
+    required String gender,
     required String phone,
     required String password,
     String? email,
   }) =>
       _guardVoid(() => _api.register(
             name: name,
+            gender: gender,
             phone: phone,
             password: password,
             email: email,

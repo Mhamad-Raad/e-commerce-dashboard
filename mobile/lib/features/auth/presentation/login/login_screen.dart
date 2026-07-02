@@ -100,6 +100,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             ),
           ],
         ),
+        const SizedBox(height: AppSpacing.xs),
+        // Let visitors sample the skincare assistant before committing to an
+        // account — a low-friction hook into the consultation experience.
+        TextButton.icon(
+          onPressed: () => context.push(Routes.guestAssistant),
+          icon: const Icon(Icons.auto_awesome_outlined, size: 18),
+          label: Text(l10n.assistantGuestCta),
+        ),
       ],
     );
   }
