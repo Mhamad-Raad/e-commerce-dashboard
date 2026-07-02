@@ -18,6 +18,7 @@ import {
 import { CustomerJwtGuard } from '../customer-auth/guards/customer-jwt.guard';
 import { CartsService } from './carts.service';
 import { AppCheckoutDto } from './dto/app-checkout.dto';
+import { ApplyCouponDto } from './dto/apply-coupon.dto';
 import { AddCartItemDto, UpdateCartItemDto } from './dto/cart-item.dto';
 
 // The customer's own cart (mobile app). Scoped to the authenticated customer via
@@ -69,7 +70,7 @@ export class AppCartController {
   @Post('coupon')
   applyCoupon(
     @CurrentCustomer() customer: CurrentCustomerPayload,
-    @Body() body: { code: string },
+    @Body() body: ApplyCouponDto,
   ) {
     return this.carts.applyCouponForCustomer(customer.id, body.code);
   }

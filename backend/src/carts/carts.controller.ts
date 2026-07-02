@@ -12,6 +12,7 @@ import {
 } from '@nestjs/common';
 import { CurrentUser, CurrentUserPayload } from '../auth/decorators/current-user.decorator';
 import { CartsService } from './carts.service';
+import { ApplyCouponDto } from './dto/apply-coupon.dto';
 import { AddCartItemDto, UpdateCartItemDto } from './dto/cart-item.dto';
 import { CheckoutCartDto } from './dto/checkout.dto';
 import { CreateCartDto } from './dto/create-cart.dto';
@@ -78,7 +79,7 @@ export class CartsController {
   }
 
   @Post(':id/coupon')
-  applyCoupon(@Param('id') id: string, @Body() body: { code: string }) {
+  applyCoupon(@Param('id') id: string, @Body() body: ApplyCouponDto) {
     return this.carts.applyCoupon(id, body.code);
   }
 
