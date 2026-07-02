@@ -747,6 +747,14 @@
     "business_address": "عنوان النشاط",
     "default_currency": "العملة الافتراضية",
     "default_currency_hint": "رمز ISO من 3 أحرف، مثل IQD",
+    "app_version_section": "إصدار تطبيق الجوال",
+    "min_app_version": "الحد الأدنى للإصدار المطلوب",
+    "min_app_version_hint": "التطبيقات الأقدم تُحظر حتى يتم التحديث (مثل 1.2.0). اتركه فارغًا للتعطيل.",
+    "latest_app_version": "أحدث إصدار",
+    "latest_app_version_hint": "إذا كان أحدث من تطبيق المستخدم يظهر تنبيه تحديث قابل للإغلاق. اتركه فارغًا للتعطيل.",
+    "play_store_url": "رابط متجر Play",
+    "app_store_url": "رابط App Store",
+    "version_format_error": "استخدم الصيغة 1.2.3",
     "saved_toast": "تم حفظ الإعدادات"
   },
   "reports": {

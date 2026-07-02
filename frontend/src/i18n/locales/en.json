@@ -747,6 +747,14 @@
     "business_address": "Business address",
     "default_currency": "Default currency",
     "default_currency_hint": "3-letter ISO code, e.g. IQD",
+    "app_version_section": "Mobile app version",
+    "min_app_version": "Minimum required version",
+    "min_app_version_hint": "Older apps are blocked until they update (e.g. 1.2.0). Leave empty to disable.",
+    "latest_app_version": "Latest version",
+    "latest_app_version_hint": "Newer than the user's app shows a dismissible update prompt. Leave empty to disable.",
+    "play_store_url": "Play Store URL",
+    "app_store_url": "App Store URL",
+    "version_format_error": "Use the form 1.2.3",
     "saved_toast": "Settings saved"
   },
   "reports": {

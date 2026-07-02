@@ -16,12 +16,18 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { extractErrorMessage } from '@/lib/format';
 
+const versionPattern = /^(\d+\.\d+\.\d+)?$/;
+
 const schema = z.object({
   businessName: z.string().max(120).optional().or(z.literal('')),
   businessEmail: z.string().email().optional().or(z.literal('')),
   businessPhone: z.string().max(40).optional().or(z.literal('')),
   businessAddress: z.string().max(300).optional().or(z.literal('')),
   defaultCurrency: z.string().length(3),
+  minAppVersion: z.string().regex(versionPattern),
+  latestAppVersion: z.string().regex(versionPattern),
+  appStoreUrl: z.string().max(300),
+  playStoreUrl: z.string().max(300),
 });
 
 type FormValues = z.infer<typeof schema>;
@@ -48,6 +54,10 @@ export function Settings() {
       businessPhone: '',
       businessAddress: '',
       defaultCurrency: 'IQD',
+      minAppVersion: '',
+      latestAppVersion: '',
+      appStoreUrl: '',
+      playStoreUrl: '',
     },
   });
 
@@ -60,6 +70,10 @@ export function Settings() {
         businessPhone: s.businessPhone ?? '',
         businessAddress: s.businessAddress ?? '',
         defaultCurrency: s.defaultCurrency,
+        minAppVersion: s.minAppVersion ?? '',
+        latestAppVersion: s.latestAppVersion ?? '',
+        appStoreUrl: s.appStoreUrl ?? '',
+        playStoreUrl: s.playStoreUrl ?? '',
       });
     }
   }, [settingsQuery.data, reset]);
@@ -72,6 +86,11 @@ export function Settings() {
         businessPhone: values.businessPhone?.trim() || undefined,
         businessAddress: values.businessAddress?.trim() || undefined,
         defaultCurrency: values.defaultCurrency.toUpperCase(),
+        // Always sent (empty = clear/disable), unlike the identity fields above.
+        minAppVersion: values.minAppVersion.trim(),
+        latestAppVersion: values.latestAppVersion.trim(),
+        appStoreUrl: values.appStoreUrl.trim(),
+        playStoreUrl: values.playStoreUrl.trim(),
       };
       return settingsApi.update(payload);
     },
@@ -115,6 +134,32 @@ export function Settings() {
               >
                 <Input className="max-w-[8rem] uppercase" maxLength={3} {...register('defaultCurrency')} />
               </FormField>
+
+              <h3 className="border-t pt-5 text-sm font-semibold">{t('settings.app_version_section')}</h3>
+              <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+                <FormField
+                  label={t('settings.min_app_version')}
+                  error={errors.minAppVersion ? t('settings.version_format_error') : undefined}
+                  hint={t('settings.min_app_version_hint')}
+                >
+                  <Input dir="ltr" placeholder="1.0.0" autoComplete="off" {...register('minAppVersion')} />
+                </FormField>
+                <FormField
+                  label={t('settings.latest_app_version')}
+                  error={errors.latestAppVersion ? t('settings.version_format_error') : undefined}
+                  hint={t('settings.latest_app_version_hint')}
+                >
+                  <Input dir="ltr" placeholder="1.1.0" autoComplete="off" {...register('latestAppVersion')} />
+                </FormField>
+              </div>
+              <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+                <FormField label={t('settings.play_store_url')} error={errors.playStoreUrl?.message}>
+                  <Input dir="ltr" autoComplete="off" {...register('playStoreUrl')} />
+                </FormField>
+                <FormField label={t('settings.app_store_url')} error={errors.appStoreUrl?.message}>
+                  <Input dir="ltr" autoComplete="off" {...register('appStoreUrl')} />
+                </FormField>
+              </div>
 
               <div className="flex justify-end">
                 <Button type="submit" disabled={isSubmitting || saveMutation.isPending}>

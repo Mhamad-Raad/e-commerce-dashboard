@@ -7,6 +7,10 @@ export interface Settings {
   businessPhone: string | null;
   businessAddress: string | null;
   defaultCurrency: string;
+  minAppVersion: string | null;
+  latestAppVersion: string | null;
+  appStoreUrl: string | null;
+  playStoreUrl: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -17,6 +21,11 @@ export interface SettingsWritePayload {
   businessPhone?: string;
   businessAddress?: string;
   defaultCurrency?: string;
+  // Version-gate fields: send '' to clear (the API stores it as null = off).
+  minAppVersion?: string;
+  latestAppVersion?: string;
+  appStoreUrl?: string;
+  playStoreUrl?: string;
 }
 
 export const settingsApi = {
