@@ -294,7 +294,7 @@ class _RatingRow extends StatelessWidget {
         const SizedBox(width: AppSpacing.xs),
         Text(avg.toStringAsFixed(1), style: text.bodyMedium),
         const SizedBox(width: AppSpacing.xs),
-        Text(context.l10n.reviewsCount(count),
+        Text(context.l10n.reviewsCount(context.localizedNumber(count)),
             style: text.bodySmall?.copyWith(color: scheme.onSurfaceVariant)),
       ],
     );

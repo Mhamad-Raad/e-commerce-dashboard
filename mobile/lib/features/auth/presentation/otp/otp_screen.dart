@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -20,13 +22,37 @@ class OtpScreen extends ConsumerStatefulWidget {
 }
 
 class _OtpScreenState extends ConsumerState<OtpScreen> {
+  // Mirrors the backend's RESEND_COOLDOWN_MS (60s) so the button re-enables
+  // right when the server would accept a resend, instead of surfacing a 429.
+  static const _cooldownSeconds = 60;
+
   final _code = TextEditingController();
   bool _loading = false;
+  Timer? _timer;
+  int _cooldown = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    // A code was just sent to get here — start counting immediately.
+    _startCooldown();
+  }
 
   @override
   void dispose() {
+    _timer?.cancel();
     _code.dispose();
     super.dispose();
+  }
+
+  void _startCooldown() {
+    _timer?.cancel();
+    setState(() => _cooldown = _cooldownSeconds);
+    _timer = Timer.periodic(const Duration(seconds: 1), (t) {
+      if (!mounted) return t.cancel();
+      setState(() => _cooldown--);
+      if (_cooldown <= 0) t.cancel();
+    });
   }
 
   Future<void> _verify() async {
@@ -47,6 +73,7 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
   }
 
   Future<void> _resend() async {
+    if (_cooldown > 0) return;
     final result = await ref
         .read(authControllerProvider.notifier)
         .resendVerification(widget.phone);
@@ -54,6 +81,7 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
     switch (result) {
       case Success():
         showMessage(context, context.l10n.newCodeSent);
+        _startCooldown();
       case Failed(failure: final failure):
         showFailure(context, failure);
     }
@@ -80,8 +108,12 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
         const SizedBox(height: AppSpacing.lg),
         PrimaryButton(label: l10n.verify, loading: _loading, onPressed: _verify),
         const SizedBox(height: AppSpacing.sm),
-        // TODO(auth): add a resend countdown to match the backend cooldown.
-        TextButton(onPressed: _resend, child: Text(l10n.resendCode)),
+        TextButton(
+          onPressed: _cooldown > 0 ? null : _resend,
+          child: Text(_cooldown > 0
+              ? l10n.resendCodeIn(context.localizedNumber(_cooldown))
+              : l10n.resendCode),
+        ),
       ],
     );
   }

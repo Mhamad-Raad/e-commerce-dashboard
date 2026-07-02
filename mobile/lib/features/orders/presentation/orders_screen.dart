@@ -101,7 +101,10 @@ class _OrderRow extends StatelessWidget {
                   style: text.bodySmall
                       ?.copyWith(color: scheme.onSurfaceVariant),
                 ),
-                Text(l10n.itemsCount(order.itemCount), style: text.bodySmall),
+                Text(
+                    l10n.itemsCount(
+                        context.localizedNumber(order.itemCount)),
+                    style: text.bodySmall),
               ],
             ),
             const SizedBox(height: AppSpacing.xs),

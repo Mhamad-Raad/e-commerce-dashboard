@@ -65,6 +65,10 @@ class AuthInterceptor extends Interceptor {
       return handler.next(err);
     }
 
+    // A consumed multipart body can't be re-sent — propagate the 401 and let
+    // the API layer retry with a rebuilt FormData (the token is fresh now).
+    if (err.requestOptions.data is FormData) return handler.next(err);
+
     try {
       final newAccess = await _ref.read(tokenStoreProvider).accessToken;
       final options = err.requestOptions

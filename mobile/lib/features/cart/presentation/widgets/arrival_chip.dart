@@ -30,8 +30,9 @@ class ArrivalChip extends StatelessWidget {
           const SizedBox(width: AppSpacing.xs),
           Text(
             minDays == maxDays
-                ? l10n.arrivalEstimateSingle(minDays)
-                : l10n.arrivalEstimate(minDays, maxDays),
+                ? l10n.arrivalEstimateSingle(context.localizedNumber(minDays))
+                : l10n.arrivalEstimate(context.localizedNumber(minDays),
+                    context.localizedNumber(maxDays)),
             style: Theme.of(context)
                 .textTheme
                 .labelSmall

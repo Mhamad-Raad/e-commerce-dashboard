@@ -502,7 +502,9 @@ class _CartSummaryState extends ConsumerState<_CartSummary> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                l10n.selectedItemsCount(selected.length, widget.items.length),
+                l10n.selectedItemsCount(
+                    context.localizedNumber(selected.length),
+                    context.localizedNumber(widget.items.length)),
                 style:
                     text.bodySmall?.copyWith(color: scheme.onSurfaceVariant),
               ),

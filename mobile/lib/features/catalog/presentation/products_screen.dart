@@ -141,7 +141,7 @@ class _FilterBar extends StatelessWidget {
           AppSpacing.margin, AppSpacing.xs, AppSpacing.margin, 0),
       child: Row(
         children: [
-          Text(l10n.resultsCount(resultCount),
+          Text(l10n.resultsCount(context.localizedNumber(resultCount)),
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     color: scheme.onSurfaceVariant,
                   )),

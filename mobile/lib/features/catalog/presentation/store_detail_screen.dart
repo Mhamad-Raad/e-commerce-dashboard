@@ -79,7 +79,9 @@ class _Header extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(store.name, style: text.titleLarge),
-                Text(l10n.productsCount(store.productCount),
+                Text(
+                    l10n.productsCount(
+                        context.localizedNumber(store.productCount)),
                     style: text.bodySmall
                         ?.copyWith(color: scheme.onSurfaceVariant)),
                 if (store.description != null && store.description!.isNotEmpty)

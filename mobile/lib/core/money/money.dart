@@ -13,7 +13,12 @@ class Money {
     // intl has no `ckb` number data — use Arabic digits (same script) for it.
     final loc = locale == 'ckb' ? 'ar' : (locale ?? 'en');
     final f = NumberFormat.decimalPattern(loc);
-    return '${f.format(amount)} $currency';
+    // Arabic-script locales show the dinar as "د.ع" (Iraqi convention), not the
+    // Latin ISO code.
+    final label = currency == 'IQD' && (locale == 'ar' || locale == 'ckb')
+        ? 'د.ع'
+        : currency;
+    return '${f.format(amount)} $label';
   }
 
   Money operator +(Money other) {
