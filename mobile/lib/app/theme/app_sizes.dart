@@ -24,14 +24,17 @@ class AppSizes {
   /// as the screen allows, so it scales from phones to tablets.
   static const double productCardMaxWidth = 200;
 
-  /// Product card aspect ratio (width / height) — square image + text below.
-  static const double productCardAspect = 0.62;
+  /// Deterministic height of the text block under a product card's square image
+  /// (boutique brand line + 2-line name + one-line price + card padding). Grid
+  /// cells and sliders are sized to `columnWidth + this`, so the square image
+  /// fills the rest with no dead space and sale/non-sale cards match exactly.
+  static const double productCardTextHeight = 108;
 
-  /// Horizontal product slider item sizing. Height carries slack over the card's
-  /// content (square image + brand + 2-line name + price + card margin) to avoid
-  /// a RenderFlex overflow.
+  /// Horizontal product slider item sizing: square image (item width) + the
+  /// text block, so slider cards match the grid with no extra slack.
   static const double productSliderItemWidth = 160;
-  static const double productSliderHeight = 292;
+  static const double productSliderHeight =
+      productSliderItemWidth + productCardTextHeight;
 
   /// Blog/story card sizing in a BLOG section slider.
   static const double blogCardWidth = 260;

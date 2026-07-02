@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../app/router/routes.dart';
-import '../../../../app/theme/app_sizes.dart';
 import '../../../../app/theme/app_spacing.dart';
 import '../../domain/catalog_product.dart';
 import '../home/widgets/product_card.dart';
@@ -54,20 +53,19 @@ class _ProductGridState extends State<ProductGrid> {
     return Column(
       children: [
         Expanded(
-          child: GridView.builder(
-            controller: _controller,
-            padding: widget.padding,
-            gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-              maxCrossAxisExtent: AppSizes.productCardMaxWidth,
-              mainAxisSpacing: AppSpacing.gutter,
-              crossAxisSpacing: AppSpacing.gutter,
-              childAspectRatio: AppSizes.productCardAspect,
-            ),
-            itemCount: widget.products.length,
-            itemBuilder: (_, i) => ProductCard(
-              product: widget.products[i],
-              onTap: () =>
-                  context.push(Routes.productDetail(widget.products[i].id)),
+          child: LayoutBuilder(
+            builder: (context, constraints) => GridView.builder(
+              controller: _controller,
+              padding: widget.padding,
+              gridDelegate: productGridDelegate(
+                constraints.maxWidth - widget.padding.horizontal,
+              ),
+              itemCount: widget.products.length,
+              itemBuilder: (_, i) => ProductCard(
+                product: widget.products[i],
+                onTap: () =>
+                    context.push(Routes.productDetail(widget.products[i].id)),
+              ),
             ),
           ),
         ),

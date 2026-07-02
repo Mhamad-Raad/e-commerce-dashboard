@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../../app/theme/app_radii.dart';
+import '../../../../../app/theme/app_sizes.dart';
 import '../../../../../app/theme/app_spacing.dart';
 import '../../../../../app/theme/app_typography.dart';
 import '../../../../../core/l10n/l10n_ext.dart';
@@ -48,8 +49,10 @@ class ProductCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            AspectRatio(
-              aspectRatio: 1,
+            // Image fills whatever height is left after the fixed text block, so
+            // there's never dead space below short cards. Cells are sized (see
+            // productGridDelegate / the slider height) so this stays ~square.
+            Expanded(
               child: Stack(
                 fit: StackFit.expand,
                 children: [
@@ -91,18 +94,29 @@ class ProductCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  if (product.storeName != null)
-                    Text(
-                      product.storeName!,
-                      maxLines: 1,
+                  // Reserve the brand line whether or not a store is set, so
+                  // every card is the same height.
+                  SizedBox(
+                    height: 18,
+                    child: product.storeName != null
+                        ? Text(
+                            product.storeName!,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: AppTypography.brand(scheme.primary),
+                          )
+                        : null,
+                  ),
+                  // Always reserve two lines for the name so one- and two-line
+                  // names produce identically sized cards (no uneven gaps).
+                  SizedBox(
+                    height: 40,
+                    child: Text(
+                      product.name,
+                      maxLines: 2,
                       overflow: TextOverflow.ellipsis,
-                      style: AppTypography.brand(scheme.primary),
+                      style: text.bodyLarge?.copyWith(height: 1.25),
                     ),
-                  Text(
-                    product.name,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: text.bodyLarge,
                   ),
                   const SizedBox(height: AppSpacing.xs),
                   _Price(product: product, locale: locale),
@@ -184,31 +198,60 @@ class _Price extends StatelessWidget {
     if (!product.onSale) {
       return Text(
         product.price.format(locale: locale),
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
         style: text.bodyLarge?.copyWith(
           fontWeight: FontWeight.w700,
           color: scheme.primary,
         ),
       );
     }
-    return Wrap(
-      crossAxisAlignment: WrapCrossAlignment.center,
-      spacing: AppSpacing.xs,
+    // A single row (not a Wrap) so a sale card is exactly one line tall like a
+    // non-sale one; the struck-through original ellipsizes if space is tight.
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Text(
           product.salePrice.format(locale: locale),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
           style: text.bodyLarge?.copyWith(
             fontWeight: FontWeight.w700,
             color: scheme.error,
           ),
         ),
-        Text(
-          product.price.format(locale: locale),
-          style: text.bodySmall?.copyWith(
-            color: scheme.onSurfaceVariant,
-            decoration: TextDecoration.lineThrough,
+        const SizedBox(width: AppSpacing.xs),
+        Flexible(
+          child: Text(
+            product.price.format(locale: locale),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: text.bodySmall?.copyWith(
+              color: scheme.onSurfaceVariant,
+              decoration: TextDecoration.lineThrough,
+            ),
           ),
         ),
       ],
     );
   }
+}
+
+/// Grid delegate for product cards: fits as many [AppSizes.productCardMaxWidth]
+/// columns as [contentWidth] allows (responsive phone→tablet), then sizes each
+/// cell to a square image plus the fixed text block — so there's no dead space
+/// under short cards. Pass the grid's inner width (its width minus horizontal
+/// padding) from a LayoutBuilder.
+SliverGridDelegate productGridDelegate(double contentWidth) {
+  const spacing = AppSpacing.gutter;
+  const maxExtent = AppSizes.productCardMaxWidth;
+  final raw = ((contentWidth + spacing) / (maxExtent + spacing)).ceil();
+  final columns = raw < 1 ? 1 : raw;
+  final columnWidth = (contentWidth - spacing * (columns - 1)) / columns;
+  return SliverGridDelegateWithFixedCrossAxisCount(
+    crossAxisCount: columns,
+    mainAxisSpacing: spacing,
+    crossAxisSpacing: spacing,
+    mainAxisExtent: columnWidth + AppSizes.productCardTextHeight,
+  );
 }

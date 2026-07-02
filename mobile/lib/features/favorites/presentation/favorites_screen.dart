@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../app/router/routes.dart';
-import '../../../app/theme/app_sizes.dart';
 import '../../../app/theme/app_spacing.dart';
 import '../../../core/l10n/l10n_ext.dart';
 import '../../catalog/presentation/home/widgets/product_card.dart';
@@ -38,19 +37,18 @@ class FavoritesScreen extends ConsumerWidget {
         ),
         data: (products) => products.isEmpty
             ? _Empty()
-            : GridView.builder(
-                padding: const EdgeInsets.all(AppSpacing.margin),
-                gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                  maxCrossAxisExtent: AppSizes.productCardMaxWidth,
-                  mainAxisSpacing: AppSpacing.gutter,
-                  crossAxisSpacing: AppSpacing.gutter,
-                  childAspectRatio: AppSizes.productCardAspect,
-                ),
-                itemCount: products.length,
-                itemBuilder: (_, i) => ProductCard(
-                  product: products[i],
-                  onTap: () =>
-                      context.push(Routes.productDetail(products[i].id)),
+            : LayoutBuilder(
+                builder: (context, constraints) => GridView.builder(
+                  padding: const EdgeInsets.all(AppSpacing.margin),
+                  gridDelegate: productGridDelegate(
+                    constraints.maxWidth - AppSpacing.margin * 2,
+                  ),
+                  itemCount: products.length,
+                  itemBuilder: (_, i) => ProductCard(
+                    product: products[i],
+                    onTap: () =>
+                        context.push(Routes.productDetail(products[i].id)),
+                  ),
                 ),
               ),
       ),

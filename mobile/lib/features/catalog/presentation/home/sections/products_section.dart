@@ -50,21 +50,19 @@ class ProductsSection extends StatelessWidget {
   }
 
   Widget _grid(BuildContext context, List<HomeSectionItem> items) {
-    return GridView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.margin),
-      gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-        maxCrossAxisExtent: AppSizes.productCardMaxWidth,
-        mainAxisSpacing: AppSpacing.gutter,
-        crossAxisSpacing: AppSpacing.gutter,
-        childAspectRatio: AppSizes.productCardAspect,
-      ),
-      itemCount: items.length,
-      itemBuilder: (context, i) => ProductCard(
-        product: items[i].product!,
-        badge: items[i].badge,
-        onTap: () => navigateToHomeTarget(context, items[i]),
+    return LayoutBuilder(
+      builder: (context, constraints) => GridView.builder(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.margin),
+        gridDelegate:
+            productGridDelegate(constraints.maxWidth - AppSpacing.margin * 2),
+        itemCount: items.length,
+        itemBuilder: (context, i) => ProductCard(
+          product: items[i].product!,
+          badge: items[i].badge,
+          onTap: () => navigateToHomeTarget(context, items[i]),
+        ),
       ),
     );
   }

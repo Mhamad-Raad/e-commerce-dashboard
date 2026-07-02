@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../app/router/routes.dart';
 import '../../../../app/theme/app_radii.dart';
+import '../../../../app/theme/app_sizes.dart';
 import '../../../../app/theme/app_spacing.dart';
 import '../../../../core/error/failure.dart';
 import '../../../../core/l10n/l10n_ext.dart';
@@ -73,14 +74,14 @@ class AssistantProductsStrip extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(bottom: AppSpacing.sm),
       child: SizedBox(
-        height: 280,
+        height: AppSizes.productSliderHeight,
         child: ListView.separated(
           scrollDirection: Axis.horizontal,
           padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
           itemCount: products.length,
           separatorBuilder: (_, _) => const SizedBox(width: AppSpacing.sm),
           itemBuilder: (_, i) => SizedBox(
-            width: 160,
+            width: AppSizes.productSliderItemWidth,
             child: ProductCard(
               product: products[i],
               showActions: !guest,
