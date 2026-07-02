@@ -68,13 +68,19 @@ class AuthApi {
     return _asMap(res.data);
   }
 
-  Future<Map<String, dynamic>> updateProfile({String? name, String? email}) async {
+  Future<Map<String, dynamic>> updateProfile(
+      {String? name, String? email, String? gender}) async {
     final res = await _dio.patch('/app/auth/profile', data: {
       'name': ?name,
       'email': ?email,
+      'gender': ?gender,
     });
     return _asMap(res.data);
   }
+
+  /// Deactivates the account server-side and revokes every session.
+  Future<Map<String, dynamic>> deleteAccount() =>
+      _post('/app/auth/delete-account', {});
 
   Future<Map<String, dynamic>> changePassword({
     required String currentPassword,
@@ -86,11 +92,23 @@ class AuthApi {
       });
 
   Future<Map<String, dynamic>> uploadAvatar(String filePath) async {
-    final form = FormData.fromMap({
-      'file': await MultipartFile.fromFile(filePath),
-    });
-    final res = await _dio.post('/app/auth/avatar', data: form);
-    return _asMap(res.data);
+    Future<Response<dynamic>> attempt() async {
+      // Fresh FormData per attempt — a multipart stream can only be sent once,
+      // so the auth interceptor can't replay it after a token refresh.
+      final form = FormData.fromMap({
+        'file': await MultipartFile.fromFile(filePath),
+      });
+      return _dio.post('/app/auth/avatar', data: form);
+    }
+
+    try {
+      return _asMap((await attempt()).data);
+    } on DioException catch (e) {
+      // The interceptor refreshed the token but propagated the 401 (it can't
+      // rebuild the body) — one retry with a new stream and the fresh token.
+      if (e.response?.statusCode != 401) rethrow;
+      return _asMap((await attempt()).data);
+    }
   }
 
   Future<Map<String, dynamic>> _post(String path, Map<String, dynamic> body) async {

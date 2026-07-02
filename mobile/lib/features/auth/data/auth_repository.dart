@@ -69,9 +69,13 @@ class AuthRepository {
   Future<Result<Customer>> me() =>
       _guard(() async => Customer.fromJson(await _api.me()));
 
-  Future<Result<Customer>> updateProfile({String? name, String? email}) =>
-      _guard(() async =>
-          Customer.fromJson(await _api.updateProfile(name: name, email: email)));
+  Future<Result<Customer>> updateProfile(
+          {String? name, String? email, String? gender}) =>
+      _guard(() async => Customer.fromJson(await _api.updateProfile(
+          name: name, email: email, gender: gender)));
+
+  Future<Result<void>> deleteAccount() =>
+      _guardVoid(() => _api.deleteAccount());
 
   Future<Result<void>> changePassword({
     required String currentPassword,

@@ -101,8 +101,30 @@ class AuthController extends Notifier<AuthState> {
   Future<Result<void>> resendVerification(String phone) =>
       _repo.resendOtp(phone: phone, purpose: 'PHONE_VERIFICATION');
 
-  Future<Result<void>> updateProfile({String? name, String? email}) async =>
-      _applyCustomer(await _repo.updateProfile(name: name, email: email));
+  Future<Result<void>> updateProfile(
+          {String? name, String? email, String? gender}) async =>
+      _applyCustomer(await _repo.updateProfile(
+          name: name, email: email, gender: gender));
+
+  /// Deactivate the account server-side, then drop the local session (the
+  /// server already revoked everything, so no logout call — just clean up).
+  Future<Result<void>> deleteAccount() async {
+    final result = await _repo.deleteAccount();
+    if (result is Success) {
+      final pushService = ref.read(pushServiceProvider);
+      state = AuthState.loggedOut;
+      unawaited(() async {
+        try {
+          await pushService.onLogout();
+        } catch (_) {
+          // best-effort unregister
+        } finally {
+          await _tokens.clear();
+        }
+      }());
+    }
+    return result;
+  }
 
   Future<Result<void>> uploadAvatar(String filePath) async =>
       _applyCustomer(await _repo.uploadAvatar(filePath));
