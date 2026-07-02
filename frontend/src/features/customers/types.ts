@@ -26,10 +26,13 @@ export interface CustomerFavorite {
   } | null;
 }
 
+export type Gender = 'FEMALE' | 'MALE';
+
 export interface Customer {
   id: string;
   email: string;
   name: string;
+  gender: Gender | null;
   phone: string | null;
   address: string | null;
   city: string | null;
@@ -54,6 +57,8 @@ export interface CustomerListResponse {
 export interface CustomerWritePayload {
   email: string;
   name: string;
+  // Required on create, omitted on edit when unknown (legacy customers).
+  gender?: Gender;
   phone?: string;
   address?: string;
   city?: string;

@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -18,11 +18,22 @@ import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { extractErrorMessage } from '@/lib/format';
 
 const schema = z.object({
   name: z.string().min(1).max(200),
   email: z.string().email(),
+  // Optional in the base schema; required on create via the refinement below.
+  // Left optional on edit so legacy customers (gender null) can be updated
+  // without forcing the admin to guess a value the assistant would then act on.
+  gender: z.enum(['FEMALE', 'MALE']).optional(),
   phone: z.string().max(40).optional().or(z.literal('')),
   address: z.string().max(500).optional().or(z.literal('')),
   city: z.string().max(100).optional().or(z.literal('')),
@@ -36,6 +47,9 @@ type FormValues = z.infer<typeof schema>;
 const defaultValues: FormValues = {
   name: '',
   email: '',
+  // No neutral option — left unset so the admin picks one. Required on create
+  // (refinement); optional on edit.
+  gender: undefined,
   phone: '',
   address: '',
   city: '',
@@ -57,6 +71,22 @@ export function CustomerForm() {
     enabled: isEdit,
   });
 
+  // Gender is mandatory when creating a customer, but optional when editing so
+  // legacy records (gender null) stay editable without fabricating a value.
+  const resolverSchema = useMemo(
+    () =>
+      schema.superRefine((values, ctx) => {
+        if (!isEdit && !values.gender) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ['gender'],
+            message: t('customers.selectGender'),
+          });
+        }
+      }),
+    [isEdit, t],
+  );
+
   const {
     register,
     handleSubmit,
@@ -64,7 +94,7 @@ export function CustomerForm() {
     setValue,
     watch,
     formState: { errors, isSubmitting },
-  } = useForm<FormValues>({ resolver: zodResolver(schema), defaultValues });
+  } = useForm<FormValues>({ resolver: zodResolver(resolverSchema), defaultValues });
 
   useEffect(() => {
     if (customerQuery.data) {
@@ -72,6 +102,7 @@ export function CustomerForm() {
       reset({
         name: c.name,
         email: c.email,
+        gender: c.gender ?? undefined,
         phone: c.phone ?? '',
         address: c.address ?? '',
         city: c.city ?? '',
@@ -87,6 +118,7 @@ export function CustomerForm() {
       const payload: CustomerWritePayload = {
         name: values.name.trim(),
         email: values.email.trim().toLowerCase(),
+        gender: values.gender,
         phone: values.phone?.trim() || undefined,
         address: values.address?.trim() || undefined,
         city: values.city?.trim() || undefined,
@@ -141,6 +173,22 @@ export function CustomerForm() {
               </FormField>
               <FormField label={t('customers.email')} error={errors.email?.message}>
                 <Input type="email" autoComplete="email" {...register('email')} />
+              </FormField>
+              <FormField label={t('customers.gender')} error={errors.gender?.message}>
+                <Select
+                  value={watch('gender') ?? ''}
+                  onValueChange={(v) =>
+                    setValue('gender', v as FormValues['gender'], { shouldDirty: true })
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder={t('customers.selectGender')} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="FEMALE">{t('customers.female')}</SelectItem>
+                    <SelectItem value="MALE">{t('customers.male')}</SelectItem>
+                  </SelectContent>
+                </Select>
               </FormField>
               <FormField label={t('customers.phone')} error={errors.phone?.message}>
                 <Input autoComplete="tel" {...register('phone')} />

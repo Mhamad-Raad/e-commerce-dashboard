@@ -124,6 +124,9 @@ export function CustomerDetail() {
           </CardHeader>
           <CardContent className="divide-y pt-0">
             <DetailRow label={t('customers.email')}>{customer.email}</DetailRow>
+            <DetailRow label={t('customers.gender')}>
+              {customer.gender ? t(`customers.${customer.gender.toLowerCase()}`) : t('common.none')}
+            </DetailRow>
             <DetailRow label={t('customers.phone')}>{customer.phone || t('common.none')}</DetailRow>
             <DetailRow label={t('common.status')}>
               <StatusBadge
