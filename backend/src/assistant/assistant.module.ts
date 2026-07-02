@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { AppAssistantController } from './app-assistant.controller';
+import { GuestAssistantController } from './guest-assistant.controller';
 import { AssistantController } from './assistant.controller';
 import { AssistantService } from './assistant.service';
 import { AssistantChatService } from './assistant-chat.service';
@@ -8,7 +9,7 @@ import { ClaudeProvider } from './provider/claude.provider';
 import { ASSISTANT_PROVIDER } from './provider/assistant-provider.interface';
 
 @Module({
-  controllers: [AssistantController, AppAssistantController],
+  controllers: [AssistantController, AppAssistantController, GuestAssistantController],
   providers: [
     AssistantService,
     AssistantChatService,

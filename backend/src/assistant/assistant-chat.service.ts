@@ -4,10 +4,12 @@ import {
   HttpStatus,
   Inject,
   Injectable,
+  Logger,
   NotFoundException,
   ServiceUnavailableException,
 } from '@nestjs/common';
-import { AssistantConfig } from '@prisma/client';
+import { Cron, CronExpression } from '@nestjs/schedule';
+import { AssistantConfig, Customer } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { AssistantService } from './assistant.service';
 import { AssistantToolsService } from './assistant-tools.service';
@@ -19,6 +21,22 @@ import { AppChatDto } from './dto/app-chat.dto';
 const HISTORY_LIMIT = 20; // prior turns sent as context
 const MAX_OUTPUT_TOKENS = 1024;
 
+// Free assistant turns a logged-out guest gets before the login wall. Enforced
+// server-side (the client also counts, but can't be trusted) as a lifetime total
+// per device id.
+const GUEST_MESSAGE_LIMIT = 3;
+
+// The per-device cap above is defeatable by rotating the client-supplied device
+// id, so this is a hard ceiling on ALL guest turns in a rolling 24h — it bounds
+// total anonymous spend and, being guest-only, can't lock out paying customers
+// the way the shared budget cap would.
+const GUEST_GLOBAL_DAILY_LIMIT = 500;
+
+// Guest (customerId == null) conversations are anonymous trial threads with no
+// owner to view them; purge anything older than this so abuse can't grow the
+// table without bound.
+const GUEST_CONVERSATION_TTL_DAYS = 14;
+
 const WINDOW_MS = {
   Minute: 60_000,
   Hour: 3_600_000,
@@ -27,11 +45,22 @@ const WINDOW_MS = {
   Month: 30 * 86_400_000,
 } as const;
 
+// Who a chat turn belongs to: a signed-in customer, or an unauthenticated guest
+// identified only by an app-generated device id.
+type ChatPrincipal =
+  | { kind: 'customer'; customerId: string }
+  | { kind: 'guest'; deviceId: string };
+
+// The provider-agnostic shape of one turn, shared by ChatDto and AppChatDto.
+type ChatTurn = { conversationId?: string; message: string; language?: string };
+
 // NOTE: limit/budget gates are read-then-act, so a burst of truly concurrent
 // requests can each pass before any persists (overshoot bounded by concurrency).
 // Acceptable at this scale; revisit with row-locking/serialization if traffic grows.
 @Injectable()
 export class AssistantChatService {
+  private readonly logger = new Logger(AssistantChatService.name);
+
   constructor(
     private prisma: PrismaService,
     private config: AssistantService,
@@ -39,7 +68,18 @@ export class AssistantChatService {
     @Inject(ASSISTANT_PROVIDER) private provider: AssistantProvider,
   ) {}
 
+  /**
+   * Admin path: the caller supplies the customerId in the request body. The
+   * customer-app and guest paths go through chatForCustomer / chatForGuest.
+   */
   async chat(dto: ChatDto) {
+    return this.runChat({ kind: 'customer', customerId: dto.customerId }, dto);
+  }
+
+  // Shared engine for all three callers (admin, signed-in customer, guest). The
+  // principal decides who owns the conversation and which limits apply; the rest
+  // of the turn (provider call, product collection, persistence) is identical.
+  private async runChat(principal: ChatPrincipal, dto: ChatTurn) {
     const cfg = await this.config.getConfig();
     if (!cfg.enabled) throw new ForbiddenException('The assistant is currently disabled.');
     if (cfg.locked) throw new ForbiddenException('The assistant is locked (budget reached).');
@@ -47,20 +87,27 @@ export class AssistantChatService {
       throw new ServiceUnavailableException('AI assistant is not configured.');
     }
 
-    const customer = await this.prisma.customer.findUnique({ where: { id: dto.customerId } });
-    if (!customer) throw new NotFoundException('Customer not found.');
-    if (!customer.assistantEnabled) {
-      throw new ForbiddenException('The assistant is disabled for this customer.');
+    // Signed-in customer: load + gate per-customer. Guest: no customer record and
+    // no per-customer toggle — the lifetime message cap is enforced upstream in
+    // chatForGuest, and the global budget gate below still applies.
+    let customer: Customer | null = null;
+    if (principal.kind === 'customer') {
+      customer = await this.prisma.customer.findUnique({
+        where: { id: principal.customerId },
+      });
+      if (!customer) throw new NotFoundException('Customer not found.');
+      if (!customer.assistantEnabled) {
+        throw new ForbiddenException('The assistant is disabled for this customer.');
+      }
+      await this.enforcePerUserLimits(principal.customerId, cfg);
     }
-
-    await this.enforcePerUserLimits(dto.customerId, cfg);
     await this.enforceBudget(cfg); // pre-check; throws + locks if already over
 
-    // Resolve (or create) the conversation, scoped to this customer.
-    const conversation = await this.resolveConversation(dto);
+    // Resolve (or create) the conversation, scoped to this principal.
+    const conversation = await this.resolveConversation(principal, dto);
 
     const history = await this.loadHistory(conversation.id);
-    const system = await this.buildSystemPrompt(dto.language);
+    const system = await this.buildSystemPrompt(dto.language, customer);
 
     // Collect the products surfaced via search_products this turn so the app can
     // render them as tappable cards under the reply. Deduped, per-request (no
@@ -146,7 +193,71 @@ export class AssistantChatService {
 
   // Same engine as chat(), but the customer comes from the JWT, never the body.
   chatForCustomer(customerId: string, dto: AppChatDto) {
-    return this.chat({ customerId, ...dto });
+    return this.runChat({ kind: 'customer', customerId }, dto);
+  }
+
+  // ---- Guest trial (unauthenticated, capped) ----
+
+  /**
+   * Lets a logged-OUT visitor try the assistant for a few turns before signing
+   * up. Keyed by an app-generated device id (NOT trusted on its own — the public
+   * endpoint is also IP-rate-limited, and rotating the id only buys another small
+   * batch). The cap is a lifetime total across all of this device's guest
+   * threads; the reply reports how many turns remain so the app can show the
+   * login wall at zero.
+   */
+  async chatForGuest(deviceId: string, dto: AppChatDto) {
+    await this.enforceGuestGlobalLimit();
+    await this.enforceGuestLimit(deviceId);
+    const reply = await this.runChat({ kind: 'guest', deviceId }, dto);
+    const used = await this.countGuestMessages(deviceId);
+    return { ...reply, guestMessagesRemaining: Math.max(0, GUEST_MESSAGE_LIMIT - used) };
+  }
+
+  /**
+   * Hard ceiling on all guest turns in the last 24h, across every device id.
+   * Throws 429 (not the shared budget lock) so anonymous abuse degrades only the
+   * guest trial, never the assistant for signed-in customers.
+   */
+  private async enforceGuestGlobalLimit() {
+    const since = new Date(Date.now() - WINDOW_MS.Day);
+    const used = await this.prisma.message.count({
+      where: {
+        role: 'user',
+        createdAt: { gte: since },
+        conversation: { guestDeviceId: { not: null } },
+      },
+    });
+    if (used >= GUEST_GLOBAL_DAILY_LIMIT) throw this.tooMany();
+  }
+
+  // Purge anonymous guest trial threads past their TTL (messages cascade).
+  @Cron(CronExpression.EVERY_DAY_AT_3AM)
+  async purgeOldGuestConversations() {
+    const cutoff = new Date(Date.now() - GUEST_CONVERSATION_TTL_DAYS * WINDOW_MS.Day);
+    const { count } = await this.prisma.conversation.deleteMany({
+      where: { customerId: null, guestDeviceId: { not: null }, updatedAt: { lt: cutoff } },
+    });
+    if (count > 0) this.logger.log(`Purged ${count} expired guest conversation(s).`);
+  }
+
+  private countGuestMessages(deviceId: string) {
+    return this.prisma.message.count({
+      where: { role: 'user', conversation: { guestDeviceId: deviceId } },
+    });
+  }
+
+  /** Throw a recognizable 403 once the device has used its free guest turns. */
+  private async enforceGuestLimit(deviceId: string) {
+    const used = await this.countGuestMessages(deviceId);
+    if (used >= GUEST_MESSAGE_LIMIT) {
+      // Object body so the app can distinguish "log in to continue" from other
+      // 403s (assistant disabled/locked) via the `code` field.
+      throw new ForbiddenException({
+        code: 'GUEST_LIMIT_REACHED',
+        message: 'Free guest messages used up. Please log in to keep chatting.',
+      });
+    }
   }
 
   // A conversation, but only if it belongs to this customer (else 404).
@@ -179,19 +290,25 @@ export class AssistantChatService {
 
   // ---- internals ----
 
-  private async resolveConversation(dto: ChatDto) {
+  private async resolveConversation(principal: ChatPrincipal, dto: ChatTurn) {
     if (dto.conversationId) {
       const existing = await this.prisma.conversation.findUnique({
         where: { id: dto.conversationId },
       });
-      if (!existing || existing.customerId !== dto.customerId) {
-        throw new NotFoundException('Conversation not found.');
-      }
+      if (!existing) throw new NotFoundException('Conversation not found.');
+      // The thread must belong to this exact principal — a customer can't resume
+      // a guest's thread (or another customer's), and vice versa.
+      const owns =
+        principal.kind === 'customer'
+          ? existing.customerId === principal.customerId
+          : existing.guestDeviceId === principal.deviceId;
+      if (!owns) throw new NotFoundException('Conversation not found.');
       return existing;
     }
     return this.prisma.conversation.create({
       data: {
-        customerId: dto.customerId,
+        customerId: principal.kind === 'customer' ? principal.customerId : null,
+        guestDeviceId: principal.kind === 'guest' ? principal.deviceId : null,
         title: dto.message.slice(0, 60),
       },
     });
@@ -208,7 +325,10 @@ export class AssistantChatService {
       .map((m) => ({ role: m.role as 'user' | 'assistant', content: m.content }));
   }
 
-  private async buildSystemPrompt(language?: string): Promise<string> {
+  private async buildSystemPrompt(
+    language?: string,
+    customer?: Customer | null,
+  ): Promise<string> {
     const [settings, categories] = await Promise.all([
       this.prisma.setting.findUnique({ where: { id: 'singleton' } }),
       this.prisma.category.findMany({
@@ -219,7 +339,7 @@ export class AssistantChatService {
     ]);
     const business = settings?.businessName || 'our store';
     const catList = categories.map((c) => c.name).join(', ');
-    return [
+    const lines = [
       `You are the shopping assistant for ${business}.`,
       // Vertical-agnostic: the store may sell beauty, perfume, clothing, etc.
       // Ground the assistant in whatever categories actually exist.
@@ -247,7 +367,24 @@ export class AssistantChatService {
       'Be concise: use as few words as possible while still being helpful.',
       'Reply in the same language the customer writes in (English, Arabic, or Kurdish Sorani).' +
         (language ? ` Prefer ${language}.` : ''),
-    ].join('\n');
+    ];
+
+    // Gender-aware tailoring. Gender is required at sign-up, but legacy customers
+    // (created before the field existed) may be null — only add these when known.
+    if (customer?.gender) {
+      lines.push(
+        `The customer is ${customer.gender === 'FEMALE' ? 'female' : 'male'}. Take this into account when it is relevant to product suitability or typical skin/hair considerations, but keep it subtle — do not mention it unprompted or over-emphasize it.`,
+      );
+    }
+    if (customer?.gender === 'FEMALE') {
+      // Cycle-aware skincare: conversational consultation context ONLY — never a
+      // stored field (sensitive health data), and the no-diagnosis boundary holds.
+      lines.push(
+        'Hormones and the menstrual cycle can affect skin, so cyclical/hormonal breakouts are common. If she raises acne or breakouts (or a concern that may be hormonal), you may gently and respectfully ask whether her breakouts tend to be cyclical — e.g. around her period — to better tailor product suggestions. Treat any such answer as private, in-the-moment context only: never store it, repeat it, or bring it up again unprompted. Keep the medical boundary: for persistent hormonal acne or anything needing treatment, suggest a doctor/dermatologist; never diagnose or advise hormonal or medication treatment.',
+      );
+    }
+
+    return lines.join('\n');
   }
 
   /** Throw 429 if the customer has hit any configured message/token window cap. */
