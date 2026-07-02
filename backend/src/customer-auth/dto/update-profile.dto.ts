@@ -1,4 +1,5 @@
-import { IsEmail, IsOptional, IsString, Length } from 'class-validator';
+import { Gender } from '@prisma/client';
+import { IsEmail, IsEnum, IsOptional, IsString, Length } from 'class-validator';
 
 export class UpdateProfileDto {
   @IsOptional()
@@ -9,4 +10,8 @@ export class UpdateProfileDto {
   @IsOptional()
   @IsEmail()
   email?: string;
+
+  @IsOptional()
+  @IsEnum(Gender)
+  gender?: Gender;
 }

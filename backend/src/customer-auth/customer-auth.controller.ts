@@ -131,6 +131,15 @@ export class CustomerAuthController {
     return this.auth.updateProfile(customer.id, dto);
   }
 
+  @Throttle({ default: { limit: 3, ttl: 60_000 } })
+  @Public()
+  @UseGuards(CustomerJwtGuard)
+  @Post('delete-account')
+  @HttpCode(HttpStatus.OK)
+  deleteAccount(@CurrentCustomer() customer: CurrentCustomerPayload) {
+    return this.auth.deleteAccount(customer.id);
+  }
+
   @Throttle({ default: { limit: 5, ttl: 60_000 } })
   @Public()
   @UseGuards(CustomerJwtGuard)

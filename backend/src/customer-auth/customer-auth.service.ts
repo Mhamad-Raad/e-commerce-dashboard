@@ -279,16 +279,32 @@ export class CustomerAuthService {
     return this.publicCustomer(customer);
   }
 
+  /**
+   * Self-service account deletion (app-store policy requirement). Soft: the
+   * account is deactivated and every session revoked, so login/refresh stop
+   * working immediately, while order history stays intact for the business.
+   * An admin can reactivate on request — nothing is destroyed.
+   */
+  async deleteAccount(customerId: string) {
+    await this.prisma.customer.update({
+      where: { id: customerId },
+      data: { isActive: false },
+    });
+    await this.revokeAllSessions(customerId);
+    return { status: 'ok' as const };
+  }
+
   // ── Profile (logged-in self-service) ──────────────────────────────────────
 
-  /** Update the customer's own name/email. Sessions are left intact. */
+  /** Update the customer's own name/email/gender. Sessions are left intact. */
   async updateProfile(
     customerId: string,
-    input: { name?: string; email?: string },
+    input: { name?: string; email?: string; gender?: Gender },
   ) {
     const data: Prisma.CustomerUpdateInput = {};
     if (input.name !== undefined) data.name = input.name;
     if (input.email !== undefined) data.email = input.email;
+    if (input.gender !== undefined) data.gender = input.gender;
 
     try {
       const customer = await this.prisma.customer.update({
