@@ -1,6 +1,7 @@
 import {
   CartStatus,
   City,
+  Gender,
   Governorate,
   OrderStatus,
   PaymentMethod,
@@ -93,21 +94,21 @@ const variantSeed: Record<string, { name: string; sku: string; priceCents: numbe
 };
 
 const customerSeed = [
-  { name: 'Alice Carter',       email: 'alice.carter@example.com',    city: 'New York',    country: 'USA' },
-  { name: 'Brian Nguyen',       email: 'brian.nguyen@example.com',    city: 'Seattle',     country: 'USA' },
-  { name: 'Chen Wei',           email: 'chen.wei@example.com',        city: 'Toronto',     country: 'Canada' },
-  { name: 'Dana Hoffmann',      email: 'dana.hoffmann@example.com',   city: 'Berlin',      country: 'Germany' },
-  { name: 'Elena Ricci',        email: 'elena.ricci@example.com',     city: 'Milan',       country: 'Italy' },
-  { name: 'Farhan Ahmed',       email: 'farhan.ahmed@example.com',    city: 'London',      country: 'UK' },
-  { name: 'Gabriela Souza',     email: 'gabriela.souza@example.com',  city: 'São Paulo',   country: 'Brazil' },
-  { name: 'Hiro Tanaka',        email: 'hiro.tanaka@example.com',     city: 'Tokyo',       country: 'Japan' },
-  { name: 'Ines Lefevre',       email: 'ines.lefevre@example.com',    city: 'Paris',       country: 'France' },
-  { name: 'Jonas Lindqvist',    email: 'jonas.lindqvist@example.com', city: 'Stockholm',   country: 'Sweden' },
-  { name: 'Karim Idris',        email: 'karim.idris@example.com',     city: 'Cairo',       country: 'Egypt' },
-  { name: 'Lina Park',          email: 'lina.park@example.com',       city: 'Seoul',       country: 'South Korea' },
-  { name: 'Marco Diaz',         email: 'marco.diaz@example.com',      city: 'Madrid',      country: 'Spain' },
-  { name: 'Nia Williams',       email: 'nia.williams@example.com',    city: 'Austin',      country: 'USA', isActive: false },
-  { name: 'Omar Haddad',        email: 'omar.haddad@example.com',     city: 'Dubai',       country: 'UAE' },
+  { name: 'Alice Carter',       email: 'alice.carter@example.com',    city: 'New York',    country: 'USA',          gender: Gender.FEMALE },
+  { name: 'Brian Nguyen',       email: 'brian.nguyen@example.com',    city: 'Seattle',     country: 'USA',          gender: Gender.MALE },
+  { name: 'Chen Wei',           email: 'chen.wei@example.com',        city: 'Toronto',     country: 'Canada',       gender: Gender.MALE },
+  { name: 'Dana Hoffmann',      email: 'dana.hoffmann@example.com',   city: 'Berlin',      country: 'Germany',      gender: Gender.FEMALE },
+  { name: 'Elena Ricci',        email: 'elena.ricci@example.com',     city: 'Milan',       country: 'Italy',        gender: Gender.FEMALE },
+  { name: 'Farhan Ahmed',       email: 'farhan.ahmed@example.com',    city: 'London',      country: 'UK',           gender: Gender.MALE },
+  { name: 'Gabriela Souza',     email: 'gabriela.souza@example.com',  city: 'São Paulo',   country: 'Brazil',       gender: Gender.FEMALE },
+  { name: 'Hiro Tanaka',        email: 'hiro.tanaka@example.com',     city: 'Tokyo',       country: 'Japan',        gender: Gender.MALE },
+  { name: 'Ines Lefevre',       email: 'ines.lefevre@example.com',    city: 'Paris',       country: 'France',       gender: Gender.FEMALE },
+  { name: 'Jonas Lindqvist',    email: 'jonas.lindqvist@example.com', city: 'Stockholm',   country: 'Sweden',       gender: Gender.MALE },
+  { name: 'Karim Idris',        email: 'karim.idris@example.com',     city: 'Cairo',       country: 'Egypt',        gender: Gender.MALE },
+  { name: 'Lina Park',          email: 'lina.park@example.com',       city: 'Seoul',       country: 'South Korea',  gender: Gender.FEMALE },
+  { name: 'Marco Diaz',         email: 'marco.diaz@example.com',      city: 'Madrid',      country: 'Spain',        gender: Gender.MALE },
+  { name: 'Nia Williams',       email: 'nia.williams@example.com',    city: 'Austin',      country: 'USA',          gender: Gender.FEMALE, isActive: false },
+  { name: 'Omar Haddad',        email: 'omar.haddad@example.com',     city: 'Dubai',       country: 'UAE',          gender: Gender.MALE },
 ];
 
 // One address per customer for the first few customers (max 3 enforced in app).

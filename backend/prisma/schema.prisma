@@ -12,6 +12,11 @@ enum Role {
   STAFF
 }
 
+enum Gender {
+  FEMALE
+  MALE
+}
+
 enum CartStatus {
   OPEN
   CHECKED_OUT
@@ -332,14 +337,18 @@ model AssistantConfig {
 }
 
 model User {
-  id           String   @id @default(cuid())
-  email        String   @unique
-  passwordHash String
-  name         String?
-  role         Role     @default(ADMIN)
-  refreshHash  String?
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id               String    @id @default(cuid())
+  email            String    @unique
+  passwordHash     String
+  name             String?
+  role             Role      @default(ADMIN)
+  refreshHash      String?
+  // Previous hash kept briefly so concurrent tabs refreshing with the
+  // just-rotated cookie don't get logged out.
+  prevRefreshHash  String?
+  refreshRotatedAt DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
 }
 
 // A reusable tax + flat-fee rule the dashboard manages and assigns to stores.
@@ -657,6 +666,10 @@ model Customer {
   // NULLs under a unique index.
   email     String?  @unique
   name      String
+  // Required for app sign-ups and dashboard create/edit, but nullable in the DB:
+  // customers created before this field existed have no value. New writes always
+  // set it (enforced by the register/create DTOs + dashboard form).
+  gender    Gender?
   // The mobile login identifier. Stored normalized E.164 (+9647XXXXXXXXX) and
   // unique so two accounts can't claim the same WhatsApp number.
   phone     String?  @unique
@@ -826,17 +839,24 @@ model CustomerSession {
 
 // A customer's AI-assistant chat thread. Created by the chat endpoint; viewable
 // read-only by admins on the customer detail page.
+//
+// A thread belongs EITHER to a signed-in customer (customerId set) OR to an
+// unauthenticated guest trying the assistant before signing up (guestDeviceId
+// set, customerId null). Exactly one identifies the owner; the guest path is
+// capped to a few free messages server-side (see chatForGuest).
 model Conversation {
-  id         String   @id @default(cuid())
-  customerId String
-  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
-  title      String?
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  id            String    @id @default(cuid())
+  customerId    String?
+  customer      Customer? @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  guestDeviceId String? // app-generated device id for unauthenticated guest trials
+  title         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
 
   messages Message[]
 
   @@index([customerId])
+  @@index([guestDeviceId])
   @@index([updatedAt])
 }
 
