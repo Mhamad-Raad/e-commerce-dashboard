@@ -1,4 +1,13 @@
-import { IsBoolean, IsEmail, IsOptional, IsString, IsUrl, Length } from 'class-validator';
+import {
+  IsBoolean,
+  IsEmail,
+  IsEnum,
+  IsOptional,
+  IsString,
+  IsUrl,
+  Length,
+} from 'class-validator';
+import { Gender } from '@prisma/client';
 
 export class CreateCustomerDto {
   @IsEmail()
@@ -7,6 +16,10 @@ export class CreateCustomerDto {
   @IsString()
   @Length(1, 200)
   name!: string;
+
+  // Required when an admin creates a customer (matches the mobile sign-up rule).
+  @IsEnum(Gender)
+  gender!: Gender;
 
   @IsOptional()
   @IsString()

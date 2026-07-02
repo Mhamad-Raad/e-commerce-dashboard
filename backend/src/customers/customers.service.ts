@@ -56,6 +56,7 @@ export class CustomersService {
     return toCsv(customers, [
       { header: 'Name', value: (c) => c.name },
       { header: 'Email', value: (c) => c.email },
+      { header: 'Gender', value: (c) => c.gender ?? '' },
       { header: 'Phone', value: (c) => c.phone ?? '' },
       { header: 'City', value: (c) => c.city ?? '' },
       { header: 'Country', value: (c) => c.country ?? '' },
