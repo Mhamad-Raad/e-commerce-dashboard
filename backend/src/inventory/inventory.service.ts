@@ -125,7 +125,12 @@ export class InventoryService {
    * (Order.stockReserved) so this is never double-applied.
    */
   async reserveOrderStock(tx: Prisma.TransactionClient, orderId: string) {
-    const items = await tx.orderItem.findMany({ where: { orderId } });
+    // Deterministic order so concurrent orders sharing products lock the same
+    // stock rows in the same sequence and can't deadlock each other.
+    const items = await tx.orderItem.findMany({
+      where: { orderId },
+      orderBy: [{ productId: 'asc' }, { variantId: 'asc' }],
+    });
     for (const it of items) {
       const label = it.variantName ? `${it.name} (${it.variantName})` : it.name;
       await this.applyChange(
@@ -143,7 +148,10 @@ export class InventoryService {
    * idempotency is the caller's responsibility via Order.stockReserved.
    */
   async releaseOrderStock(tx: Prisma.TransactionClient, orderId: string) {
-    const items = await tx.orderItem.findMany({ where: { orderId } });
+    const items = await tx.orderItem.findMany({
+      where: { orderId },
+      orderBy: [{ productId: 'asc' }, { variantId: 'asc' }],
+    });
     for (const it of items) {
       await this.applyChange(
         tx,
