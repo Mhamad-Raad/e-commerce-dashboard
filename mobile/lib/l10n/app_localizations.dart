@@ -674,13 +674,13 @@ abstract class AppLocalizations {
   ///
   /// In en, this message translates to:
   /// **'Arrives in {min}–{max} days'**
-  String arrivalEstimate(int min, int max);
+  String arrivalEstimate(String min, String max);
 
   /// No description provided for @arrivalEstimateSingle.
   ///
   /// In en, this message translates to:
   /// **'Arrives in {days} days'**
-  String arrivalEstimateSingle(int days);
+  String arrivalEstimateSingle(String days);
 
   /// No description provided for @removeFromCart.
   ///
@@ -698,7 +698,7 @@ abstract class AppLocalizations {
   ///
   /// In en, this message translates to:
   /// **'{count} of {total} selected'**
-  String selectedItemsCount(int count, int total);
+  String selectedItemsCount(String count, String total);
 
   /// No description provided for @reviewOrder.
   ///
@@ -747,6 +747,270 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Not now'**
   String get notNow;
+
+  /// No description provided for @resendCodeIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Resend code ({seconds}s)'**
+  String resendCodeIn(String seconds);
+
+  /// No description provided for @accountInformation.
+  ///
+  /// In en, this message translates to:
+  /// **'Account information'**
+  String get accountInformation;
+
+  /// No description provided for @contactInformation.
+  ///
+  /// In en, this message translates to:
+  /// **'Contact information'**
+  String get contactInformation;
+
+  /// No description provided for @security.
+  ///
+  /// In en, this message translates to:
+  /// **'Security'**
+  String get security;
+
+  /// No description provided for @emailInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid email address.'**
+  String get emailInvalid;
+
+  /// No description provided for @deleteAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete account'**
+  String get deleteAccount;
+
+  /// No description provided for @deleteAccountConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete your account?'**
+  String get deleteAccountConfirmTitle;
+
+  /// No description provided for @deleteAccountConfirmBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Your account will be deactivated and you will be signed out. Contact support if you change your mind.'**
+  String get deleteAccountConfirmBody;
+
+  /// No description provided for @supportSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Support'**
+  String get supportSection;
+
+  /// No description provided for @aboutTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'About us'**
+  String get aboutTitle;
+
+  /// No description provided for @aboutIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Authentic beauty, delivered to every corner of Iraq.'**
+  String get aboutIntro;
+
+  /// No description provided for @aboutStoryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Our story'**
+  String get aboutStoryTitle;
+
+  /// No description provided for @aboutBody1.
+  ///
+  /// In en, this message translates to:
+  /// **'Rozhna\'s Store started with a simple belief: everyone in Iraq deserves genuine beauty and skincare products without worrying about fakes or inflated prices.'**
+  String get aboutBody1;
+
+  /// No description provided for @aboutBody2.
+  ///
+  /// In en, this message translates to:
+  /// **'Today we bring trusted brands together in one place, with clear prices in Iraqi dinar, delivery to every governorate, and a team that treats your order like its own.'**
+  String get aboutBody2;
+
+  /// No description provided for @aboutWhyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Why choose us'**
+  String get aboutWhyTitle;
+
+  /// No description provided for @aboutFeature1Title.
+  ///
+  /// In en, this message translates to:
+  /// **'100% authentic'**
+  String get aboutFeature1Title;
+
+  /// No description provided for @aboutFeature1Body.
+  ///
+  /// In en, this message translates to:
+  /// **'Every product is sourced from trusted suppliers — originals only, always.'**
+  String get aboutFeature1Body;
+
+  /// No description provided for @aboutFeature2Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Nationwide delivery'**
+  String get aboutFeature2Title;
+
+  /// No description provided for @aboutFeature2Body.
+  ///
+  /// In en, this message translates to:
+  /// **'We deliver to all of Iraq\'s governorates, with clear arrival estimates before you order.'**
+  String get aboutFeature2Body;
+
+  /// No description provided for @aboutFeature3Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Real support'**
+  String get aboutFeature3Title;
+
+  /// No description provided for @aboutFeature3Body.
+  ///
+  /// In en, this message translates to:
+  /// **'Questions before or after your order? Our team is a call or message away.'**
+  String get aboutFeature3Body;
+
+  /// No description provided for @faqTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'FAQ'**
+  String get faqTitle;
+
+  /// No description provided for @faqSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Quick answers to the questions we hear most.'**
+  String get faqSubtitle;
+
+  /// No description provided for @faqQ1.
+  ///
+  /// In en, this message translates to:
+  /// **'How long does delivery take?'**
+  String get faqQ1;
+
+  /// No description provided for @faqA1.
+  ///
+  /// In en, this message translates to:
+  /// **'Most orders arrive within 3–7 days depending on your governorate. Each store shows its estimated arrival time in your cart before you order.'**
+  String get faqA1;
+
+  /// No description provided for @faqQ2.
+  ///
+  /// In en, this message translates to:
+  /// **'What payment methods can I use?'**
+  String get faqQ2;
+
+  /// No description provided for @faqA2.
+  ///
+  /// In en, this message translates to:
+  /// **'Cash on delivery, Zain Cash, FIB, bank transfer, and more — pick what suits you at checkout.'**
+  String get faqA2;
+
+  /// No description provided for @faqQ3.
+  ///
+  /// In en, this message translates to:
+  /// **'Are your products original?'**
+  String get faqQ3;
+
+  /// No description provided for @faqA3.
+  ///
+  /// In en, this message translates to:
+  /// **'Yes. We source every brand from trusted suppliers and guarantee authenticity.'**
+  String get faqA3;
+
+  /// No description provided for @faqQ4.
+  ///
+  /// In en, this message translates to:
+  /// **'Can I return or exchange an item?'**
+  String get faqQ4;
+
+  /// No description provided for @faqA4.
+  ///
+  /// In en, this message translates to:
+  /// **'If your item arrives damaged or incorrect, contact us within 3 days of delivery and we\'ll make it right.'**
+  String get faqA4;
+
+  /// No description provided for @faqQ5.
+  ///
+  /// In en, this message translates to:
+  /// **'How do I track my order?'**
+  String get faqQ5;
+
+  /// No description provided for @faqA5.
+  ///
+  /// In en, this message translates to:
+  /// **'Open My Orders to follow your order\'s status. We\'ll also send you a notification at every step.'**
+  String get faqA5;
+
+  /// No description provided for @contactTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Contact us'**
+  String get contactTitle;
+
+  /// No description provided for @contactSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'We\'re happy to help — reach us on any of these.'**
+  String get contactSubtitle;
+
+  /// No description provided for @contactCall.
+  ///
+  /// In en, this message translates to:
+  /// **'Call us'**
+  String get contactCall;
+
+  /// No description provided for @contactWhatsApp.
+  ///
+  /// In en, this message translates to:
+  /// **'WhatsApp'**
+  String get contactWhatsApp;
+
+  /// No description provided for @contactEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Email'**
+  String get contactEmail;
+
+  /// No description provided for @contactAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'Address'**
+  String get contactAddress;
+
+  /// No description provided for @contactLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t load contact details.'**
+  String get contactLoadError;
+
+  /// No description provided for @privacyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Privacy policy'**
+  String get privacyTitle;
+
+  /// No description provided for @privacyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'We collect only what we need to serve you: your name, phone number, delivery addresses, and order history. Your phone number is used to secure your account and coordinate deliveries.\n\nWe never sell your personal information to third parties. Order details are shared only with the people who deliver your packages.\n\nYour data is stored securely, and payments are settled on delivery or through the payment method you choose — we do not store card numbers.\n\nYou can update your information anytime from your profile, and you can request account deletion from the Edit Profile screen or by contacting support.'**
+  String get privacyBody;
+
+  /// No description provided for @termsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Terms of use'**
+  String get termsTitle;
+
+  /// No description provided for @termsBody.
+  ///
+  /// In en, this message translates to:
+  /// **'By using this app you agree to these terms.\n\nOrders: placing an order is an offer to purchase; items are subject to availability and confirmation. Prices are shown in Iraqi dinar and may change until your order is confirmed.\n\nDelivery: estimated arrival times are estimates, not guarantees. Please provide accurate address and contact details — repeated failed deliveries may limit cash-on-delivery availability.\n\nAccounts: you are responsible for keeping your login details safe. We may suspend accounts that abuse the service or attempt fraud.\n\nReturns: contact us within 3 days of delivery for damaged or incorrect items.\n\nThese terms may be updated from time to time; continued use means you accept the latest version.'**
+  String get termsBody;
 
   /// No description provided for @selectAddress.
   ///
@@ -944,7 +1208,7 @@ abstract class AppLocalizations {
   ///
   /// In en, this message translates to:
   /// **'{count} reviews'**
-  String reviewsCount(int count);
+  String reviewsCount(String count);
 
   /// No description provided for @productLoadError.
   ///
@@ -1028,7 +1292,7 @@ abstract class AppLocalizations {
   ///
   /// In en, this message translates to:
   /// **'{count} items'**
-  String itemsCount(int count);
+  String itemsCount(String count);
 
   /// No description provided for @trackingNumber.
   ///
@@ -1160,7 +1424,7 @@ abstract class AppLocalizations {
   ///
   /// In en, this message translates to:
   /// **'{count} results'**
-  String resultsCount(int count);
+  String resultsCount(String count);
 
   /// No description provided for @filters.
   ///
@@ -1412,7 +1676,7 @@ abstract class AppLocalizations {
   ///
   /// In en, this message translates to:
   /// **'{count} products'**
-  String productsCount(int count);
+  String productsCount(String count);
 
   /// No description provided for @notifications.
   ///

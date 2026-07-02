@@ -304,12 +304,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get selectAll => 'All';
 
   @override
-  String arrivalEstimate(int min, int max) {
+  String arrivalEstimate(String min, String max) {
     return 'Arrives in $min–$max days';
   }
 
   @override
-  String arrivalEstimateSingle(int days) {
+  String arrivalEstimateSingle(String days) {
     return 'Arrives in $days days';
   }
 
@@ -321,7 +321,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'This item will be removed from your cart.';
 
   @override
-  String selectedItemsCount(int count, int total) {
+  String selectedItemsCount(String count, String total) {
     return '$count of $total selected';
   }
 
@@ -349,6 +349,155 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get notNow => 'Not now';
+
+  @override
+  String resendCodeIn(String seconds) {
+    return 'Resend code (${seconds}s)';
+  }
+
+  @override
+  String get accountInformation => 'Account information';
+
+  @override
+  String get contactInformation => 'Contact information';
+
+  @override
+  String get security => 'Security';
+
+  @override
+  String get emailInvalid => 'Enter a valid email address.';
+
+  @override
+  String get deleteAccount => 'Delete account';
+
+  @override
+  String get deleteAccountConfirmTitle => 'Delete your account?';
+
+  @override
+  String get deleteAccountConfirmBody =>
+      'Your account will be deactivated and you will be signed out. Contact support if you change your mind.';
+
+  @override
+  String get supportSection => 'Support';
+
+  @override
+  String get aboutTitle => 'About us';
+
+  @override
+  String get aboutIntro =>
+      'Authentic beauty, delivered to every corner of Iraq.';
+
+  @override
+  String get aboutStoryTitle => 'Our story';
+
+  @override
+  String get aboutBody1 =>
+      'Rozhna\'s Store started with a simple belief: everyone in Iraq deserves genuine beauty and skincare products without worrying about fakes or inflated prices.';
+
+  @override
+  String get aboutBody2 =>
+      'Today we bring trusted brands together in one place, with clear prices in Iraqi dinar, delivery to every governorate, and a team that treats your order like its own.';
+
+  @override
+  String get aboutWhyTitle => 'Why choose us';
+
+  @override
+  String get aboutFeature1Title => '100% authentic';
+
+  @override
+  String get aboutFeature1Body =>
+      'Every product is sourced from trusted suppliers — originals only, always.';
+
+  @override
+  String get aboutFeature2Title => 'Nationwide delivery';
+
+  @override
+  String get aboutFeature2Body =>
+      'We deliver to all of Iraq\'s governorates, with clear arrival estimates before you order.';
+
+  @override
+  String get aboutFeature3Title => 'Real support';
+
+  @override
+  String get aboutFeature3Body =>
+      'Questions before or after your order? Our team is a call or message away.';
+
+  @override
+  String get faqTitle => 'FAQ';
+
+  @override
+  String get faqSubtitle => 'Quick answers to the questions we hear most.';
+
+  @override
+  String get faqQ1 => 'How long does delivery take?';
+
+  @override
+  String get faqA1 =>
+      'Most orders arrive within 3–7 days depending on your governorate. Each store shows its estimated arrival time in your cart before you order.';
+
+  @override
+  String get faqQ2 => 'What payment methods can I use?';
+
+  @override
+  String get faqA2 =>
+      'Cash on delivery, Zain Cash, FIB, bank transfer, and more — pick what suits you at checkout.';
+
+  @override
+  String get faqQ3 => 'Are your products original?';
+
+  @override
+  String get faqA3 =>
+      'Yes. We source every brand from trusted suppliers and guarantee authenticity.';
+
+  @override
+  String get faqQ4 => 'Can I return or exchange an item?';
+
+  @override
+  String get faqA4 =>
+      'If your item arrives damaged or incorrect, contact us within 3 days of delivery and we\'ll make it right.';
+
+  @override
+  String get faqQ5 => 'How do I track my order?';
+
+  @override
+  String get faqA5 =>
+      'Open My Orders to follow your order\'s status. We\'ll also send you a notification at every step.';
+
+  @override
+  String get contactTitle => 'Contact us';
+
+  @override
+  String get contactSubtitle =>
+      'We\'re happy to help — reach us on any of these.';
+
+  @override
+  String get contactCall => 'Call us';
+
+  @override
+  String get contactWhatsApp => 'WhatsApp';
+
+  @override
+  String get contactEmail => 'Email';
+
+  @override
+  String get contactAddress => 'Address';
+
+  @override
+  String get contactLoadError => 'Couldn\'t load contact details.';
+
+  @override
+  String get privacyTitle => 'Privacy policy';
+
+  @override
+  String get privacyBody =>
+      'We collect only what we need to serve you: your name, phone number, delivery addresses, and order history. Your phone number is used to secure your account and coordinate deliveries.\n\nWe never sell your personal information to third parties. Order details are shared only with the people who deliver your packages.\n\nYour data is stored securely, and payments are settled on delivery or through the payment method you choose — we do not store card numbers.\n\nYou can update your information anytime from your profile, and you can request account deletion from the Edit Profile screen or by contacting support.';
+
+  @override
+  String get termsTitle => 'Terms of use';
+
+  @override
+  String get termsBody =>
+      'By using this app you agree to these terms.\n\nOrders: placing an order is an offer to purchase; items are subject to availability and confirmation. Prices are shown in Iraqi dinar and may change until your order is confirmed.\n\nDelivery: estimated arrival times are estimates, not guarantees. Please provide accurate address and contact details — repeated failed deliveries may limit cash-on-delivery availability.\n\nAccounts: you are responsible for keeping your login details safe. We may suspend accounts that abuse the service or attempt fraud.\n\nReturns: contact us within 3 days of delivery for damaged or incorrect items.\n\nThese terms may be updated from time to time; continued use means you accept the latest version.';
 
   @override
   String get selectAddress => 'Select address';
@@ -448,7 +597,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get productDescription => 'Description';
 
   @override
-  String reviewsCount(int count) {
+  String reviewsCount(String count) {
     return '$count reviews';
   }
 
@@ -492,7 +641,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get orderLoadError => 'Couldn\'t load this order.';
 
   @override
-  String itemsCount(int count) {
+  String itemsCount(String count) {
     return '$count items';
   }
 
@@ -560,7 +709,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noResults => 'No results';
 
   @override
-  String resultsCount(int count) {
+  String resultsCount(String count) {
     return '$count results';
   }
 
@@ -700,7 +849,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get passwordTooShort => 'Password must be at least 8 characters.';
 
   @override
-  String productsCount(int count) {
+  String productsCount(String count) {
     return '$count products';
   }
 

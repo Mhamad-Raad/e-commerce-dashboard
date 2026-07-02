@@ -34,11 +34,25 @@ import '../../features/favorites/presentation/favorites_screen.dart';
 import '../../features/notifications/presentation/notifications_screen.dart';
 import '../../features/orders/presentation/order_detail_screen.dart';
 import '../../features/orders/presentation/orders_screen.dart';
+import '../../features/info/presentation/about_screen.dart';
+import '../../features/info/presentation/contact_screen.dart';
+import '../../features/info/presentation/faq_screen.dart';
+import '../../features/info/presentation/legal_screen.dart';
 import '../../features/product/presentation/product_detail_screen.dart';
 import '../../core/version_gate/update_required_screen.dart';
 import '../../core/version_gate/version_gate_controller.dart';
 import '../shell/main_shell.dart';
 import 'routes.dart';
+
+// Informational screens a logged-out visitor may open (About/FAQ/legal —
+// harmless, and signup links to the legal pages).
+const _infoRoutes = {
+  Routes.about,
+  Routes.faq,
+  Routes.contact,
+  Routes.privacy,
+  Routes.terms,
+};
 
 /// App router. A single [redirect] enforces auth gating (no guest checkout):
 /// while the session is restoring we sit on the splash, then route to home or
@@ -75,10 +89,14 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         // Logged in: leave the splash / auth screens / guest trial for home.
         return (onSplash || inAuth || onGuestAssistant) ? Routes.home : null;
       }
-      // Resolved + logged out: leave the splash, allow the auth screens and the
-      // guest assistant trial, gate everything else to login. (Splash is NOT an
-      // auth screen — a logged-out user sitting on it must be sent to login.)
-      return (onSplash || !(inAuth || onGuestAssistant)) ? Routes.login : null;
+      // Resolved + logged out: leave the splash, allow the auth screens, the
+      // guest assistant trial, and the informational pages; gate everything
+      // else to login. (Splash is NOT an auth screen — a logged-out user
+      // sitting on it must be sent to login.)
+      final onInfo = _infoRoutes.contains(location);
+      return (onSplash || !(inAuth || onGuestAssistant || onInfo))
+          ? Routes.login
+          : null;
     },
     routes: [
       GoRoute(path: Routes.splash, builder: (_, _) => const SplashScreen()),
@@ -201,6 +219,18 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: Routes.updateRequired,
         builder: (_, _) => const UpdateRequiredScreen(),
+      ),
+      // Informational screens (also reachable logged-out — see redirect).
+      GoRoute(path: Routes.about, builder: (_, _) => const AboutScreen()),
+      GoRoute(path: Routes.faq, builder: (_, _) => const FaqScreen()),
+      GoRoute(path: Routes.contact, builder: (_, _) => const ContactScreen()),
+      GoRoute(
+        path: Routes.privacy,
+        builder: (_, _) => const LegalScreen(doc: LegalDoc.privacy),
+      ),
+      GoRoute(
+        path: Routes.terms,
+        builder: (_, _) => const LegalScreen(doc: LegalDoc.terms),
       ),
       GoRoute(path: Routes.login, builder: (_, _) => const LoginScreen()),
       GoRoute(path: Routes.signup, builder: (_, _) => const SignupScreen()),

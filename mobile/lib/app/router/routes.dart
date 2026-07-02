@@ -42,6 +42,12 @@ class Routes {
   static const guestAssistant = '/guest/assistant';
   // Hard version block (server-driven) — reachable regardless of auth state.
   static const updateRequired = '/update-required';
+  // Informational screens — also reachable while logged out (see redirect).
+  static const about = '/about';
+  static const faq = '/faq';
+  static const contact = '/contact';
+  static const privacy = '/privacy';
+  static const terms = '/terms';
   static const login = '/auth/login';
   static const signup = '/auth/signup';
   static const otp = '/auth/otp';

@@ -113,14 +113,14 @@
   "arrivalEstimate": "Arrives in {min}–{max} days",
   "@arrivalEstimate": {
     "placeholders": {
-      "min": { "type": "int" },
-      "max": { "type": "int" }
+      "min": { "type": "String" },
+      "max": { "type": "String" }
     }
   },
   "arrivalEstimateSingle": "Arrives in {days} days",
   "@arrivalEstimateSingle": {
     "placeholders": {
-      "days": { "type": "int" }
+      "days": { "type": "String" }
     }
   },
   "removeFromCart": "Remove from cart?",
@@ -128,8 +128,8 @@
   "selectedItemsCount": "{count} of {total} selected",
   "@selectedItemsCount": {
     "placeholders": {
-      "count": { "type": "int" },
-      "total": { "type": "int" }
+      "count": { "type": "String" },
+      "total": { "type": "String" }
     }
   },
   "reviewOrder": "Review order",
@@ -140,6 +140,55 @@
   "updateAvailableBody": "A newer version of the app is available.",
   "updateNow": "Update now",
   "notNow": "Not now",
+  "resendCodeIn": "Resend code ({seconds}s)",
+  "@resendCodeIn": {
+    "placeholders": {
+      "seconds": { "type": "String" }
+    }
+  },
+  "accountInformation": "Account information",
+  "contactInformation": "Contact information",
+  "security": "Security",
+  "emailInvalid": "Enter a valid email address.",
+  "deleteAccount": "Delete account",
+  "deleteAccountConfirmTitle": "Delete your account?",
+  "deleteAccountConfirmBody": "Your account will be deactivated and you will be signed out. Contact support if you change your mind.",
+  "supportSection": "Support",
+  "aboutTitle": "About us",
+  "aboutIntro": "Authentic beauty, delivered to every corner of Iraq.",
+  "aboutStoryTitle": "Our story",
+  "aboutBody1": "Rozhna's Store started with a simple belief: everyone in Iraq deserves genuine beauty and skincare products without worrying about fakes or inflated prices.",
+  "aboutBody2": "Today we bring trusted brands together in one place, with clear prices in Iraqi dinar, delivery to every governorate, and a team that treats your order like its own.",
+  "aboutWhyTitle": "Why choose us",
+  "aboutFeature1Title": "100% authentic",
+  "aboutFeature1Body": "Every product is sourced from trusted suppliers — originals only, always.",
+  "aboutFeature2Title": "Nationwide delivery",
+  "aboutFeature2Body": "We deliver to all of Iraq's governorates, with clear arrival estimates before you order.",
+  "aboutFeature3Title": "Real support",
+  "aboutFeature3Body": "Questions before or after your order? Our team is a call or message away.",
+  "faqTitle": "FAQ",
+  "faqSubtitle": "Quick answers to the questions we hear most.",
+  "faqQ1": "How long does delivery take?",
+  "faqA1": "Most orders arrive within 3–7 days depending on your governorate. Each store shows its estimated arrival time in your cart before you order.",
+  "faqQ2": "What payment methods can I use?",
+  "faqA2": "Cash on delivery, Zain Cash, FIB, bank transfer, and more — pick what suits you at checkout.",
+  "faqQ3": "Are your products original?",
+  "faqA3": "Yes. We source every brand from trusted suppliers and guarantee authenticity.",
+  "faqQ4": "Can I return or exchange an item?",
+  "faqA4": "If your item arrives damaged or incorrect, contact us within 3 days of delivery and we'll make it right.",
+  "faqQ5": "How do I track my order?",
+  "faqA5": "Open My Orders to follow your order's status. We'll also send you a notification at every step.",
+  "contactTitle": "Contact us",
+  "contactSubtitle": "We're happy to help — reach us on any of these.",
+  "contactCall": "Call us",
+  "contactWhatsApp": "WhatsApp",
+  "contactEmail": "Email",
+  "contactAddress": "Address",
+  "contactLoadError": "Couldn't load contact details.",
+  "privacyTitle": "Privacy policy",
+  "privacyBody": "We collect only what we need to serve you: your name, phone number, delivery addresses, and order history. Your phone number is used to secure your account and coordinate deliveries.\n\nWe never sell your personal information to third parties. Order details are shared only with the people who deliver your packages.\n\nYour data is stored securely, and payments are settled on delivery or through the payment method you choose — we do not store card numbers.\n\nYou can update your information anytime from your profile, and you can request account deletion from the Edit Profile screen or by contacting support.",
+  "termsTitle": "Terms of use",
+  "termsBody": "By using this app you agree to these terms.\n\nOrders: placing an order is an offer to purchase; items are subject to availability and confirmation. Prices are shown in Iraqi dinar and may change until your order is confirmed.\n\nDelivery: estimated arrival times are estimates, not guarantees. Please provide accurate address and contact details — repeated failed deliveries may limit cash-on-delivery availability.\n\nAccounts: you are responsible for keeping your login details safe. We may suspend accounts that abuse the service or attempt fraud.\n\nReturns: contact us within 3 days of delivery for damaged or incorrect items.\n\nThese terms may be updated from time to time; continued use means you accept the latest version.",
   "selectAddress": "Select address",
   "noAddressForCheckout": "You need a delivery address to continue.",
   "addAnotherAddress": "Add another address",
@@ -176,7 +225,7 @@
   "reviewsCount": "{count} reviews",
   "@reviewsCount": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": { "type": "String" }
     }
   },
   "productLoadError": "Couldn't load this product.",
@@ -196,7 +245,7 @@
   "itemsCount": "{count} items",
   "@itemsCount": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": { "type": "String" }
     }
   },
   "trackingNumber": "Tracking number",
@@ -224,7 +273,7 @@
   "resultsCount": "{count} results",
   "@resultsCount": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": { "type": "String" }
     }
   },
   "filters": "Filters",
@@ -277,7 +326,7 @@
   "productsCount": "{count} products",
   "@productsCount": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": { "type": "String" }
     }
   },
 

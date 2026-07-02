@@ -303,12 +303,12 @@ class AppLocalizationsCkb extends AppLocalizations {
   String get selectAll => 'هەموو';
 
   @override
-  String arrivalEstimate(int min, int max) {
+  String arrivalEstimate(String min, String max) {
     return 'دەگات لە ماوەی $min–$max ڕۆژدا';
   }
 
   @override
-  String arrivalEstimateSingle(int days) {
+  String arrivalEstimateSingle(String days) {
     return 'دەگات لە ماوەی $days ڕۆژدا';
   }
 
@@ -319,7 +319,7 @@ class AppLocalizationsCkb extends AppLocalizations {
   String get removeFromCartMessage => 'ئەم کاڵایە لە سەبەتەکەت لادەبردرێت.';
 
   @override
-  String selectedItemsCount(int count, int total) {
+  String selectedItemsCount(String count, String total) {
     return '$count لە $total هەڵبژێردراوە';
   }
 
@@ -347,6 +347,154 @@ class AppLocalizationsCkb extends AppLocalizations {
 
   @override
   String get notNow => 'ئێستا نا';
+
+  @override
+  String resendCodeIn(String seconds) {
+    return 'دووبارە ناردنی کۆد ($seconds چ)';
+  }
+
+  @override
+  String get accountInformation => 'زانیاری هەژمار';
+
+  @override
+  String get contactInformation => 'زانیاری پەیوەندی';
+
+  @override
+  String get security => 'پاراستن';
+
+  @override
+  String get emailInvalid => 'ئیمەیڵێکی دروست بنووسە.';
+
+  @override
+  String get deleteAccount => 'سڕینەوەی هەژمار';
+
+  @override
+  String get deleteAccountConfirmTitle => 'هەژمارەکەت بسڕدرێتەوە؟';
+
+  @override
+  String get deleteAccountConfirmBody =>
+      'هەژمارەکەت ناچالاک دەکرێت و دەردەچیت. ئەگەر بڕیارت گۆڕا پەیوەندی بە پشتگیری بکە.';
+
+  @override
+  String get supportSection => 'پشتگیری';
+
+  @override
+  String get aboutTitle => 'دەربارەی ئێمە';
+
+  @override
+  String get aboutIntro => 'جوانی ڕەسەن، دەگاتە هەموو گۆشەیەکی عێراق.';
+
+  @override
+  String get aboutStoryTitle => 'چیرۆکی ئێمە';
+
+  @override
+  String get aboutBody1 =>
+      'فرۆشگای ڕۆژنا بە بیرۆکەیەکی سادە دەستی پێکرد: هەموو کەسێک لە عێراق شایستەی بەرهەمی جوانکاری و چاودێری پێستی ڕەسەنە، بەبێ نیگەرانی لە ساختە یان نرخی زیادکراو.';
+
+  @override
+  String get aboutBody2 =>
+      'ئەمڕۆ براندە متمانەپێکراوەکان لە یەک شوێن کۆدەکەینەوە، بە نرخی ڕوون بە دیناری عێراقی، گەیاندن بۆ هەموو پارێزگاکان، و تیمێک کە داواکارییەکەت وەک هی خۆی دەزانێت.';
+
+  @override
+  String get aboutWhyTitle => 'بۆچی ئێمە';
+
+  @override
+  String get aboutFeature1Title => '١٠٠٪ ڕەسەن';
+
+  @override
+  String get aboutFeature1Body =>
+      'هەموو بەرهەمێک لە دابینکەری متمانەپێکراوەوە دێت — هەمیشە ڕەسەن.';
+
+  @override
+  String get aboutFeature2Title => 'گەیاندن بۆ هەموو عێراق';
+
+  @override
+  String get aboutFeature2Body =>
+      'بۆ هەموو پارێزگاکانی عێراق دەگەیەنین، لەگەڵ کاتی گەیشتنی خەمڵێندراو پێش داواکردن.';
+
+  @override
+  String get aboutFeature3Title => 'پشتگیری ڕاستەقینە';
+
+  @override
+  String get aboutFeature3Body =>
+      'پرسیارت هەیە پێش یان دوای داواکاری؟ تیمەکەمان بە پەیوەندییەک یان نامەیەک بەردەستە.';
+
+  @override
+  String get faqTitle => 'پرسیارە باوەکان';
+
+  @override
+  String get faqSubtitle => 'وەڵامی خێرا بۆ باوترین پرسیارەکان.';
+
+  @override
+  String get faqQ1 => 'گەیاندن چەند دەخایەنێت؟';
+
+  @override
+  String get faqA1 =>
+      'زۆربەی داواکارییەکان لە ماوەی ٣–٧ ڕۆژدا دەگەن بەپێی پارێزگاکەت. هەر فرۆشگایەک کاتی گەیشتنی خەمڵێندراو لە سەبەتەکەتدا پیشان دەدات.';
+
+  @override
+  String get faqQ2 => 'چ شێوازێکی پارەدان هەیە؟';
+
+  @override
+  String get faqA2 =>
+      'پارەدان لە کاتی وەرگرتن، زەین کاش، FIB، حەواڵەی بانکی و زیاتر — ئەوە هەڵبژێرە کە بۆت گونجاوە.';
+
+  @override
+  String get faqQ3 => 'بەرهەمەکانتان ڕەسەنن؟';
+
+  @override
+  String get faqA3 =>
+      'بەڵێ. هەموو براندێک لە دابینکەری متمانەپێکراوەوە دەهێنین و ڕەسەنایەتی گەرەنتی دەکەین.';
+
+  @override
+  String get faqQ4 => 'دەتوانم بگەڕێنمەوە یان بگۆڕم؟';
+
+  @override
+  String get faqA4 =>
+      'ئەگەر کاڵاکەت زیانلێکەوتوو یان هەڵە گەیشت، لە ماوەی ٣ ڕۆژ لە وەرگرتنەوە پەیوەندیمان پێوە بکە و چارەسەری دەکەین.';
+
+  @override
+  String get faqQ5 => 'چۆن داواکارییەکەم بەدواداچوون بکەم؟';
+
+  @override
+  String get faqA5 =>
+      '«داواکارییەکانم» بکەرەوە بۆ بینینی دۆخی داواکارییەکەت، هەروەها لە هەر هەنگاوێکدا ئاگادارییت بۆ دەنێرین.';
+
+  @override
+  String get contactTitle => 'پەیوەندیمان پێوە بکە';
+
+  @override
+  String get contactSubtitle =>
+      'خۆشحاڵ دەبین یارمەتیت بدەین — بە هەر یەکێک لەمانە پەیوەندی بکە.';
+
+  @override
+  String get contactCall => 'پەیوەندی تەلەفۆنی';
+
+  @override
+  String get contactWhatsApp => 'واتسئاپ';
+
+  @override
+  String get contactEmail => 'ئیمەیڵ';
+
+  @override
+  String get contactAddress => 'ناونیشان';
+
+  @override
+  String get contactLoadError => 'نەتوانرا زانیاری پەیوەندی باربکرێت.';
+
+  @override
+  String get privacyTitle => 'سیاسەتی تایبەتمەندی';
+
+  @override
+  String get privacyBody =>
+      'تەنها ئەوە کۆدەکەینەوە کە پێویستە بۆ خزمەتکردنت: ناوت، ژمارە مۆبایلەکەت، ناونیشانەکانی گەیاندن و مێژووی داواکارییەکان. ژمارەکەت بۆ پاراستنی هەژمارەکەت و ڕێکخستنی گەیاندن بەکاردێت.\n\nهەرگیز زانیارییە کەسییەکانت بە لایەنی سێیەم نافرۆشین. وردەکاری داواکاری تەنها لەگەڵ گەیەنەرانی پاکەتەکەت هاوبەش دەکرێت.\n\nداتاکانت بە پارێزراوی هەڵدەگیرێن، و پارە لە کاتی وەرگرتن یان بەو شێوازەی هەڵیدەبژێریت دەدرێت — ژمارەی کارت هەڵناگرین.\n\nدەتوانیت هەر کاتێک زانیارییەکانت لە پرۆفایلەکەتەوە نوێ بکەیتەوە، و داوای سڕینەوەی هەژمار بکەیت لە شاشەی دەستکاری پرۆفایل یان بە پەیوەندیکردن بە پشتگیری.';
+
+  @override
+  String get termsTitle => 'مەرجەکانی بەکارهێنان';
+
+  @override
+  String get termsBody =>
+      'بە بەکارهێنانی ئەم ئەپە ڕازی دەبیت بەم مەرجانە.\n\nداواکارییەکان: ناردنی داواکاری پێشنیاری کڕینە؛ کاڵاکان بەندن بە بەردەستبوون و پشتڕاستکردنەوە. نرخەکان بە دیناری عێراقی پیشان دەدرێن و لەوانەیە بگۆڕێن تا پشتڕاستکردنەوەی داواکارییەکەت.\n\nگەیاندن: کاتەکانی گەیشتن خەمڵێندراون و گەرەنتی نین. تکایە ناونیشان و زانیاری پەیوەندی دروست بنووسە — دووبارەبوونەوەی گەیاندنی سەرنەکەوتوو لەوانەیە بژاردەی پارەدان لە کاتی وەرگرتن سنووردار بکات.\n\nهەژمار: تۆ بەرپرسیت لە پاراستنی زانیاری چوونەژوورەوەت. لەوانەیە ئەو هەژمارانە ڕابگرین کە خراپ بەکارهێنان یان فێڵ دەکەن.\n\nگەڕاندنەوە: لە ماوەی ٣ ڕۆژ لە وەرگرتن پەیوەندیمان پێوە بکە بۆ کاڵای زیانلێکەوتوو یان هەڵە.\n\nئەم مەرجانە لەوانەیە کاتبەکات نوێ بکرێنەوە؛ بەردەوامبوون لە بەکارهێنان واتە قبوڵکردنی نوێترین وەشان.';
 
   @override
   String get selectAddress => 'ناونیشان هەڵبژێرە';
@@ -447,7 +595,7 @@ class AppLocalizationsCkb extends AppLocalizations {
   String get productDescription => 'وەسف';
 
   @override
-  String reviewsCount(int count) {
+  String reviewsCount(String count) {
     return '$count هەڵسەنگاندن';
   }
 
@@ -492,7 +640,7 @@ class AppLocalizationsCkb extends AppLocalizations {
   String get orderLoadError => 'نەتوانرا ئەم داواکارییە باربکرێت.';
 
   @override
-  String itemsCount(int count) {
+  String itemsCount(String count) {
     return '$count ئایتم';
   }
 
@@ -560,7 +708,7 @@ class AppLocalizationsCkb extends AppLocalizations {
   String get noResults => 'هیچ ئەنجامێک نییە';
 
   @override
-  String resultsCount(int count) {
+  String resultsCount(String count) {
     return '$count ئەنجام';
   }
 
@@ -699,7 +847,7 @@ class AppLocalizationsCkb extends AppLocalizations {
   String get passwordTooShort => 'وشەی نهێنی دەبێت لانیکەم ٨ پیت بێت.';
 
   @override
-  String productsCount(int count) {
+  String productsCount(String count) {
     return '$count بەرهەم';
   }
 

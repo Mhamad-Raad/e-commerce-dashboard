@@ -301,12 +301,12 @@ class AppLocalizationsAr extends AppLocalizations {
   String get selectAll => 'الكل';
 
   @override
-  String arrivalEstimate(int min, int max) {
+  String arrivalEstimate(String min, String max) {
     return 'يصل خلال $min–$max أيام';
   }
 
   @override
-  String arrivalEstimateSingle(int days) {
+  String arrivalEstimateSingle(String days) {
     return 'يصل خلال $days أيام';
   }
 
@@ -317,7 +317,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get removeFromCartMessage => 'ستتم إزالة هذا المنتج من سلتك.';
 
   @override
-  String selectedItemsCount(int count, int total) {
+  String selectedItemsCount(String count, String total) {
     return '$count من $total محدد';
   }
 
@@ -345,6 +345,153 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get notNow => 'ليس الآن';
+
+  @override
+  String resendCodeIn(String seconds) {
+    return 'إعادة إرسال الرمز ($seconds ث)';
+  }
+
+  @override
+  String get accountInformation => 'معلومات الحساب';
+
+  @override
+  String get contactInformation => 'معلومات التواصل';
+
+  @override
+  String get security => 'الأمان';
+
+  @override
+  String get emailInvalid => 'أدخل بريدًا إلكترونيًا صحيحًا.';
+
+  @override
+  String get deleteAccount => 'حذف الحساب';
+
+  @override
+  String get deleteAccountConfirmTitle => 'حذف حسابك؟';
+
+  @override
+  String get deleteAccountConfirmBody =>
+      'سيتم تعطيل حسابك وتسجيل خروجك. تواصل مع الدعم إذا غيّرت رأيك.';
+
+  @override
+  String get supportSection => 'الدعم';
+
+  @override
+  String get aboutTitle => 'من نحن';
+
+  @override
+  String get aboutIntro => 'جمال أصلي يصل إلى كل ركن في العراق.';
+
+  @override
+  String get aboutStoryTitle => 'قصتنا';
+
+  @override
+  String get aboutBody1 =>
+      'بدأ متجر روژنا بفكرة بسيطة: كل شخص في العراق يستحق منتجات تجميل وعناية أصلية دون القلق من التقليد أو الأسعار المبالغ بها.';
+
+  @override
+  String get aboutBody2 =>
+      'اليوم نجمع علامات موثوقة في مكان واحد، بأسعار واضحة بالدينار العراقي، وتوصيل لجميع المحافظات، وفريق يهتم بطلبك كأنه طلبه.';
+
+  @override
+  String get aboutWhyTitle => 'لماذا نحن';
+
+  @override
+  String get aboutFeature1Title => 'أصلي ١٠٠٪';
+
+  @override
+  String get aboutFeature1Body =>
+      'كل منتج من موردين موثوقين — أصلي دائمًا وبلا استثناء.';
+
+  @override
+  String get aboutFeature2Title => 'توصيل لكل العراق';
+
+  @override
+  String get aboutFeature2Body =>
+      'نوصل إلى جميع المحافظات مع موعد وصول تقديري واضح قبل الطلب.';
+
+  @override
+  String get aboutFeature3Title => 'دعم حقيقي';
+
+  @override
+  String get aboutFeature3Body =>
+      'أسئلة قبل الطلب أو بعده؟ فريقنا على بعد اتصال أو رسالة.';
+
+  @override
+  String get faqTitle => 'الأسئلة الشائعة';
+
+  @override
+  String get faqSubtitle => 'إجابات سريعة عن أكثر الأسئلة تكرارًا.';
+
+  @override
+  String get faqQ1 => 'كم يستغرق التوصيل؟';
+
+  @override
+  String get faqA1 =>
+      'تصل أغلب الطلبات خلال ٣–٧ أيام حسب محافظتك. يعرض كل متجر موعد الوصول التقديري في سلتك قبل الطلب.';
+
+  @override
+  String get faqQ2 => 'ما طرق الدفع المتاحة؟';
+
+  @override
+  String get faqA2 =>
+      'الدفع عند الاستلام، زين كاش، FIB، التحويل المصرفي وغيرها — اختر ما يناسبك عند إتمام الطلب.';
+
+  @override
+  String get faqQ3 => 'هل منتجاتكم أصلية؟';
+
+  @override
+  String get faqA3 => 'نعم. نستورد كل علامة من موردين موثوقين ونضمن الأصالة.';
+
+  @override
+  String get faqQ4 => 'هل يمكن الإرجاع أو الاستبدال؟';
+
+  @override
+  String get faqA4 =>
+      'إذا وصل المنتج تالفًا أو خاطئًا، تواصل معنا خلال ٣ أيام من الاستلام وسنصحح الأمر.';
+
+  @override
+  String get faqQ5 => 'كيف أتابع طلبي؟';
+
+  @override
+  String get faqA5 =>
+      'افتح «طلباتي» لمتابعة حالة الطلب، وسنرسل لك إشعارًا عند كل خطوة.';
+
+  @override
+  String get contactTitle => 'تواصل معنا';
+
+  @override
+  String get contactSubtitle =>
+      'يسعدنا مساعدتك — تواصل معنا عبر أي من هذه الطرق.';
+
+  @override
+  String get contactCall => 'اتصل بنا';
+
+  @override
+  String get contactWhatsApp => 'واتساب';
+
+  @override
+  String get contactEmail => 'البريد الإلكتروني';
+
+  @override
+  String get contactAddress => 'العنوان';
+
+  @override
+  String get contactLoadError => 'تعذّر تحميل بيانات التواصل.';
+
+  @override
+  String get privacyTitle => 'سياسة الخصوصية';
+
+  @override
+  String get privacyBody =>
+      'نجمع فقط ما نحتاجه لخدمتك: اسمك ورقم هاتفك وعناوين التوصيل وسجل الطلبات. يُستخدم رقم هاتفك لتأمين حسابك وتنسيق التوصيل.\n\nلا نبيع معلوماتك الشخصية لأي طرف ثالث. تُشارك تفاصيل الطلب فقط مع القائمين على توصيل شحنتك.\n\nتُخزَّن بياناتك بأمان، وتُسدَّد المبالغ عند الاستلام أو عبر وسيلة الدفع التي تختارها — لا نخزّن أرقام البطاقات.\n\nيمكنك تحديث معلوماتك في أي وقت من ملفك الشخصي، ويمكنك طلب حذف الحساب من شاشة تعديل الملف أو بالتواصل مع الدعم.';
+
+  @override
+  String get termsTitle => 'شروط الاستخدام';
+
+  @override
+  String get termsBody =>
+      'باستخدامك هذا التطبيق فأنت توافق على هذه الشروط.\n\nالطلبات: تقديم الطلب هو عرض للشراء؛ المنتجات خاضعة للتوفر والتأكيد. الأسعار معروضة بالدينار العراقي وقد تتغير حتى تأكيد طلبك.\n\nالتوصيل: مواعيد الوصول تقديرية وليست مضمونة. يرجى إدخال عنوان وبيانات تواصل دقيقة — تكرار فشل التسليم قد يقيّد خيار الدفع عند الاستلام.\n\nالحساب: أنت مسؤول عن الحفاظ على بيانات دخولك. قد نوقف الحسابات التي تسيء استخدام الخدمة أو تحاول الاحتيال.\n\nالإرجاع: تواصل معنا خلال ٣ أيام من الاستلام للمنتجات التالفة أو الخاطئة.\n\nقد تُحدَّث هذه الشروط من وقت لآخر؛ استمرارك بالاستخدام يعني قبولك أحدث نسخة.';
 
   @override
   String get selectAddress => 'اختر العنوان';
@@ -444,7 +591,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get productDescription => 'الوصف';
 
   @override
-  String reviewsCount(int count) {
+  String reviewsCount(String count) {
     return '$count تقييم';
   }
 
@@ -488,7 +635,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get orderLoadError => 'تعذّر تحميل هذا الطلب.';
 
   @override
-  String itemsCount(int count) {
+  String itemsCount(String count) {
     return '$count عنصر';
   }
 
@@ -556,7 +703,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get noResults => 'لا توجد نتائج';
 
   @override
-  String resultsCount(int count) {
+  String resultsCount(String count) {
     return '$count نتيجة';
   }
 
@@ -695,7 +842,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get passwordTooShort => 'يجب أن تكون كلمة المرور 8 أحرف على الأقل.';
 
   @override
-  String productsCount(int count) {
+  String productsCount(String count) {
     return '$count منتج';
   }
 

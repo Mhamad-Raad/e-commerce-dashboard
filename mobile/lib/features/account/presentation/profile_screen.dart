@@ -8,6 +8,7 @@ import '../../../app/router/routes.dart';
 import '../../../app/theme/app_spacing.dart';
 import '../../../app/theme/theme_controller.dart';
 import '../../../core/l10n/l10n_ext.dart';
+import '../../../core/version_gate/version_gate_controller.dart';
 import '../../../core/widgets/rozhna_app_bar.dart';
 import '../../auth/presentation/providers/auth_controller.dart';
 
@@ -118,12 +119,49 @@ class ProfileScreen extends ConsumerWidget {
             trailingText: langLabel,
             onTap: () => _pickLanguage(context, ref, currentLang),
           ),
+          const SizedBox(height: AppSpacing.md),
+
+          _SectionLabel(l10n.supportSection),
+          _Tile(
+            icon: Icons.info_outline,
+            title: l10n.aboutTitle,
+            onTap: () => context.push(Routes.about),
+          ),
+          _Tile(
+            icon: Icons.help_outline,
+            title: l10n.faqTitle,
+            onTap: () => context.push(Routes.faq),
+          ),
+          _Tile(
+            icon: Icons.support_agent_outlined,
+            title: l10n.contactTitle,
+            onTap: () => context.push(Routes.contact),
+          ),
+          _Tile(
+            icon: Icons.privacy_tip_outlined,
+            title: l10n.privacyTitle,
+            onTap: () => context.push(Routes.privacy),
+          ),
+          _Tile(
+            icon: Icons.description_outlined,
+            title: l10n.termsTitle,
+            onTap: () => context.push(Routes.terms),
+          ),
           const SizedBox(height: AppSpacing.xl),
 
           TextButton.icon(
             onPressed: () => ref.read(authControllerProvider.notifier).logout(),
             icon: const Icon(Icons.logout),
             label: Text(l10n.logOut),
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          Center(
+            child: Text(
+              'v${ref.watch(currentAppVersionProvider)}',
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+            ),
           ),
         ],
       ),
