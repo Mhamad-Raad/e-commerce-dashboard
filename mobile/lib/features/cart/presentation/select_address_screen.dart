@@ -9,9 +9,9 @@ import '../../../core/l10n/l10n_ext.dart';
 import '../../addresses/domain/address.dart';
 import '../../addresses/presentation/providers/addresses_controller.dart';
 
-/// Checkout step 2 — pick the delivery address (default pre-selected), or add a
-/// new one when none exist. Continuing carries the chosen address id to the
-/// checkout review screen.
+/// Address picker for checkout — pushed with `context.push<String>(...)`; pops
+/// with the chosen address id (default pre-selected), or lets the user add one
+/// when none exist.
 class SelectAddressScreen extends ConsumerStatefulWidget {
   const SelectAddressScreen({super.key});
 
@@ -110,8 +110,8 @@ class _SelectAddressScreenState extends ConsumerState<SelectAddressScreen> {
           child: SizedBox(
             width: double.infinity,
             child: FilledButton(
-              onPressed: () => context.push(Routes.checkout, extra: selectedId),
-              child: Text(l10n.continueToReview),
+              onPressed: () => context.pop(selectedId),
+              child: Text(l10n.useThisAddress),
             ),
           ),
         ),

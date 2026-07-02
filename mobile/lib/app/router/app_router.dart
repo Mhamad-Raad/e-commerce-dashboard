@@ -16,10 +16,12 @@ import '../../features/addresses/domain/address.dart';
 import '../../features/addresses/presentation/address_form_screen.dart';
 import '../../features/addresses/presentation/addresses_screen.dart';
 import '../../features/blog/presentation/blog_article_screen.dart';
+import '../../features/cart/domain/checkout_draft.dart';
 import '../../features/cart/domain/placed_order.dart';
 import '../../features/cart/presentation/cart_screen.dart';
-import '../../features/cart/presentation/checkout_screen.dart';
 import '../../features/cart/presentation/order_confirmation_screen.dart';
+import '../../features/cart/presentation/payment_options_screen.dart';
+import '../../features/cart/presentation/review_order_screen.dart';
 import '../../features/cart/presentation/select_address_screen.dart';
 import '../../features/assistant/presentation/assistant_screen.dart';
 import '../../features/assistant/presentation/guest_assistant_screen.dart';
@@ -158,16 +160,21 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: Routes.notifications,
         builder: (_, _) => const NotificationsScreen(),
       ),
-      // Cart → checkout flow.
+      // Cart → checkout flow: options (payment/coupon/notes) → review.
       GoRoute(path: Routes.cart, builder: (_, _) => const CartScreen()),
       GoRoute(
         path: Routes.checkoutAddress,
         builder: (_, _) => const SelectAddressScreen(),
       ),
       GoRoute(
+        path: Routes.checkoutOptions,
+        builder: (_, state) =>
+            PaymentOptionsScreen(addressId: state.extra as String? ?? ''),
+      ),
+      GoRoute(
         path: Routes.checkout,
         builder: (_, state) =>
-            CheckoutScreen(addressId: state.extra as String? ?? ''),
+            ReviewOrderScreen(draft: state.extra as CheckoutDraft),
       ),
       GoRoute(
         path: Routes.orderConfirmation,

@@ -29,9 +29,12 @@ class Routes {
   // Account settings.
   static const editProfile = '/profile/edit';
   static const changePassword = '/profile/change-password';
-  // Cart → checkout flow (pushed over the tab shell; require auth).
+  // Cart → checkout flow (pushed over the tab shell; require auth):
+  // cart → options (payment/coupon/notes) → checkout (review) → confirmation.
+  // checkoutAddress is a picker pushed from cart/review; it pops with the id.
   static const cart = '/cart';
   static const checkoutAddress = '/checkout/address';
+  static const checkoutOptions = '/checkout/options';
   static const checkout = '/checkout';
   static const orderConfirmation = '/order-confirmation';
   // Guest assistant trial — the ONE screen a logged-out visitor may open outside

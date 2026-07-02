@@ -3,38 +3,66 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../app/router/routes.dart';
-import '../../../app/theme/app_radii.dart';
 import '../../../app/theme/app_spacing.dart';
 import '../../../core/l10n/l10n_ext.dart';
 import '../../../core/money/money.dart';
 import '../../../core/network/api_result.dart';
-import '../../auth/presentation/widgets/auth_widgets.dart';
 import '../../addresses/domain/address.dart';
 import '../../addresses/presentation/providers/addresses_controller.dart';
+import '../../auth/presentation/widgets/auth_widgets.dart';
+import '../domain/cart.dart';
 import '../domain/cart_quote.dart';
+import '../domain/checkout_draft.dart';
 import '../domain/payment_method.dart';
 import 'providers/cart_controller.dart';
+import 'widgets/arrival_chip.dart';
+import 'widgets/section_card.dart';
 
-/// Checkout step 3 — review the order: delivery address, items, an optional
-/// note, the payment method, and the live money breakdown, then place the order.
-class CheckoutScreen extends ConsumerStatefulWidget {
-  const CheckoutScreen({super.key, required this.addressId});
+/// Checkout step 3 — review: delivery address (changeable), the selected items
+/// grouped per store, payment method (changeable), the live money breakdown,
+/// then place the order.
+class ReviewOrderScreen extends ConsumerStatefulWidget {
+  const ReviewOrderScreen({super.key, required this.draft});
 
-  final String addressId;
+  final CheckoutDraft draft;
 
   @override
-  ConsumerState<CheckoutScreen> createState() => _CheckoutScreenState();
+  ConsumerState<ReviewOrderScreen> createState() => _ReviewOrderScreenState();
 }
 
-class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
-  final _notes = TextEditingController();
-  String _paymentMethod = paymentOptions.first.code;
+class _ReviewOrderScreenState extends ConsumerState<ReviewOrderScreen> {
+  late String _addressId = widget.draft.addressId;
+  late String _paymentMethod = widget.draft.paymentMethod;
   bool _placing = false;
 
-  @override
-  void dispose() {
-    _notes.dispose();
-    super.dispose();
+  Future<void> _changeAddress() async {
+    final id = await context.push<String>(Routes.checkoutAddress);
+    if (id != null && mounted) setState(() => _addressId = id);
+  }
+
+  Future<void> _changePayment() async {
+    final code = await showModalBottomSheet<String>(
+      context: context,
+      showDragHandle: true,
+      builder: (sheetContext) => SafeArea(
+        child: RadioGroup<String>(
+          groupValue: _paymentMethod,
+          onChanged: (v) => Navigator.pop(sheetContext, v),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              for (final option in paymentOptions)
+                RadioListTile<String>(
+                  value: option.code,
+                  secondary: Icon(option.icon),
+                  title: Text(option.label(sheetContext.l10n)),
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+    if (code != null && mounted) setState(() => _paymentMethod = code);
   }
 
   Future<void> _placeOrder() async {
@@ -42,10 +70,12 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
     // taps in the same frame both pass it and would create two orders.
     if (_placing) return;
     setState(() => _placing = true);
+    final itemIds = ref.read(cartSelectedIdsProvider);
     final result = await ref.read(cartControllerProvider.notifier).checkout(
-          addressId: widget.addressId,
+          addressId: _addressId,
           paymentMethod: _paymentMethod,
-          notes: _notes.text.trim(),
+          notes: widget.draft.notes,
+          itemIds: itemIds,
         );
     if (!mounted) return;
     setState(() => _placing = false);
@@ -61,25 +91,28 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final locale = Localizations.localeOf(context).languageCode;
-    final cart = ref.watch(cartControllerProvider).asData?.value;
+    final selectedItems = ref.watch(cartSelectedItemsProvider);
+    final groups = groupItemsByStore(selectedItems);
     final quoteAsync = ref.watch(cartQuoteProvider);
     final address = ref.watch(addressesControllerProvider).asData?.value.firstWhere(
-          (a) => a.id == widget.addressId,
+          (a) => a.id == _addressId,
           orElse: () => _missingAddress,
         );
+    final payment =
+        paymentOptions.firstWhere((o) => o.code == _paymentMethod);
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.checkout)),
+      appBar: AppBar(title: Text(l10n.reviewOrder)),
       body: ListView(
         padding: const EdgeInsets.all(AppSpacing.margin),
         children: [
-          _SectionCard(
+          SectionCard(
             title: l10n.deliveryAddress,
             trailing: TextButton(
-              onPressed: () => context.pop(),
+              onPressed: _changeAddress,
               child: Text(l10n.change),
             ),
-            child: address == null
+            child: address == null || address.id.isEmpty
                 ? Text(l10n.addressFallbackLabel)
                 : Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -92,17 +125,42 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                       ),
                       const SizedBox(height: 2),
                       Text(address.summary),
-                      if (address.phone?.isNotEmpty == true) Text(address.phone!),
+                      if (address.phone?.isNotEmpty == true)
+                        Text(address.phone!),
                     ],
                   ),
           ),
           const SizedBox(height: AppSpacing.md),
-          if (cart != null)
-            _SectionCard(
-              title: l10n.orderItems,
-              child: Column(
-                children: [
-                  for (final item in cart.items)
+          SectionCard(
+            title: l10n.orderItems,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                for (final (g, group) in groups.indexed) ...[
+                  if (g > 0) const SizedBox(height: AppSpacing.sm),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          group.storeName,
+                          style: Theme.of(context)
+                              .textTheme
+                              .labelMedium
+                              ?.copyWith(
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .onSurfaceVariant),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      ArrivalChip(
+                          minDays: group.minLeadDays,
+                          maxDays: group.maxLeadDays),
+                    ],
+                  ),
+                  const SizedBox(height: AppSpacing.xs),
+                  for (final item in group.items)
                     Padding(
                       padding: const EdgeInsets.symmetric(vertical: 2),
                       child: Row(
@@ -120,39 +178,35 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                       ),
                     ),
                 ],
-              ),
-            ),
-          const SizedBox(height: AppSpacing.md),
-          _SectionCard(
-            title: l10n.notesOptional,
-            child: TextField(
-              controller: _notes,
-              maxLines: 3,
-              decoration: InputDecoration(hintText: l10n.notesHint),
+              ],
             ),
           ),
           const SizedBox(height: AppSpacing.md),
-          _SectionCard(
+          SectionCard(
             title: l10n.paymentMethod,
-            child: RadioGroup<String>(
-              groupValue: _paymentMethod,
-              onChanged: (v) => setState(() => _paymentMethod = v!),
-              child: Column(
-                children: [
-                  for (final option in paymentOptions)
-                    RadioListTile<String>(
-                      contentPadding: EdgeInsets.zero,
-                      dense: true,
-                      value: option.code,
-                      secondary: Icon(option.icon),
-                      title: Text(option.label(l10n)),
-                    ),
-                ],
-              ),
+            trailing: TextButton(
+              onPressed: _changePayment,
+              child: Text(l10n.change),
+            ),
+            child: Row(
+              children: [
+                Icon(payment.icon,
+                    size: 20,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant),
+                const SizedBox(width: AppSpacing.sm),
+                Text(payment.label(l10n)),
+              ],
             ),
           ),
+          if (widget.draft.notes.isNotEmpty) ...[
+            const SizedBox(height: AppSpacing.md),
+            SectionCard(
+              title: l10n.notes,
+              child: Text(widget.draft.notes),
+            ),
+          ],
           const SizedBox(height: AppSpacing.md),
-          _SectionCard(
+          SectionCard(
             title: l10n.orderSummary,
             child: quoteAsync.when(
               loading: () => const Padding(
@@ -167,7 +221,8 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
           SizedBox(
             width: double.infinity,
             child: FilledButton(
-              onPressed: _placing ? null : _placeOrder,
+              onPressed:
+                  _placing || selectedItems.isEmpty ? null : _placeOrder,
               child: _placing
                   ? const SizedBox(
                       width: 22, height: 22,
@@ -183,7 +238,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
 
 // Sentinel returned when the chosen address can't be found in the list (e.g. it
 // was deleted on another device) — keeps the UI null-safe.
-final _missingAddress = const Address(
+const _missingAddress = Address(
   id: '',
   governorate: '',
   city: '',
@@ -228,44 +283,6 @@ class _Breakdown extends StatelessWidget {
               color: negative ? Theme.of(context).colorScheme.primary : null,
             ),
           ),
-        ],
-      ),
-    );
-  }
-}
-
-class _SectionCard extends StatelessWidget {
-  const _SectionCard({
-    required this.title,
-    required this.child,
-    this.trailing,
-  });
-
-  final String title;
-  final Widget child;
-  final Widget? trailing;
-
-  @override
-  Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    return Container(
-      padding: const EdgeInsets.all(AppSpacing.md),
-      decoration: BoxDecoration(
-        borderRadius: AppRadii.cardRadius,
-        border: Border.all(color: scheme.outlineVariant),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(title, style: Theme.of(context).textTheme.titleSmall),
-              ?trailing,
-            ],
-          ),
-          const SizedBox(height: AppSpacing.sm),
-          child,
         ],
       ),
     );
