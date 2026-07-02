@@ -1,5 +1,12 @@
 import { PaymentMethod } from '@prisma/client';
-import { IsEnum, IsOptional, IsString, Length } from 'class-validator';
+import {
+  ArrayMinSize,
+  IsArray,
+  IsEnum,
+  IsOptional,
+  IsString,
+  Length,
+} from 'class-validator';
 
 /**
  * Customer self-checkout payload (mobile app). Unlike the staff [CheckoutCartDto],
@@ -18,4 +25,12 @@ export class AppCheckoutDto {
   @IsString()
   @Length(0, 2000)
   notes?: string;
+
+  // Cart item ids to check out (app-side selection). Omitted -> the whole cart.
+  // Items left out stay in a fresh open cart.
+  @IsOptional()
+  @IsArray()
+  @ArrayMinSize(1)
+  @IsString({ each: true })
+  itemIds?: string[];
 }

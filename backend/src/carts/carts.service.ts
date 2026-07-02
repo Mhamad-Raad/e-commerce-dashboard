@@ -24,7 +24,20 @@ const cartInclude = {
   coupon: true,
   items: {
     include: {
-      product: { select: { id: true, name: true, sku: true, imageUrl: true, currency: true } },
+      product: {
+        select: {
+          id: true,
+          name: true,
+          sku: true,
+          imageUrl: true,
+          currency: true,
+          // Store + lead-days so the app can group cart items per store and show
+          // an estimated-arrival window (product override, else store default).
+          minLeadDays: true,
+          maxLeadDays: true,
+          store: { select: { id: true, name: true, minLeadDays: true, maxLeadDays: true } },
+        },
+      },
     },
     orderBy: { id: 'asc' as const },
   },
@@ -214,13 +227,31 @@ export class CartsService {
    * prices via OrdersService.create), snapshots the chosen address, records a
    * payment, and marks the cart CHECKED_OUT. Used for staff-assisted checkout.
    */
-  async checkout(cartId: string, dto: CheckoutCartDto, actorId?: string) {
+  async checkout(
+    cartId: string,
+    dto: CheckoutCartDto,
+    actorId?: string,
+    itemIds?: string[],
+  ) {
     const cart = await this.findById(cartId);
     if (cart.status === 'CHECKED_OUT') {
       throw new BadRequestException('This cart has already been checked out');
     }
     if (cart.items.length === 0) {
       throw new BadRequestException('Cannot check out an empty cart');
+    }
+
+    // Partial checkout (app selection): order only the given items. Validate
+    // before claiming the cart so a stale id doesn't bounce the cart status.
+    let itemsToOrder = cart.items;
+    if (itemIds && itemIds.length > 0) {
+      const byId = new Map(cart.items.map((i) => [i.id, i]));
+      if (itemIds.some((id) => !byId.has(id))) {
+        throw new BadRequestException(
+          'Some selected items are no longer in the cart',
+        );
+      }
+      itemsToOrder = itemIds.map((id) => byId.get(id)!);
     }
 
     // Atomically claim the cart BEFORE creating the order so a double-tap /
@@ -238,7 +269,7 @@ export class CartsService {
       const order = await this.orders.create(
         {
           customerId: cart.customerId,
-          items: cart.items.map((i) => ({
+          items: itemsToOrder.map((i) => ({
             productId: i.productId,
             variantId: i.variantId ?? undefined,
             quantity: i.quantity,
@@ -257,6 +288,23 @@ export class CartsService {
         amountCents: order.totalCents,
         status: dto.markPaid ? 'PAID' : 'PENDING',
       });
+
+      // Partial checkout: unselected items move to a fresh OPEN cart so the
+      // customer keeps them. The coupon was consumed by this order, so the new
+      // cart starts without one.
+      const orderedIds = new Set(itemsToOrder.map((i) => i.id));
+      const leftover = cart.items.filter((i) => !orderedIds.has(i.id));
+      if (leftover.length > 0) {
+        await this.prisma.$transaction(async (tx) => {
+          const newCart = await tx.cart.create({
+            data: { customerId: cart.customerId, status: 'OPEN' },
+          });
+          await tx.cartItem.updateMany({
+            where: { id: { in: leftover.map((i) => i.id) } },
+            data: { cartId: newCart.id },
+          });
+        });
+      }
 
       // Re-fetch so the returned order includes the payment just recorded.
       return this.orders.findById(order.id);
@@ -312,10 +360,18 @@ export class CartsService {
     return this.removeCoupon(await this.openCartId(customerId));
   }
 
-  /** Dry-run the money breakdown (subtotal/discount/tax/fees/total) for the cart. */
-  async previewForCustomer(customerId: string) {
+  /**
+   * Dry-run the money breakdown (subtotal/discount/tax/fees/total) for the cart.
+   * `itemIds` limits the quote to the app's locally-selected items; unknown ids
+   * are ignored (it's a dry run).
+   */
+  async previewForCustomer(customerId: string, itemIds?: string[]) {
     const cart = await this.getOrCreateOpenCart(customerId);
-    if (cart.items.length === 0) {
+    const items =
+      itemIds && itemIds.length > 0
+        ? cart.items.filter((i) => itemIds.includes(i.id))
+        : cart.items;
+    if (items.length === 0) {
       return {
         subtotalCents: 0,
         discountCents: 0,
@@ -330,7 +386,7 @@ export class CartsService {
     }
     return this.orders.preview({
       customerId,
-      items: cart.items.map((i) => ({
+      items: items.map((i) => ({
         productId: i.productId,
         variantId: i.variantId ?? undefined,
         quantity: i.quantity,
@@ -358,6 +414,7 @@ export class CartsService {
         markPaid: false,
       },
       undefined,
+      dto.itemIds,
     );
 
     // Best-effort order-confirmation push (never throws / never blocks checkout).

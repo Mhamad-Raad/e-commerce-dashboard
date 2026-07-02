@@ -8,6 +8,7 @@ import {
   Param,
   Patch,
   Post,
+  Query,
   UseGuards,
 } from '@nestjs/common';
 import { Public } from '../auth/decorators/public.decorator';
@@ -36,9 +37,18 @@ export class AppCartController {
     return this.carts.getOrCreateOpenCart(customer.id);
   }
 
+  // itemIds: comma-separated cart item ids to limit the quote to the app's
+  // locally-selected items. Omitted -> the whole cart.
   @Get('preview')
-  preview(@CurrentCustomer() customer: CurrentCustomerPayload) {
-    return this.carts.previewForCustomer(customer.id);
+  preview(
+    @CurrentCustomer() customer: CurrentCustomerPayload,
+    @Query('itemIds') itemIds?: string,
+  ) {
+    const ids = itemIds?.split(',').filter(Boolean);
+    return this.carts.previewForCustomer(
+      customer.id,
+      ids && ids.length > 0 ? ids : undefined,
+    );
   }
 
   @Post('items')
