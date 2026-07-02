@@ -1,5 +1,8 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/error/failure.dart';
 import '../../../../core/network/api_result.dart';
 import '../../../../core/storage/token_store.dart';
 import '../../../notifications/data/push_service.dart';
@@ -51,8 +54,13 @@ class AuthController extends Notifier<AuthState> {
       switch (result) {
         case Success(value: final customer):
           state = AuthState(status: AuthStatus.authenticated, customer: customer);
-        case Failed():
+        // Only a real auth failure (refresh itself rejected) means the session
+        // is gone — clear tokens then. A network/server blip on launch must NOT
+        // destroy a valid session; keep the tokens so a later launch restores.
+        case Failed(failure: AuthFailure()):
           await _tokens.clear();
+          state = AuthState.loggedOut;
+        case Failed():
           state = AuthState.loggedOut;
       }
     } catch (_) {
@@ -119,13 +127,25 @@ class AuthController extends Notifier<AuthState> {
   }
 
   Future<void> logout() async {
-    // Unregister this device for push WHILE still authenticated (the request
-    // needs the access token, which clear() is about to drop). Best-effort.
-    await ref.read(pushServiceProvider).onLogout();
-    final refresh = await _tokens.refreshToken;
-    await _repo.logout(refresh); // best-effort server-side revoke
-    await _tokens.clear();
+    // Flip the UI to logged-out immediately so logout feels instant even when
+    // offline. The server-side revoke + push unregister run in the background
+    // (both need the still-stored access token, so tokens are cleared only after
+    // that attempt finishes — best-effort; a killed app just clears on next use).
+    final pushService = ref.read(pushServiceProvider);
+    final tokens = _tokens;
+    final repo = _repo;
+    final refresh = await tokens.refreshToken;
     state = AuthState.loggedOut;
+    unawaited(() async {
+      try {
+        await pushService.onLogout();
+        await repo.logout(refresh);
+      } catch (_) {
+        // best-effort revoke
+      } finally {
+        await tokens.clear();
+      }
+    }());
   }
 
   /// Called by [AuthInterceptor] when a refresh fails irrecoverably.

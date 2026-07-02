@@ -95,11 +95,18 @@ class AuthInterceptor extends Interceptor {
     }
   }
 
-  // A Dio without this interceptor, so refresh + retry don't recurse.
+  // A Dio without this interceptor, so refresh + retry don't recurse. Mirrors
+  // the main client's timeouts — without them a stalled refresh POST would leave
+  // the shared _refreshing future pending forever and hang all 401 handling.
   Dio _bareDio() {
     final config = _ref.read(appConfigProvider);
     return Dio(
-      BaseOptions(baseUrl: config.apiBaseUrl, contentType: 'application/json'),
+      BaseOptions(
+        baseUrl: config.apiBaseUrl,
+        connectTimeout: const Duration(seconds: 15),
+        receiveTimeout: const Duration(seconds: 20),
+        contentType: 'application/json',
+      ),
     );
   }
 }

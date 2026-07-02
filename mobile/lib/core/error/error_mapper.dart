@@ -16,6 +16,8 @@ Failure mapError(Object error) {
       case DioExceptionType.badResponse:
         final code = error.response?.statusCode;
         if (code == 401 || code == 403) return const AuthFailure();
+        if (code == 429) return const RateLimitFailure();
+        if (code == 409) return ConflictFailure(_message(error) ?? 'Conflict');
         if (code == 422 || code == 400) {
           return ValidationFailure(_message(error) ?? 'Invalid request');
         }
