@@ -89,13 +89,21 @@ export function PaymentDialog({
   const status = watch('status');
 
   const submit = (values: FormValues) => {
+    // The date input can't hold time-of-day, so only send paidAt when the user
+    // actually changed the date — otherwise editing any other field would
+    // rewrite a stored timestamp to UTC midnight and lose its time.
+    const originalPaidAt = toDateInput(payment?.paidAt ?? null);
+    const paidAtChanged = values.paidAt !== originalPaidAt;
     onSubmit({
       method: values.method as PaymentWritePayload['method'],
       status: values.status as PaymentWritePayload['status'],
       amountCents: toMinor(Number(values.amount), currency),
       reference: values.reference?.trim() || undefined,
       note: values.note?.trim() || undefined,
-      paidAt: values.paidAt ? new Date(values.paidAt).toISOString() : undefined,
+      paidAt:
+        paidAtChanged && values.paidAt
+          ? new Date(values.paidAt).toISOString()
+          : undefined,
     });
   };
 

@@ -180,6 +180,9 @@ export function CartDetail() {
   const cart = cartQuery.data;
   const subtotal = cartSubtotalCents(cart);
   const total = cartTotalCents(cart);
+  // Cart-level currency for the aggregate rows (a store is effectively
+  // single-currency); per-line amounts use each product's own currency.
+  const cartCurrency = cart.items[0]?.product.currency ?? 'IQD';
 
   return (
     <div className="space-y-5">
@@ -252,7 +255,7 @@ export function CartDetail() {
                   <TableCell className="font-mono text-xs text-muted-foreground">
                     {item.product.sku}
                   </TableCell>
-                  <TableCell>{formatMoney(item.priceCents)}</TableCell>
+                  <TableCell>{formatMoney(item.priceCents, item.product.currency)}</TableCell>
                   <TableCell>
                     <Input
                       type="number"
@@ -266,7 +269,7 @@ export function CartDetail() {
                     />
                   </TableCell>
                   <TableCell className="font-medium">
-                    {formatMoney(item.priceCents * item.quantity)}
+                    {formatMoney(item.priceCents * item.quantity, item.product.currency)}
                   </TableCell>
                   <TableCell className="text-end">
                     <Button
@@ -285,7 +288,7 @@ export function CartDetail() {
                 <TableCell colSpan={4} className="text-end text-muted-foreground">
                   {t('orders.subtotal')}
                 </TableCell>
-                <TableCell colSpan={2}>{formatMoney(subtotal)}</TableCell>
+                <TableCell colSpan={2}>{formatMoney(subtotal, cartCurrency)}</TableCell>
               </TableRow>
               {cart.discountCents > 0 && (
                 <TableRow className="hover:bg-transparent">
@@ -296,7 +299,7 @@ export function CartDetail() {
                     )}
                   </TableCell>
                   <TableCell colSpan={2} className="text-emerald-600 dark:text-emerald-400">
-                    −{formatMoney(cart.discountCents)}
+                    −{formatMoney(cart.discountCents, cartCurrency)}
                   </TableCell>
                 </TableRow>
               )}
@@ -305,7 +308,7 @@ export function CartDetail() {
                   {t('carts.total')}
                 </TableCell>
                 <TableCell colSpan={2} className="font-semibold">
-                  {formatMoney(total)}
+                  {formatMoney(total, cartCurrency)}
                 </TableCell>
               </TableRow>
             </TableBody>
@@ -322,7 +325,7 @@ export function CartDetail() {
             <div className="flex items-center gap-3">
               <StatusBadge label={cart.coupon.code} tone="green" />
               <span className="text-sm text-muted-foreground">
-                −{formatMoney(cart.discountCents)}
+                −{formatMoney(cart.discountCents, cartCurrency)}
               </span>
               <Button
                 variant="outline"
