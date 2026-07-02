@@ -449,14 +449,29 @@ export class OrdersService {
       }
       // Cancelling/refunding returns reserved stock; re-opening re-reserves it
       // (and fails the whole update if it was sold elsewhere in the meantime).
-      // Order.stockReserved guards against double release/reserve.
+      // Order.stockReserved guards against double release/reserve. Coupon
+      // redemption shares this lifecycle (both set at creation), so it's
+      // reversed alongside stock — otherwise a limited coupon stays "spent" on
+      // a cancelled order and exhausts early.
       if (entersReversal && current.stockReserved) {
         await this.inventory.releaseOrderStock(tx, id);
         await tx.order.update({ where: { id }, data: { stockReserved: false } });
+        if (existing.couponCode) {
+          await tx.coupon.updateMany({
+            where: { code: existing.couponCode },
+            data: { redeemedCount: { decrement: 1 } },
+          });
+        }
         await this.events.record(tx, id, OrderEventType.STOCK_RESTORED);
       } else if (leavesReversal && !current.stockReserved) {
         await this.inventory.reserveOrderStock(tx, id);
         await tx.order.update({ where: { id }, data: { stockReserved: true } });
+        if (existing.couponCode) {
+          await tx.coupon.updateMany({
+            where: { code: existing.couponCode },
+            data: { redeemedCount: { increment: 1 } },
+          });
+        }
         await this.events.record(tx, id, OrderEventType.STOCK_RESERVED);
       }
       if (dto.trackingNumber !== undefined && dto.trackingNumber !== existing.trackingNumber) {
@@ -486,9 +501,16 @@ export class OrdersService {
   async remove(id: string) {
     const existing = await this.findById(id);
     await this.prisma.$transaction(async (tx) => {
-      // Return stock only if this order is still holding a reservation.
+      // Return stock and the coupon redemption only if this order is still
+      // holding them (mirrors the cancel path).
       if (existing.stockReserved) {
         await this.inventory.releaseOrderStock(tx, id);
+        if (existing.couponCode) {
+          await tx.coupon.updateMany({
+            where: { code: existing.couponCode },
+            data: { redeemedCount: { decrement: 1 } },
+          });
+        }
       }
       await tx.order.delete({ where: { id } });
     });
