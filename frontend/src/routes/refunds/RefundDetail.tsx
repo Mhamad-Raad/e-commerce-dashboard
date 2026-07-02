@@ -57,6 +57,8 @@ export function RefundDetail() {
       queryClient.invalidateQueries({ queryKey: ['refund', id] });
       queryClient.invalidateQueries({ queryKey: ['refunds'] });
       queryClient.invalidateQueries({ queryKey: ['order', r.orderId] });
+      // Status changes free/consume refundable quantity the RefundDialog reads.
+      queryClient.invalidateQueries({ queryKey: ['refundable', r.orderId] });
       toast.success(t('refunds.status_updated_toast'));
     },
     onError: (err) => toast.error(extractErrorMessage(err)),
@@ -65,7 +67,13 @@ export function RefundDetail() {
   const removeRefund = useMutation({
     mutationFn: () => refundsApi.remove(id!),
     onSuccess: () => {
+      const orderId = refundQuery.data?.order.id;
       queryClient.invalidateQueries({ queryKey: ['refunds'] });
+      if (orderId) {
+        // Deleting a refund frees the quantity/amount it had claimed.
+        queryClient.invalidateQueries({ queryKey: ['order', orderId] });
+        queryClient.invalidateQueries({ queryKey: ['refundable', orderId] });
+      }
       toast.success(t('refunds.deleted_toast'));
       navigate('/refunds');
     },

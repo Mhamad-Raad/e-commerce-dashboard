@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useMutation, useQuery, keepPreviousData } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient, keepPreviousData } from '@tanstack/react-query';
 import { couponsApi } from '@/features/coupons/api';
 import { useTranslation } from 'react-i18next';
 import { ArrowLeft, ClipboardList, Plus, Trash2 } from 'lucide-react';
@@ -50,6 +50,7 @@ const lineKey = (productId: string, variantId: string | null) =>
 export function NewOrder() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [customerId, setCustomerId] = useState('');
   const [addressId, setAddressId] = useState('');
   const [items, setItems] = useState<DraftItem[]>([]);
@@ -189,7 +190,13 @@ export function NewOrder() {
 
   const createOrder = useMutation({
     mutationFn: () => ordersApi.create({ ...previewPayload, addressId: addressId || undefined }),
-    onSuccess: (order) => navigate(`/orders/${order.id}`),
+    onSuccess: (order) => {
+      // Creating an order reserves stock, so the cached lists are now stale.
+      queryClient.invalidateQueries({ queryKey: ['orders'] });
+      queryClient.invalidateQueries({ queryKey: ['products'] });
+      queryClient.invalidateQueries({ queryKey: ['inventory'] });
+      navigate(`/orders/${order.id}`);
+    },
     onError: (err) => toast.error(extractErrorMessage(err)),
   });
 

@@ -12,7 +12,14 @@ import {
 } from 'recharts';
 import type { TimeseriesPoint } from '@/features/reports/types';
 import { Skeleton } from '@/components/ui/skeleton';
-import { formatMoney } from '@/lib/format';
+import { formatMoney, fromMinor } from '@/lib/format';
+
+// Compact axis label from integer minor units, in the same units as the tooltip
+// (IQD has no minor unit, so dividing by 100 under-reported revenue 100x).
+const compactMoney = (minor: number) =>
+  new Intl.NumberFormat(undefined, { notation: 'compact', maximumFractionDigits: 1 }).format(
+    fromMinor(minor),
+  );
 
 const ORDERS_COLOR = 'oklch(0.62 0.19 255)'; // blue — readable on light & dark
 const REVENUE_COLOR = 'var(--primary)'; // adapts to the active theme
@@ -61,7 +68,7 @@ export function OrdersTimeseriesChart({ data, loading }: ChartProps) {
         <YAxis
           yAxisId="revenue"
           orientation="right"
-          tickFormatter={(v) => `${Math.round(Number(v) / 100)}`}
+          tickFormatter={(v) => compactMoney(Number(v))}
           tick={{ fontSize: 12, fill: 'var(--muted-foreground)' }}
           tickLine={false}
           axisLine={false}

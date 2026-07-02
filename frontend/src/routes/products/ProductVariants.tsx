@@ -22,7 +22,13 @@ export function ProductVariants({ product }: { product: Product }) {
   const [editing, setEditing] = useState<ProductVariant | null>(null);
   const [deleting, setDeleting] = useState<ProductVariant | null>(null);
 
-  const invalidate = () => queryClient.invalidateQueries({ queryKey: ['product', product.id] });
+  const invalidate = () => {
+    queryClient.invalidateQueries({ queryKey: ['product', product.id] });
+    // The variant pickers in cart/new-order checkout read this key; without it
+    // they serve stale prices or deleted variants for up to the staleTime.
+    queryClient.invalidateQueries({ queryKey: ['product-variants', product.id] });
+    queryClient.invalidateQueries({ queryKey: ['products'] });
+  };
 
   const saveMutation = useMutation({
     mutationFn: (payload: VariantWritePayload) =>
