@@ -109,6 +109,31 @@
   "discount": "Discount",
   "taxesFeesAtCheckout": "Taxes and fees calculated at checkout.",
   "proceedToCheckout": "Proceed to checkout",
+  "selectAll": "All",
+  "arrivalEstimate": "Arrives in {min}–{max} days",
+  "@arrivalEstimate": {
+    "placeholders": {
+      "min": { "type": "int" },
+      "max": { "type": "int" }
+    }
+  },
+  "arrivalEstimateSingle": "Arrives in {days} days",
+  "@arrivalEstimateSingle": {
+    "placeholders": {
+      "days": { "type": "int" }
+    }
+  },
+  "removeFromCart": "Remove from cart?",
+  "removeFromCartMessage": "This item will be removed from your cart.",
+  "selectedItemsCount": "{count} of {total} selected",
+  "@selectedItemsCount": {
+    "placeholders": {
+      "count": { "type": "int" },
+      "total": { "type": "int" }
+    }
+  },
+  "reviewOrder": "Review order",
+  "useThisAddress": "Use this address",
   "selectAddress": "Select address",
   "noAddressForCheckout": "You need a delivery address to continue.",
   "addAnotherAddress": "Add another address",

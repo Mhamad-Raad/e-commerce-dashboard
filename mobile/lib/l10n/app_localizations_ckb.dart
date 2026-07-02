@@ -300,6 +300,36 @@ class AppLocalizationsCkb extends AppLocalizations {
   String get proceedToCheckout => 'بەردەوامبوون بۆ پارەدان';
 
   @override
+  String get selectAll => 'هەموو';
+
+  @override
+  String arrivalEstimate(int min, int max) {
+    return 'دەگات لە ماوەی $min–$max ڕۆژدا';
+  }
+
+  @override
+  String arrivalEstimateSingle(int days) {
+    return 'دەگات لە ماوەی $days ڕۆژدا';
+  }
+
+  @override
+  String get removeFromCart => 'لابردن لە سەبەتە؟';
+
+  @override
+  String get removeFromCartMessage => 'ئەم کاڵایە لە سەبەتەکەت لادەبردرێت.';
+
+  @override
+  String selectedItemsCount(int count, int total) {
+    return '$count لە $total هەڵبژێردراوە';
+  }
+
+  @override
+  String get reviewOrder => 'پێداچوونەوەی داواکاری';
+
+  @override
+  String get useThisAddress => 'ئەم ناونیشانە بەکاربهێنە';
+
+  @override
   String get selectAddress => 'ناونیشان هەڵبژێرە';
 
   @override

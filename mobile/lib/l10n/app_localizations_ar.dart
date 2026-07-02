@@ -298,6 +298,36 @@ class AppLocalizationsAr extends AppLocalizations {
   String get proceedToCheckout => 'المتابعة للدفع';
 
   @override
+  String get selectAll => 'الكل';
+
+  @override
+  String arrivalEstimate(int min, int max) {
+    return 'يصل خلال $min–$max أيام';
+  }
+
+  @override
+  String arrivalEstimateSingle(int days) {
+    return 'يصل خلال $days أيام';
+  }
+
+  @override
+  String get removeFromCart => 'إزالة من السلة؟';
+
+  @override
+  String get removeFromCartMessage => 'ستتم إزالة هذا المنتج من سلتك.';
+
+  @override
+  String selectedItemsCount(int count, int total) {
+    return '$count من $total محدد';
+  }
+
+  @override
+  String get reviewOrder => 'مراجعة الطلب';
+
+  @override
+  String get useThisAddress => 'استخدام هذا العنوان';
+
+  @override
   String get selectAddress => 'اختر العنوان';
 
   @override

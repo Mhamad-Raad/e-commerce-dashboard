@@ -301,6 +301,37 @@ class AppLocalizationsEn extends AppLocalizations {
   String get proceedToCheckout => 'Proceed to checkout';
 
   @override
+  String get selectAll => 'All';
+
+  @override
+  String arrivalEstimate(int min, int max) {
+    return 'Arrives in $min–$max days';
+  }
+
+  @override
+  String arrivalEstimateSingle(int days) {
+    return 'Arrives in $days days';
+  }
+
+  @override
+  String get removeFromCart => 'Remove from cart?';
+
+  @override
+  String get removeFromCartMessage =>
+      'This item will be removed from your cart.';
+
+  @override
+  String selectedItemsCount(int count, int total) {
+    return '$count of $total selected';
+  }
+
+  @override
+  String get reviewOrder => 'Review order';
+
+  @override
+  String get useThisAddress => 'Use this address';
+
+  @override
   String get selectAddress => 'Select address';
 
   @override

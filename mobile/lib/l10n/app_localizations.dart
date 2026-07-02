@@ -664,6 +664,54 @@ abstract class AppLocalizations {
   /// **'Proceed to checkout'**
   String get proceedToCheckout;
 
+  /// No description provided for @selectAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get selectAll;
+
+  /// No description provided for @arrivalEstimate.
+  ///
+  /// In en, this message translates to:
+  /// **'Arrives in {min}–{max} days'**
+  String arrivalEstimate(int min, int max);
+
+  /// No description provided for @arrivalEstimateSingle.
+  ///
+  /// In en, this message translates to:
+  /// **'Arrives in {days} days'**
+  String arrivalEstimateSingle(int days);
+
+  /// No description provided for @removeFromCart.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove from cart?'**
+  String get removeFromCart;
+
+  /// No description provided for @removeFromCartMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'This item will be removed from your cart.'**
+  String get removeFromCartMessage;
+
+  /// No description provided for @selectedItemsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} of {total} selected'**
+  String selectedItemsCount(int count, int total);
+
+  /// No description provided for @reviewOrder.
+  ///
+  /// In en, this message translates to:
+  /// **'Review order'**
+  String get reviewOrder;
+
+  /// No description provided for @useThisAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'Use this address'**
+  String get useThisAddress;
+
   /// No description provided for @selectAddress.
   ///
   /// In en, this message translates to:
