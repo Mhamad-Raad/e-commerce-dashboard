@@ -420,28 +420,41 @@ export class OrdersService {
 
   async update(id: string, dto: UpdateOrderDto) {
     const existing = await this.findById(id);
-    const entersReversal =
-      dto.status !== undefined && isReversing(dto.status) && !isReversing(existing.status);
-    const leavesReversal =
-      dto.status !== undefined && !isReversing(dto.status) && isReversing(existing.status);
+    let statusChanged = false;
 
     await this.prisma.$transaction(async (tx) => {
+      // Lock the order and re-read status/stockReserved inside the tx: two
+      // concurrent cancels would otherwise both see stockReserved and release
+      // the same reservation twice, inflating inventory.
+      await tx.$queryRaw`SELECT id FROM "Order" WHERE id = ${id} FOR UPDATE`;
+      const current = await tx.order.findUnique({
+        where: { id },
+        select: { status: true, stockReserved: true },
+      });
+      if (!current) throw new NotFoundException(`Order ${id} not found`);
+
+      const entersReversal =
+        dto.status !== undefined && isReversing(dto.status) && !isReversing(current.status);
+      const leavesReversal =
+        dto.status !== undefined && !isReversing(dto.status) && isReversing(current.status);
+
       await tx.order.update({ where: { id }, data: dto });
 
-      if (dto.status !== undefined && dto.status !== existing.status) {
+      if (dto.status !== undefined && dto.status !== current.status) {
+        statusChanged = true;
         await this.events.record(tx, id, OrderEventType.STATUS_CHANGED, {
-          from: existing.status,
+          from: current.status,
           to: dto.status,
         });
       }
       // Cancelling/refunding returns reserved stock; re-opening re-reserves it
       // (and fails the whole update if it was sold elsewhere in the meantime).
       // Order.stockReserved guards against double release/reserve.
-      if (entersReversal && existing.stockReserved) {
+      if (entersReversal && current.stockReserved) {
         await this.inventory.releaseOrderStock(tx, id);
         await tx.order.update({ where: { id }, data: { stockReserved: false } });
         await this.events.record(tx, id, OrderEventType.STOCK_RESTORED);
-      } else if (leavesReversal && !existing.stockReserved) {
+      } else if (leavesReversal && !current.stockReserved) {
         await this.inventory.reserveOrderStock(tx, id);
         await tx.order.update({ where: { id }, data: { stockReserved: true } });
         await this.events.record(tx, id, OrderEventType.STOCK_RESERVED);
@@ -458,7 +471,8 @@ export class OrdersService {
 
     // Notify the customer of a status change — only after the tx has committed,
     // and best-effort (notify() never throws) so push can't fail the update.
-    if (dto.status !== undefined && dto.status !== existing.status) {
+    // Gated on the in-tx result so a racing no-op update sends nothing.
+    if (statusChanged && dto.status !== undefined) {
       void this.customerNotifications.notify(existing.customerId, 'ORDER_STATUS_CHANGED', {
         orderId: id,
         number: existing.number,
