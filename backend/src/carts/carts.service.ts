@@ -217,36 +217,52 @@ export class CartsService {
       throw new BadRequestException('Cannot check out an empty cart');
     }
 
-    const order = await this.orders.create(
-      {
-        customerId: cart.customerId,
-        items: cart.items.map((i) => ({
-          productId: i.productId,
-          variantId: i.variantId ?? undefined,
-          quantity: i.quantity,
-        })),
-        couponCode: cart.coupon?.code,
-        addressId: dto.addressId,
-        notes: dto.notes,
-        taxCents: dto.taxCents,
-        shippingCents: dto.shippingCents,
-      },
-      actorId,
-    );
-
-    await this.payments.create(order.id, {
-      method: dto.paymentMethod,
-      amountCents: order.totalCents,
-      status: dto.markPaid ? 'PAID' : 'PENDING',
-    });
-
-    await this.prisma.cart.update({
-      where: { id: cartId },
+    // Atomically claim the cart BEFORE creating the order so a double-tap /
+    // retried request can't produce two orders (with double stock decrement).
+    // Only one caller wins the OPEN→CHECKED_OUT transition; the rest get 0 rows.
+    const claim = await this.prisma.cart.updateMany({
+      where: { id: cartId, status: 'OPEN' },
       data: { status: 'CHECKED_OUT' },
     });
+    if (claim.count === 0) {
+      throw new BadRequestException('This cart has already been checked out');
+    }
 
-    // Re-fetch so the returned order includes the payment just recorded.
-    return this.orders.findById(order.id);
+    try {
+      const order = await this.orders.create(
+        {
+          customerId: cart.customerId,
+          items: cart.items.map((i) => ({
+            productId: i.productId,
+            variantId: i.variantId ?? undefined,
+            quantity: i.quantity,
+          })),
+          couponCode: cart.coupon?.code,
+          addressId: dto.addressId,
+          notes: dto.notes,
+          taxCents: dto.taxCents,
+          shippingCents: dto.shippingCents,
+        },
+        actorId,
+      );
+
+      await this.payments.create(order.id, {
+        method: dto.paymentMethod,
+        amountCents: order.totalCents,
+        status: dto.markPaid ? 'PAID' : 'PENDING',
+      });
+
+      // Re-fetch so the returned order includes the payment just recorded.
+      return this.orders.findById(order.id);
+    } catch (err) {
+      // Order/payment creation failed (stock, coupon, etc. — its own tx rolled
+      // back). Release the claim so the customer can fix the issue and retry.
+      await this.prisma.cart.updateMany({
+        where: { id: cartId, status: 'CHECKED_OUT' },
+        data: { status: 'OPEN' },
+      });
+      throw err;
+    }
   }
 
   // ---- Customer-scoped ("my cart") operations for the mobile app ----
