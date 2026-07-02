@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useMemo, useState, ReactNode } from 'react';
-import { api, setAccessToken } from './api';
+import { api, refreshAccessToken, setAccessToken, setOnSessionExpired } from './api';
 
 export interface User {
   id: string;
@@ -23,15 +23,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     let cancelled = false;
+    setOnSessionExpired(() => {
+      setAccessToken(null);
+      setUser(null);
+    });
     (async () => {
       try {
-        const refresh = await fetch('/api/auth/refresh', {
-          method: 'POST',
-          credentials: 'include',
-        });
-        if (!refresh.ok) throw new Error('no session');
-        const { accessToken } = (await refresh.json()) as { accessToken: string };
-        setAccessToken(accessToken);
+        // Shared with the 401 interceptor so it honors VITE_API_URL — a plain
+        // fetch('/api/...') never reaches the backend on the split-origin deploy.
+        const accessToken = await refreshAccessToken();
+        if (!accessToken) throw new Error('no session');
         const me = await api.get<User>('/auth/me');
         if (!cancelled) setUser(me.data);
       } catch {
@@ -45,6 +46,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     })();
     return () => {
       cancelled = true;
+      setOnSessionExpired(null);
     };
   }, []);
 

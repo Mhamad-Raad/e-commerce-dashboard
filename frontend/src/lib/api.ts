@@ -25,9 +25,17 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
+// Lets AuthProvider drop to the login screen when a mid-session refresh fails,
+// instead of leaving a logged-in UI whose every request 401s.
+let onSessionExpired: (() => void) | null = null;
+
+export const setOnSessionExpired = (handler: (() => void) | null) => {
+  onSessionExpired = handler;
+};
+
 let refreshPromise: Promise<string | null> | null = null;
 
-const refreshAccessToken = async (): Promise<string | null> => {
+export const refreshAccessToken = async (): Promise<string | null> => {
   if (!refreshPromise) {
     refreshPromise = axios
       .post<{ accessToken: string }>(`${API_BASE}/auth/refresh`, null, { withCredentials: true })
@@ -66,6 +74,7 @@ api.interceptors.response.use(
         original.headers = { ...(original.headers ?? {}), Authorization: `Bearer ${newToken}` };
         return api(original);
       }
+      onSessionExpired?.();
     }
 
     return Promise.reject(error);

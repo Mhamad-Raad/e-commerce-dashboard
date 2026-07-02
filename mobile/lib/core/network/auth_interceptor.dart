@@ -16,6 +16,20 @@ class AuthInterceptor extends Interceptor {
   // Shared across concurrent 401s so we refresh once, not once per request.
   Future<bool>? _refreshing;
 
+  // 401s here mean bad credentials/OTP, not an expired access token — never
+  // refresh-and-retry them. Authenticated auth routes (me, profile, logout,
+  // change-password, avatar) are NOT listed: they must go through refresh,
+  // otherwise every cold start after access expiry logs the user out.
+  static const _noRefreshPaths = [
+    '/app/auth/register',
+    '/app/auth/verify-phone',
+    '/app/auth/resend-otp',
+    '/app/auth/login',
+    '/app/auth/forgot-password',
+    '/app/auth/reset-password',
+    '/app/auth/refresh',
+  ];
+
   @override
   Future<void> onRequest(
     RequestOptions options,
@@ -33,16 +47,18 @@ class AuthInterceptor extends Interceptor {
     DioException err,
     ErrorInterceptorHandler handler,
   ) async {
-    final isAuthRoute = err.requestOptions.path.contains('/app/auth/');
+    final path = err.requestOptions.path;
+    final isPublicAuthRoute = _noRefreshPaths.any(path.contains);
     final alreadyRetried = err.requestOptions.extra['__retried'] == true;
 
-    // Only act on an expired access token on a normal (non-auth) request, once.
-    if (err.response?.statusCode != 401 || isAuthRoute || alreadyRetried) {
+    if (err.response?.statusCode != 401 || isPublicAuthRoute || alreadyRetried) {
       return handler.next(err);
     }
 
-    final refreshed = await (_refreshing ??= _refresh());
-    _refreshing = null;
+    // Creator clears the shared future (whenComplete), so a late 401 can't
+    // race a second refresh with the already-rotated token.
+    final refreshed = await (_refreshing ??=
+        _refresh().whenComplete(() => _refreshing = null));
 
     if (!refreshed) {
       _ref.read(authControllerProvider.notifier).onSessionExpired();

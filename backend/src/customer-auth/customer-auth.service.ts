@@ -9,7 +9,7 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { JwtService } from '@nestjs/jwt';
-import { Customer, OtpPurpose, Prisma } from '@prisma/client';
+import { Customer, Gender, OtpPurpose, Prisma } from '@prisma/client';
 import * as bcrypt from 'bcryptjs';
 import { createHash, randomBytes, randomUUID } from 'crypto';
 import { PrismaService } from '../prisma/prisma.service';
@@ -30,6 +30,9 @@ export class CustomerAuthService {
   // enumerate registered numbers (mirrors the admin AuthService).
   private readonly dummyHash = bcrypt.hashSync('login-timing-placeholder', 12);
   private readonly refreshTtlMs: number;
+  // Replays of a just-rotated token inside this window are treated as client
+  // retries (lost response, racing interceptors), not theft.
+  private readonly reuseGraceMs = 60_000;
 
   constructor(
     private prisma: PrismaService,
@@ -46,6 +49,7 @@ export class CustomerAuthService {
   // ── Sign up ──────────────────────────────────────────────────────────────
   async register(input: {
     name: string;
+    gender: Gender;
     phone: string;
     password: string;
     email?: string;
@@ -65,13 +69,20 @@ export class CustomerAuthService {
           where: { id: existing.id },
           data: {
             name: input.name,
+            gender: input.gender,
             email: input.email ?? existing.email,
             passwordHash,
           },
         });
       } else {
         await this.prisma.customer.create({
-          data: { name: input.name, phone, email: input.email, passwordHash },
+          data: {
+            name: input.name,
+            gender: input.gender,
+            phone,
+            email: input.email,
+            passwordHash,
+          },
         });
       }
     } catch (err) {
@@ -201,7 +212,10 @@ export class CustomerAuthService {
     });
     if (!session) throw new UnauthorizedException('Invalid session.');
 
-    if (session.revokedAt) {
+    const replayedInGrace =
+      session.revokedAt !== null &&
+      Date.now() - session.revokedAt.getTime() < this.reuseGraceMs;
+    if (session.revokedAt && !replayedInGrace) {
       // A token that was already rotated out is being replayed → likely theft.
       // Revoke the entire family so neither party can continue.
       await this.prisma.customerSession.updateMany({
@@ -211,10 +225,12 @@ export class CustomerAuthService {
       throw new UnauthorizedException('Session reuse detected. Please log in again.');
     }
     if (session.expiresAt.getTime() < Date.now()) {
-      await this.prisma.customerSession.update({
-        where: { id: session.id },
-        data: { revokedAt: new Date() },
-      });
+      if (!session.revokedAt) {
+        await this.prisma.customerSession.update({
+          where: { id: session.id },
+          data: { revokedAt: new Date() },
+        });
+      }
       throw new UnauthorizedException('Session expired. Please log in again.');
     }
 
@@ -226,10 +242,14 @@ export class CustomerAuthService {
     }
 
     // Rotate: revoke the presented token, mint a new one in the same family.
-    await this.prisma.customerSession.update({
-      where: { id: session.id },
-      data: { revokedAt: new Date() },
-    });
+    // A grace replay keeps its original revokedAt so repeated replays can't
+    // keep the window alive.
+    if (!session.revokedAt) {
+      await this.prisma.customerSession.update({
+        where: { id: session.id },
+        data: { revokedAt: new Date() },
+      });
+    }
     return this.issueSession(customer.id, ctx, session.familyId);
   }
 
@@ -415,6 +435,7 @@ export class CustomerAuthService {
     return {
       id: c.id,
       name: c.name,
+      gender: c.gender,
       email: c.email,
       phone: c.phone,
       avatarUrl: c.avatarUrl,

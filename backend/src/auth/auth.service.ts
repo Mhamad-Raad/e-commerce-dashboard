@@ -11,6 +11,9 @@ export class AuthService {
   // A throwaway hash so login always runs bcrypt even when the email is unknown,
   // equalizing response time so attackers can't enumerate valid emails by timing.
   private readonly dummyHash = bcrypt.hashSync('login-timing-placeholder', 12);
+  // Refresh cookies are shared across tabs; a cookie rotated out moments ago
+  // is usually another tab racing this one, not theft.
+  private readonly rotateGraceMs = 60_000;
 
   constructor(
     private prisma: PrismaService,
@@ -36,18 +39,27 @@ export class AuthService {
     const user = await this.prisma.user.findUnique({ where: { id: userId } });
     if (!user || !user.refreshHash) throw new ForbiddenException('Access denied');
 
-    const matches = await bcrypt.compare(this.digest(presentedToken), user.refreshHash);
-    if (!matches) throw new ForbiddenException('Access denied');
+    const digest = this.digest(presentedToken);
+    const matchesCurrent = await bcrypt.compare(digest, user.refreshHash);
+    const matchesPrevInGrace =
+      !matchesCurrent &&
+      user.prevRefreshHash !== null &&
+      user.refreshRotatedAt !== null &&
+      Date.now() - user.refreshRotatedAt.getTime() < this.rotateGraceMs &&
+      (await bcrypt.compare(digest, user.prevRefreshHash));
+    if (!matchesCurrent && !matchesPrevInGrace) {
+      throw new ForbiddenException('Access denied');
+    }
 
     const tokens = await this.issueTokens(user.id, user.email, user.role);
-    await this.storeRefreshHash(user.id, tokens.refreshToken);
+    await this.storeRefreshHash(user.id, tokens.refreshToken, user.refreshHash);
     return tokens;
   }
 
   async logout(userId: string) {
     await this.prisma.user.update({
       where: { id: userId },
-      data: { refreshHash: null },
+      data: { refreshHash: null, prevRefreshHash: null, refreshRotatedAt: null },
     });
   }
 
@@ -75,11 +87,19 @@ export class AuthService {
     return { accessToken, refreshToken };
   }
 
-  private async storeRefreshHash(userId: string, refreshToken: string) {
+  // On rotation the outgoing hash is kept as prev for the grace window; a
+  // fresh login starts clean.
+  private async storeRefreshHash(
+    userId: string,
+    refreshToken: string,
+    rotatedFromHash?: string | null,
+  ) {
     const refreshHash = await bcrypt.hash(this.digest(refreshToken), 12);
     await this.prisma.user.update({
       where: { id: userId },
-      data: { refreshHash },
+      data: rotatedFromHash
+        ? { refreshHash, prevRefreshHash: rotatedFromHash, refreshRotatedAt: new Date() }
+        : { refreshHash, prevRefreshHash: null, refreshRotatedAt: null },
     });
   }
 
