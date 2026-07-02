@@ -142,6 +142,23 @@ export class RefundsService {
     return new Map(claimed.map((c) => [c.orderItemId, c._sum.quantity ?? 0]));
   }
 
+  /** Total money already claimed by non-rejected refunds on this order. */
+  private async claimedAmount(
+    client: PrismaService | Prisma.TransactionClient,
+    orderId: string,
+    excludeRefundId?: string,
+  ): Promise<number> {
+    const agg = await client.refund.aggregate({
+      _sum: { amountCents: true },
+      where: {
+        orderId,
+        status: { in: ACTIVE_REFUND_STATUSES },
+        ...(excludeRefundId ? { id: { not: excludeRefundId } } : {}),
+      },
+    });
+    return agg._sum.amountCents ?? 0;
+  }
+
   /** Per-order-item refundable quantities (ordered minus already-claimed). */
   async refundableForOrder(orderId: string) {
     const order = await this.prisma.order.findUnique({
@@ -221,8 +238,14 @@ export class RefundsService {
       });
 
       const computed = lines.reduce((sum, l) => sum + l.priceCents * l.quantity, 0);
-      // A manual override can't exceed what the order was actually worth.
-      const amountCents = Math.min(dto.amountCents ?? computed, order.totalCents);
+      // Cap against what's LEFT to refund (order total minus other active
+      // refunds), not the full total — otherwise several refunds can each be
+      // capped at the total and sum past what the customer ever paid.
+      const remainingMoney = Math.max(
+        0,
+        order.totalCents - (await this.claimedAmount(tx, dto.orderId)),
+      );
+      const amountCents = Math.min(dto.amountCents ?? computed, remainingMoney);
 
       const created = await tx.refund.create({
         data: {
@@ -288,13 +311,29 @@ export class RefundsService {
         }
       }
 
+      // Editing the amount must respect the same cap as create: order total
+      // minus every OTHER active refund. Without this the amount was writable
+      // unbounded via PATCH.
+      let amountCents = dto.amountCents;
+      if (amountCents !== undefined) {
+        const order = await tx.order.findUnique({
+          where: { id: existing.orderId },
+          select: { totalCents: true },
+        });
+        const remainingMoney = Math.max(
+          0,
+          (order?.totalCents ?? 0) - (await this.claimedAmount(tx, existing.orderId, id)),
+        );
+        amountCents = Math.min(amountCents, remainingMoney);
+      }
+
       await tx.refund.update({
         where: { id },
         data: {
           reason: dto.reason,
           note: dto.note,
           restock: dto.restock,
-          amountCents: dto.amountCents,
+          amountCents,
           status: targetStatus,
           ...(targetStatus && targetStatus !== existing.status && targetStatus !== 'APPROVED'
             ? { resolvedAt: new Date() }
