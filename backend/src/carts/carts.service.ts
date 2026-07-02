@@ -24,7 +24,7 @@ const cartInclude = {
   coupon: true,
   items: {
     include: {
-      product: { select: { id: true, name: true, sku: true, imageUrl: true } },
+      product: { select: { id: true, name: true, sku: true, imageUrl: true, currency: true } },
     },
     orderBy: { id: 'asc' as const },
   },
@@ -105,6 +105,9 @@ export class CartsService {
     await this.findById(cartId);
     const product = await this.prisma.product.findUnique({ where: { id: dto.productId } });
     if (!product) throw new NotFoundException(`Product ${dto.productId} not found`);
+    if (!product.isActive) {
+      throw new BadRequestException('This product is no longer available');
+    }
 
     // Resolve an optional variant: snapshot its name + price, otherwise fall
     // back to the product's own price (a "simple" product with no variants).
@@ -119,6 +122,9 @@ export class CartsService {
         throw new BadRequestException(
           'Selected variant does not belong to this product',
         );
+      }
+      if (!variant.isActive) {
+        throw new BadRequestException('This variant is no longer available');
       }
       variantId = variant.id;
       variantName = variant.name;
