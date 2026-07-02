@@ -67,6 +67,20 @@ export class ReviewsService {
     return review;
   }
 
+  // Keep Product.ratingAvg/ratingCount (read by the storefront, catalog sort,
+  // and the AI assistant) in sync with approved reviews.
+  private async recomputeProductRating(productId: string) {
+    const agg = await this.prisma.review.aggregate({
+      where: { productId, isApproved: true },
+      _avg: { rating: true },
+      _count: true,
+    });
+    await this.prisma.product.update({
+      where: { id: productId },
+      data: { ratingAvg: agg._avg.rating ?? 0, ratingCount: agg._count },
+    });
+  }
+
   async create(dto: CreateReviewDto) {
     try {
       const review = await this.prisma.review.create({
@@ -80,6 +94,7 @@ export class ReviewsService {
         },
         include: reviewInclude,
       });
+      await this.recomputeProductRating(review.productId);
       return review;
     } catch (err) {
       if (err instanceof Prisma.PrismaClientKnownRequestError) {
@@ -96,16 +111,20 @@ export class ReviewsService {
 
   async update(id: string, dto: UpdateReviewDto) {
     await this.findById(id);
-    return this.prisma.review.update({
+    const review = await this.prisma.review.update({
       where: { id },
       data: dto,
       include: reviewInclude,
     });
+    // rating or approval may have changed → refresh the denormalized aggregate.
+    await this.recomputeProductRating(review.productId);
+    return review;
   }
 
   async remove(id: string) {
-    await this.findById(id);
+    const review = await this.findById(id);
     await this.prisma.review.delete({ where: { id } });
+    await this.recomputeProductRating(review.productId);
     return { success: true };
   }
 }

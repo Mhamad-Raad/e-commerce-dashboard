@@ -1,4 +1,5 @@
 import {
+  IsBoolean,
   IsBooleanString,
   IsInt,
   IsOptional,
@@ -32,6 +33,7 @@ export class CreateReviewDto {
   comment?: string;
 
   @IsOptional()
+  @IsBoolean()
   isApproved?: boolean;
 }
 
@@ -53,6 +55,7 @@ export class UpdateReviewDto {
   comment?: string;
 
   @IsOptional()
+  @IsBoolean()
   isApproved?: boolean;
 }
 
