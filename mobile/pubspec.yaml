@@ -52,6 +52,9 @@ dependencies:
   firebase_core: ^4.11.0
   firebase_messaging: ^16.4.1
   flutter_local_notifications: ^22.0.1
+  # Direct dep (already pulled transitively by flutter_local_notifications) so we
+  # can build TZDateTime for the daily local routine reminder without a lint.
+  timezone: ^0.11.0
 
 dev_dependencies:
   flutter_test:
