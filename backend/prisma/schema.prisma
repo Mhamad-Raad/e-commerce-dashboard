@@ -295,6 +295,13 @@ model Setting {
   businessPhone   String?
   businessAddress String?
   defaultCurrency String   @default("IQD")
+  // App version gate: clients below minAppVersion are refused (426 middleware +
+  // launch check → blocking update screen); latestAppVersion only drives the
+  // dismissible "update available" nudge. Store links are picked by client OS.
+  minAppVersion    String?
+  latestAppVersion String?
+  appStoreUrl      String?
+  playStoreUrl     String?
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 }

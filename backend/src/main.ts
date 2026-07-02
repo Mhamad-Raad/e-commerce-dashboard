@@ -4,6 +4,7 @@ import { NestFactory } from '@nestjs/core';
 import cookieParser from 'cookie-parser';
 import helmet from 'helmet';
 import { AppModule } from './app.module';
+import { AppVersionGateService } from './settings/app-version-gate.service';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -22,6 +23,12 @@ async function bootstrap() {
   app.enableCors({
     origin: config.get<string>('CORS_ORIGIN')?.split(',') ?? true,
     credentials: true,
+  });
+  // App version gate: refuse /app/* requests from outdated clients with 426
+  // (after CORS so the refusal carries CORS headers; before routing).
+  const versionGate = app.get(AppVersionGateService);
+  app.use((req: any, res: any, next: any) => {
+    void versionGate.handle(req, res, next);
   });
   app.useGlobalPipes(
     new ValidationPipe({
