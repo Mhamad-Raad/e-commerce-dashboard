@@ -27,6 +27,9 @@ export class PaymentsService {
   ): Date | null | undefined {
     if (paidAt) return new Date(paidAt);
     if (status === 'PAID') return new Date();
+    // Reverting to a not-yet-paid state clears the stale timestamp; REFUNDED
+    // keeps it since the payment genuinely was paid before being refunded.
+    if (status === 'PENDING' || status === 'FAILED') return null;
     return undefined;
   }
 
