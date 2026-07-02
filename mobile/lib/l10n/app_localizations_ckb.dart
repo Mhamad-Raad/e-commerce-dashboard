@@ -330,6 +330,25 @@ class AppLocalizationsCkb extends AppLocalizations {
   String get useThisAddress => 'ئەم ناونیشانە بەکاربهێنە';
 
   @override
+  String get updateRequiredTitle => 'نوێکردنەوە پێویستە';
+
+  @override
+  String get updateRequiredBody =>
+      'ئەم وەشانەی ئەپەکە چیتر پشتگیری ناکرێت. تکایە نوێی بکەرەوە بۆ بەردەوامبوون.';
+
+  @override
+  String get updateAvailableTitle => 'نوێکردنەوە بەردەستە';
+
+  @override
+  String get updateAvailableBody => 'وەشانێکی نوێتری ئەپەکە بەردەستە.';
+
+  @override
+  String get updateNow => 'ئێستا نوێی بکەرەوە';
+
+  @override
+  String get notNow => 'ئێستا نا';
+
+  @override
   String get selectAddress => 'ناونیشان هەڵبژێرە';
 
   @override

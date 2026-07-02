@@ -35,6 +35,8 @@ import '../../features/notifications/presentation/notifications_screen.dart';
 import '../../features/orders/presentation/order_detail_screen.dart';
 import '../../features/orders/presentation/orders_screen.dart';
 import '../../features/product/presentation/product_detail_screen.dart';
+import '../../core/version_gate/update_required_screen.dart';
+import '../../core/version_gate/version_gate_controller.dart';
 import '../shell/main_shell.dart';
 import 'routes.dart';
 
@@ -52,6 +54,15 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       final location = state.matchedLocation;
       final onSplash = location == Routes.splash;
       final inAuth = location.startsWith('/auth');
+
+      // Version gate outranks auth: while blocked, every location redirects to
+      // the update screen (426 mid-session or launch check below minimum).
+      final gateBlocked = ref.read(versionGateControllerProvider).status ==
+          VersionGateStatus.blocked;
+      final onUpdateRequired = location == Routes.updateRequired;
+      if (gateBlocked) return onUpdateRequired ? null : Routes.updateRequired;
+      // No longer blocked (fail-open recheck): resume normal routing via splash.
+      if (onUpdateRequired) return Routes.splash;
       // The one non-/auth screen a logged-out visitor may open: the assistant
       // trial. Signed-in users are bounced off it (they have the real tab).
       final onGuestAssistant = location == Routes.guestAssistant;
@@ -186,6 +197,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: Routes.guestAssistant,
         builder: (_, _) => const GuestAssistantScreen(),
       ),
+      // Hard version block (see the version-gate redirect above).
+      GoRoute(
+        path: Routes.updateRequired,
+        builder: (_, _) => const UpdateRequiredScreen(),
+      ),
       GoRoute(path: Routes.login, builder: (_, _) => const LoginScreen()),
       GoRoute(path: Routes.signup, builder: (_, _) => const SignupScreen()),
       GoRoute(
@@ -210,9 +226,13 @@ String _phoneArg(GoRouterState state) {
   return extra is Map && extra['phone'] is String ? extra['phone'] as String : '';
 }
 
-/// Bridges [authControllerProvider] into a Listenable go_router can watch.
+/// Bridges auth + version-gate state into a Listenable go_router can watch.
+/// Listening also instantiates the version-gate controller, which kicks off
+/// its launch check.
 class _AuthRefresh extends ChangeNotifier {
   _AuthRefresh(Ref ref) {
     ref.listen<AuthState>(authControllerProvider, (_, _) => notifyListeners());
+    ref.listen<VersionGateState>(
+        versionGateControllerProvider, (_, _) => notifyListeners());
   }
 }

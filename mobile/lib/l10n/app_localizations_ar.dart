@@ -328,6 +328,25 @@ class AppLocalizationsAr extends AppLocalizations {
   String get useThisAddress => 'استخدام هذا العنوان';
 
   @override
+  String get updateRequiredTitle => 'التحديث مطلوب';
+
+  @override
+  String get updateRequiredBody =>
+      'هذا الإصدار من التطبيق لم يعد مدعومًا. يرجى التحديث للمتابعة.';
+
+  @override
+  String get updateAvailableTitle => 'يتوفر تحديث';
+
+  @override
+  String get updateAvailableBody => 'يتوفر إصدار أحدث من التطبيق.';
+
+  @override
+  String get updateNow => 'حدّث الآن';
+
+  @override
+  String get notNow => 'ليس الآن';
+
+  @override
   String get selectAddress => 'اختر العنوان';
 
   @override

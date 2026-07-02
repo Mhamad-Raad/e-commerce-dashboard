@@ -18,6 +18,7 @@ class AppPrefs {
   static const _kLocale = 'locale';
   static const _kOnboarded = 'onboarded';
   static const _kGuestDeviceId = 'guest_device_id';
+  static const _kLastNudgedVersion = 'last_nudged_version';
 
   ThemeMode get themeMode => switch (_p.getString(_kThemeMode)) {
         'light' => ThemeMode.light,
@@ -31,6 +32,12 @@ class AppPrefs {
 
   bool get onboarded => _p.getBool(_kOnboarded) ?? false;
   Future<void> setOnboarded(bool v) => _p.setBool(_kOnboarded, v);
+
+  /// Last app version the "update available" nudge was shown for (once per
+  /// version — see VersionGateController.dismissNudge).
+  String? get lastNudgedVersion => _p.getString(_kLastNudgedVersion);
+  Future<void> setLastNudgedVersion(String v) =>
+      _p.setString(_kLastNudgedVersion, v);
 
   /// Stable, app-generated id for the unauthenticated assistant trial. Generated
   /// once on first use and persisted, so the backend can hold a guest to their

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../app/env/env.dart';
 import 'auth_interceptor.dart';
+import 'version_gate_interceptor.dart';
 
 /// Shared Dio instance, configured per flavor.
 final dioProvider = Provider<Dio>((ref) {
@@ -15,6 +16,7 @@ final dioProvider = Provider<Dio>((ref) {
       contentType: 'application/json',
     ),
   );
+  dio.interceptors.add(VersionGateInterceptor(ref));
   dio.interceptors.add(AuthInterceptor(ref));
   if (config.env == Env.dev) {
     dio.interceptors.add(LogInterceptor(requestBody: true, responseBody: true));

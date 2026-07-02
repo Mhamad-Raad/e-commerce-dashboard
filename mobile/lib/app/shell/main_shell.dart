@@ -3,9 +3,12 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../core/l10n/l10n_ext.dart';
+import '../../core/version_gate/version_gate_controller.dart';
 import '../../features/notifications/data/push_service.dart';
+import '../theme/app_spacing.dart';
 
 /// The authenticated app shell: a body that swaps between the four main tabs
 /// (Home / Products / Assistant / Profile) with a frosted-glass bottom nav bar.
@@ -38,7 +41,63 @@ class _MainShellState extends ConsumerState<MainShell> {
         title: l10n.routineReminderTitle,
         body: l10n.routineReminderBody,
       );
+      // The launch check may already have resolved before the shell mounted —
+      // the ref.listen in build only catches later changes.
+      _maybeShowUpdateNudge();
     });
+  }
+
+  /// Dismissible "update available" sheet, shown once per latestAppVersion
+  /// (dismissNudge persists it). Hard blocks never reach here — the router
+  /// redirects to UpdateRequiredScreen before the shell builds.
+  void _maybeShowUpdateNudge() {
+    final gate = ref.read(versionGateControllerProvider);
+    if (gate.nudgeVersion == null) return;
+    ref.read(versionGateControllerProvider.notifier).dismissNudge();
+
+    final l10n = context.l10n;
+    final storeUrl = gate.storeUrl;
+    showModalBottomSheet<void>(
+      context: context,
+      showDragHandle: true,
+      builder: (sheetContext) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(
+              AppSpacing.margin, 0, AppSpacing.margin, AppSpacing.md),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.system_update_alt,
+                  size: 40, color: Theme.of(sheetContext).colorScheme.primary),
+              const SizedBox(height: AppSpacing.md),
+              Text(l10n.updateAvailableTitle,
+                  style: Theme.of(sheetContext).textTheme.titleMedium),
+              const SizedBox(height: AppSpacing.xs),
+              Text(l10n.updateAvailableBody,
+                  style: Theme.of(sheetContext).textTheme.bodyMedium,
+                  textAlign: TextAlign.center),
+              const SizedBox(height: AppSpacing.lg),
+              if (storeUrl != null)
+                SizedBox(
+                  width: double.infinity,
+                  child: FilledButton(
+                    onPressed: () {
+                      Navigator.pop(sheetContext);
+                      launchUrl(Uri.parse(storeUrl),
+                          mode: LaunchMode.externalApplication);
+                    },
+                    child: Text(l10n.updateNow),
+                  ),
+                ),
+              TextButton(
+                onPressed: () => Navigator.pop(sheetContext),
+                child: Text(l10n.notNow),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   @override
@@ -46,6 +105,13 @@ class _MainShellState extends ConsumerState<MainShell> {
     final navigationShell = widget.navigationShell;
     final l10n = context.l10n;
     final scheme = Theme.of(context).colorScheme;
+
+    // A slow gate check can resolve after the shell mounted.
+    ref.listen(versionGateControllerProvider, (prev, next) {
+      if (next.nudgeVersion != null && prev?.nudgeVersion == null) {
+        _maybeShowUpdateNudge();
+      }
+    });
 
     return Scaffold(
       // Let content scroll behind the translucent bar for the frosted effect.

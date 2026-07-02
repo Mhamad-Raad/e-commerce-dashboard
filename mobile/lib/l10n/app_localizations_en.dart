@@ -332,6 +332,25 @@ class AppLocalizationsEn extends AppLocalizations {
   String get useThisAddress => 'Use this address';
 
   @override
+  String get updateRequiredTitle => 'Update required';
+
+  @override
+  String get updateRequiredBody =>
+      'This version of the app is no longer supported. Please update to continue.';
+
+  @override
+  String get updateAvailableTitle => 'Update available';
+
+  @override
+  String get updateAvailableBody => 'A newer version of the app is available.';
+
+  @override
+  String get updateNow => 'Update now';
+
+  @override
+  String get notNow => 'Not now';
+
+  @override
   String get selectAddress => 'Select address';
 
   @override

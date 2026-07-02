@@ -40,6 +40,8 @@ class Routes {
   // Guest assistant trial — the ONE screen a logged-out visitor may open outside
   // the /auth/* screens (see the redirect in appRouterProvider).
   static const guestAssistant = '/guest/assistant';
+  // Hard version block (server-driven) — reachable regardless of auth state.
+  static const updateRequired = '/update-required';
   static const login = '/auth/login';
   static const signup = '/auth/signup';
   static const otp = '/auth/otp';
