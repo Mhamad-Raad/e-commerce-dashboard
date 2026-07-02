@@ -60,6 +60,11 @@ final guestAssistantControllerProvider =
 class GuestAssistantController extends Notifier<GuestChatState> {
   AssistantRepository get _repo => ref.read(assistantRepositoryProvider);
 
+  // Bumped when the guest transcript is reset (on sign-in). A reply in flight
+  // captures this before its await and is dropped if it changed, so a late reply
+  // can't repopulate the cleared guest chat for the next user on a shared device.
+  int _generation = 0;
+
   String get _deviceId => ref.read(prefsProvider).guestDeviceId();
 
   /// Human-readable reply-language hint for the backend system prompt.
@@ -78,6 +83,7 @@ class GuestAssistantController extends Notifier<GuestChatState> {
     // clears on logout.
     ref.listen(authControllerProvider, (_, next) {
       if (next.status == AuthStatus.authenticated) {
+        _generation++;
         state = const GuestChatState();
       }
     });
@@ -112,6 +118,7 @@ class GuestAssistantController extends Notifier<GuestChatState> {
   }
 
   Future<void> _request(String message) async {
+    final gen = _generation;
     state = state.copyWith(sending: true, clearError: true);
     final result = await _repo.sendGuest(
       deviceId: _deviceId,
@@ -119,6 +126,8 @@ class GuestAssistantController extends Notifier<GuestChatState> {
       message: message,
       language: _languageHint,
     );
+    // Guest chat was reset (user signed in) mid-flight — drop the late reply.
+    if (gen != _generation) return;
     switch (result) {
       case Success(value: final reply):
         final remaining = reply.guestMessagesRemaining ?? state.remaining;

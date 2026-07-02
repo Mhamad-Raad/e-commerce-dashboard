@@ -45,6 +45,11 @@ final assistantChatControllerProvider =
 class AssistantChatController extends Notifier<AssistantChatState> {
   AssistantRepository get _repo => ref.read(assistantRepositoryProvider);
 
+  // Bumped on every transcript reset (logout / new chat). An in-flight reply
+  // captures the generation before its await and is dropped if it changed, so a
+  // late reply can't repopulate a cleared transcript (shared-device leak).
+  int _generation = 0;
+
   /// Human-readable reply-language hint for the backend system prompt.
   String get _languageHint => switch (ref.read(localeControllerProvider).languageCode) {
         'ar' => 'Arabic',
@@ -59,6 +64,7 @@ class AssistantChatController extends Notifier<AssistantChatState> {
     // tab shell, so it won't reset on its own).
     ref.listen(authControllerProvider, (_, next) {
       if (next.status == AuthStatus.unauthenticated) {
+        _generation++;
         state = const AssistantChatState();
       }
     });
@@ -92,15 +98,22 @@ class AssistantChatController extends Notifier<AssistantChatState> {
   }
 
   /// Clear the transcript and start a fresh conversation.
-  void newChat() => state = const AssistantChatState();
+  void newChat() {
+    _generation++;
+    state = const AssistantChatState();
+  }
 
   Future<void> _request(String message) async {
+    final gen = _generation;
     state = state.copyWith(sending: true, clearError: true);
     final result = await _repo.send(
       conversationId: state.conversationId,
       message: message,
       language: _languageHint,
     );
+    // Transcript was reset (logout / new chat) while the reply was in flight —
+    // discard it so it can't append to or resurrect a cleared conversation.
+    if (gen != _generation) return;
     switch (result) {
       case Success(value: final reply):
         state = state.copyWith(
