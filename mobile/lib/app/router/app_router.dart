@@ -22,6 +22,7 @@ import '../../features/cart/presentation/checkout_screen.dart';
 import '../../features/cart/presentation/order_confirmation_screen.dart';
 import '../../features/cart/presentation/select_address_screen.dart';
 import '../../features/assistant/presentation/assistant_screen.dart';
+import '../../features/assistant/presentation/guest_assistant_screen.dart';
 import '../../features/catalog/presentation/category_products_screen.dart';
 import '../../features/catalog/presentation/home/home_screen.dart';
 import '../../features/catalog/presentation/products_screen.dart';
@@ -49,19 +50,22 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       final location = state.matchedLocation;
       final onSplash = location == Routes.splash;
       final inAuth = location.startsWith('/auth');
+      // The one non-/auth screen a logged-out visitor may open: the assistant
+      // trial. Signed-in users are bounced off it (they have the real tab).
+      final onGuestAssistant = location == Routes.guestAssistant;
 
       // Still restoring the session: hold on the splash.
       if (status == AuthStatus.unknown) {
         return onSplash ? null : Routes.splash;
       }
       if (status == AuthStatus.authenticated) {
-        // Logged in: leave the splash / auth screens for home.
-        return (onSplash || inAuth) ? Routes.home : null;
+        // Logged in: leave the splash / auth screens / guest trial for home.
+        return (onSplash || inAuth || onGuestAssistant) ? Routes.home : null;
       }
-      // Resolved + logged out: leave the splash, allow the auth screens,
-      // gate everything else to login. (Splash is NOT an auth screen — a
-      // logged-out user sitting on it must be sent to login, not left there.)
-      return (onSplash || !inAuth) ? Routes.login : null;
+      // Resolved + logged out: leave the splash, allow the auth screens and the
+      // guest assistant trial, gate everything else to login. (Splash is NOT an
+      // auth screen — a logged-out user sitting on it must be sent to login.)
+      return (onSplash || !(inAuth || onGuestAssistant)) ? Routes.login : null;
     },
     routes: [
       GoRoute(path: Routes.splash, builder: (_, _) => const SplashScreen()),
@@ -169,6 +173,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: Routes.orderConfirmation,
         builder: (_, state) =>
             OrderConfirmationScreen(order: state.extra as PlacedOrder),
+      ),
+      // Guest assistant trial — reachable while logged out (see redirect).
+      GoRoute(
+        path: Routes.guestAssistant,
+        builder: (_, _) => const GuestAssistantScreen(),
       ),
       GoRoute(path: Routes.login, builder: (_, _) => const LoginScreen()),
       GoRoute(path: Routes.signup, builder: (_, _) => const SignupScreen()),

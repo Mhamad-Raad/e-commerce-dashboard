@@ -24,9 +24,20 @@ class _MainShellState extends ConsumerState<MainShell> {
   void initState() {
     super.initState();
     // The shell only mounts when authenticated, so this runs on every login —
-    // a good moment to (re)register the FCM device token. Inert if push is off.
+    // a good moment to (re)register the FCM device token (inert if push is off)
+    // and to (re)schedule the daily local skincare-routine reminder. The latter
+    // is independent of Firebase and re-scheduled here so a language change is
+    // picked up. Strings are read inside the post-frame callback where context
+    // is safely available.
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(pushServiceProvider).onAuthenticated();
+      if (!mounted) return;
+      final push = ref.read(pushServiceProvider);
+      push.onAuthenticated();
+      final l10n = context.l10n;
+      push.scheduleDailyRoutineReminder(
+        title: l10n.routineReminderTitle,
+        body: l10n.routineReminderBody,
+      );
     });
   }
 

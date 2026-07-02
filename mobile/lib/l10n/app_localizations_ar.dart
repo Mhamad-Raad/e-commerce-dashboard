@@ -59,6 +59,25 @@ class AppLocalizationsAr extends AppLocalizations {
       'هذا الرقم لديه حساب بالفعل. الرجاء تسجيل الدخول.';
 
   @override
+  String get gender => 'الجنس';
+
+  @override
+  String get genderFemale => 'أنثى';
+
+  @override
+  String get genderMale => 'ذكر';
+
+  @override
+  String get genderRequired => 'الرجاء اختيار الجنس.';
+
+  @override
+  String get routineReminderTitle => 'وقت العناية ببشرتك ✨';
+
+  @override
+  String get routineReminderBody =>
+      'هل أكملت روتينك اليوم؟ اضغط لمتابعة سريعة.';
+
+  @override
   String get verifyYourNumber => 'فعّل رقمك';
 
   @override
@@ -553,6 +572,27 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get assistantNewChat => 'محادثة جديدة';
+
+  @override
+  String get assistantGuestCta => 'جرّبي مساعد العناية بالبشرة';
+
+  @override
+  String assistantGuestRemaining(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count رسائل مجانية متبقية',
+      one: 'رسالة مجانية واحدة متبقية',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get assistantGuestWallTitle => 'سجّلي الدخول لمواصلة المحادثة';
+
+  @override
+  String get assistantGuestWallBody =>
+      'لقد استخدمتِ رسائلك المجانية. سجّلي الدخول أو أنشئي حسابًا لمواصلة استشارتك.';
 
   @override
   String get editProfile => 'تعديل الملف الشخصي';

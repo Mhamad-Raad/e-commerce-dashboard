@@ -196,6 +196,42 @@ abstract class AppLocalizations {
   /// **'This number already has an account. Please log in.'**
   String get numberAlreadyRegistered;
 
+  /// No description provided for @gender.
+  ///
+  /// In en, this message translates to:
+  /// **'Gender'**
+  String get gender;
+
+  /// No description provided for @genderFemale.
+  ///
+  /// In en, this message translates to:
+  /// **'Female'**
+  String get genderFemale;
+
+  /// No description provided for @genderMale.
+  ///
+  /// In en, this message translates to:
+  /// **'Male'**
+  String get genderMale;
+
+  /// No description provided for @genderRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Please select your gender.'**
+  String get genderRequired;
+
+  /// No description provided for @routineReminderTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your skincare moment ✨'**
+  String get routineReminderTitle;
+
+  /// No description provided for @routineReminderBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Have you done your routine today? Tap for a quick check-in.'**
+  String get routineReminderBody;
+
   /// No description provided for @verifyYourNumber.
   ///
   /// In en, this message translates to:
@@ -1161,6 +1197,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'New chat'**
   String get assistantNewChat;
+
+  /// No description provided for @assistantGuestCta.
+  ///
+  /// In en, this message translates to:
+  /// **'Try our skincare assistant'**
+  String get assistantGuestCta;
+
+  /// No description provided for @assistantGuestRemaining.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 free message left} other{{count} free messages left}}'**
+  String assistantGuestRemaining(int count);
+
+  /// No description provided for @assistantGuestWallTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Log in to keep chatting'**
+  String get assistantGuestWallTitle;
+
+  /// No description provided for @assistantGuestWallBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'ve used your free messages. Log in or create an account to continue your consultation.'**
+  String get assistantGuestWallBody;
 
   /// No description provided for @editProfile.
   ///

@@ -18,6 +18,12 @@
   "passwordMin8": "Password (min 8 characters)",
   "namePhonePasswordRequired": "Name, phone and password are required.",
   "numberAlreadyRegistered": "This number already has an account. Please log in.",
+  "gender": "Gender",
+  "genderFemale": "Female",
+  "genderMale": "Male",
+  "genderRequired": "Please select your gender.",
+  "routineReminderTitle": "Your skincare moment ✨",
+  "routineReminderBody": "Have you done your routine today? Tap for a quick check-in.",
 
   "verifyYourNumber": "Verify your number",
   "otpSentTo": "Enter the code we sent on WhatsApp to {phone}.",
@@ -210,6 +216,15 @@
   "assistantUnavailable": "The assistant isn't available right now. Please try again later.",
   "assistantError": "Something went wrong. Please try again.",
   "assistantNewChat": "New chat",
+  "assistantGuestCta": "Try our skincare assistant",
+  "assistantGuestRemaining": "{count, plural, =1{1 free message left} other{{count} free messages left}}",
+  "@assistantGuestRemaining": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "assistantGuestWallTitle": "Log in to keep chatting",
+  "assistantGuestWallBody": "You've used your free messages. Log in or create an account to continue your consultation.",
   "editProfile": "Edit profile",
   "changePassword": "Change password",
   "preferences": "Preferences",

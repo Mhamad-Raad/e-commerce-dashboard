@@ -37,6 +37,12 @@ class RateLimitFailure extends Failure {
   const RateLimitFailure([super.message = 'Too many attempts. Try again shortly.']);
 }
 
+/// 403 with code GUEST_LIMIT_REACHED — a logged-out guest used up their free
+/// assistant turns. The UI swaps the input for a "log in to continue" wall.
+class GuestLimitFailure extends Failure {
+  const GuestLimitFailure([super.message = 'Guest message limit reached']);
+}
+
 class ValidationFailure extends Failure {
   const ValidationFailure(super.message);
 }

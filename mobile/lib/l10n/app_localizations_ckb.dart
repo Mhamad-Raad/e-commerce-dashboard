@@ -60,6 +60,25 @@ class AppLocalizationsCkb extends AppLocalizations {
       'ئەم ژمارەیە هەژماری هەیە. تکایە بچۆ ژوورەوە.';
 
   @override
+  String get gender => 'ڕەگەز';
+
+  @override
+  String get genderFemale => 'مێ';
+
+  @override
+  String get genderMale => 'نێر';
+
+  @override
+  String get genderRequired => 'تکایە ڕەگەزەکەت هەڵبژێرە.';
+
+  @override
+  String get routineReminderTitle => 'کاتی چاودێری پێستەکەت ✨';
+
+  @override
+  String get routineReminderBody =>
+      'ئەمڕۆ ڕووتینەکەت ئەنجامدا؟ دەستبکە بۆ پشکنینێکی خێرا.';
+
+  @override
   String get verifyYourNumber => 'ژمارەکەت پشتڕاستبکەرەوە';
 
   @override
@@ -557,6 +576,27 @@ class AppLocalizationsCkb extends AppLocalizations {
 
   @override
   String get assistantNewChat => 'گفتوگۆی نوێ';
+
+  @override
+  String get assistantGuestCta => 'یاریدەدەری چاودێری پێست تاقیبکەرەوە';
+
+  @override
+  String assistantGuestRemaining(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count نامەی بەخۆڕایی ماوە',
+      one: '١ نامەی بەخۆڕایی ماوە',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get assistantGuestWallTitle => 'بچۆ ژوورەوە بۆ بەردەوامبوون لە گفتوگۆ';
+
+  @override
+  String get assistantGuestWallBody =>
+      'نامە بەخۆڕاییەکانت بەکارهێنا. بچۆ ژوورەوە یان هەژمارێک دروستبکە بۆ بەردەوامبوونی ڕاوێژەکەت.';
 
   @override
   String get editProfile => 'دەستکاری پرۆفایل';

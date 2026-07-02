@@ -35,11 +35,17 @@ class ChatReply {
     required this.conversationId,
     required this.message,
     this.products = const [],
+    this.guestMessagesRemaining,
   });
 
   final String conversationId;
   final String message;
   final List<CatalogProduct> products;
+
+  /// Free guest turns left after this reply — present ONLY on the guest endpoint
+  /// (`/app/assistant/guest/chat`); null for the authenticated path. Drives the
+  /// login wall when it hits zero.
+  final int? guestMessagesRemaining;
 
   factory ChatReply.fromJson(Map<String, dynamic> json) => ChatReply(
         conversationId: json['conversationId'] as String,
@@ -49,5 +55,6 @@ class ChatReply {
                 .map((e) => CatalogProduct.fromJson(Map<String, dynamic>.from(e)))
                 .toList() ??
             const [],
+        guestMessagesRemaining: (json['guestMessagesRemaining'] as num?)?.toInt(),
       );
 }

@@ -60,6 +60,25 @@ class AppLocalizationsEn extends AppLocalizations {
       'This number already has an account. Please log in.';
 
   @override
+  String get gender => 'Gender';
+
+  @override
+  String get genderFemale => 'Female';
+
+  @override
+  String get genderMale => 'Male';
+
+  @override
+  String get genderRequired => 'Please select your gender.';
+
+  @override
+  String get routineReminderTitle => 'Your skincare moment ✨';
+
+  @override
+  String get routineReminderBody =>
+      'Have you done your routine today? Tap for a quick check-in.';
+
+  @override
   String get verifyYourNumber => 'Verify your number';
 
   @override
@@ -557,6 +576,27 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get assistantNewChat => 'New chat';
+
+  @override
+  String get assistantGuestCta => 'Try our skincare assistant';
+
+  @override
+  String assistantGuestRemaining(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count free messages left',
+      one: '1 free message left',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get assistantGuestWallTitle => 'Log in to keep chatting';
+
+  @override
+  String get assistantGuestWallBody =>
+      'You\'ve used your free messages. Log in or create an account to continue your consultation.';
 
   @override
   String get editProfile => 'Edit profile';

@@ -34,6 +34,9 @@ class Routes {
   static const checkoutAddress = '/checkout/address';
   static const checkout = '/checkout';
   static const orderConfirmation = '/order-confirmation';
+  // Guest assistant trial — the ONE screen a logged-out visitor may open outside
+  // the /auth/* screens (see the redirect in appRouterProvider).
+  static const guestAssistant = '/guest/assistant';
   static const login = '/auth/login';
   static const signup = '/auth/signup';
   static const otp = '/auth/otp';

@@ -16,12 +16,23 @@ import 'pill_badge.dart';
 /// A product tile for the home/shop grids. Cover image (with an optional promo
 /// badge + quick add-to-cart), boutique brand in italic serif, name, and price
 /// (struck-through original when on sale). Tapping is wired by the parent.
+///
+/// Set [showActions] to false to hide the favorite + add-to-cart overlays — both
+/// require an account, so guest/preview contexts (e.g. the logged-out assistant
+/// trial) render a non-interactive card and handle [onTap] themselves.
 class ProductCard extends StatelessWidget {
-  const ProductCard({super.key, required this.product, this.badge, this.onTap});
+  const ProductCard({
+    super.key,
+    required this.product,
+    this.badge,
+    this.onTap,
+    this.showActions = true,
+  });
 
   final CatalogProduct product;
   final String? badge;
   final VoidCallback? onTap;
+  final bool showActions;
 
   @override
   Widget build(BuildContext context) {
@@ -55,20 +66,23 @@ class ProductCard extends StatelessWidget {
                         ),
                       ),
                     ),
-                  Align(
-                    alignment: AlignmentDirectional.topEnd,
-                    child: Padding(
-                      padding: const EdgeInsets.all(AppSpacing.sm),
-                      child: FavoriteButton(productId: product.id, compact: true),
+                  if (showActions) ...[
+                    Align(
+                      alignment: AlignmentDirectional.topEnd,
+                      child: Padding(
+                        padding: const EdgeInsets.all(AppSpacing.sm),
+                        child:
+                            FavoriteButton(productId: product.id, compact: true),
+                      ),
                     ),
-                  ),
-                  Align(
-                    alignment: AlignmentDirectional.bottomEnd,
-                    child: Padding(
-                      padding: const EdgeInsets.all(AppSpacing.sm),
-                      child: _AddToCartButton(product: product),
+                    Align(
+                      alignment: AlignmentDirectional.bottomEnd,
+                      child: Padding(
+                        padding: const EdgeInsets.all(AppSpacing.sm),
+                        child: _AddToCartButton(product: product),
+                      ),
                     ),
-                  ),
+                  ],
                 ],
               ),
             ),
