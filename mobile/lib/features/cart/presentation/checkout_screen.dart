@@ -38,6 +38,9 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
   }
 
   Future<void> _placeOrder() async {
+    // Guard reentrancy directly: the disabled-button check is build-time, so two
+    // taps in the same frame both pass it and would create two orders.
+    if (_placing) return;
     setState(() => _placing = true);
     final result = await ref.read(cartControllerProvider.notifier).checkout(
           addressId: widget.addressId,

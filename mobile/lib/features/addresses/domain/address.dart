@@ -34,7 +34,7 @@ class Address {
       humanizeGeo(city),
       humanizeGeo(governorate),
     ];
-    return parts.join('، ');
+    return parts.join(', ');
   }
 
   factory Address.fromJson(Map<String, dynamic> json) => Address(

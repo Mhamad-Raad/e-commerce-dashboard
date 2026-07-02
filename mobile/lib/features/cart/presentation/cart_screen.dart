@@ -205,6 +205,7 @@ class _CartSummaryState extends ConsumerState<_CartSummary> {
   }
 
   Future<void> _applyCoupon() async {
+    if (_applying) return;
     if (_coupon.text.trim().isEmpty) return;
     setState(() => _applying = true);
     final result = await ref

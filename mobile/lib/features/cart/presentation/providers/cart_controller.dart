@@ -60,10 +60,10 @@ class CartController extends AsyncNotifier<Cart> {
       paymentMethod: paymentMethod,
       notes: notes,
     );
-    if (result is Success<PlacedOrder>) {
-      // The cart was consumed (CHECKED_OUT); reload the fresh empty open cart.
-      state = await AsyncValue.guard(() async => (await _repo.getCart()).unwrapOrThrow());
-    }
+    // Reload the cart either way: success consumed it (fresh empty open cart);
+    // failure means the server rejected it (out of stock / invalid coupon /
+    // inactive product), so show the current state instead of the stale cart.
+    state = await AsyncValue.guard(() async => (await _repo.getCart()).unwrapOrThrow());
     return result;
   }
 
