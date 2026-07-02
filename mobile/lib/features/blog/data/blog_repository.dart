@@ -24,7 +24,7 @@ class BlogRepository {
 
 /// A single article as an AsyncValue, keyed by id. Watches the locale so the
 /// article refetches in the new language on switch.
-final blogPostProvider = FutureProvider.family<BlogPost, String>((ref, id) async {
+final blogPostProvider = FutureProvider.autoDispose.family<BlogPost, String>((ref, id) async {
   final lang = ref.watch(localeControllerProvider).languageCode;
   final result = await ref.watch(blogRepositoryProvider).getPost(id, lang);
   return result.unwrapOrThrow();

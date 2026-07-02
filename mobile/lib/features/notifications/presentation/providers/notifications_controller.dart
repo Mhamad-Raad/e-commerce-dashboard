@@ -26,10 +26,13 @@ class NotificationsController extends AsyncNotifier<List<AppNotification>> {
   }
 
   Future<void> refresh() async {
-    state = await AsyncValue.guard(
-      () async => (await _repo.list(_lang)).unwrapOrThrow(),
-    );
-    ref.invalidate(unreadCountProvider);
+    // Only replace the list on success — a flaky pull-to-refresh must not blank
+    // the already-loaded notifications with an error view.
+    final result = await _repo.list(_lang);
+    if (result case Success(value: final items)) {
+      state = AsyncData(items);
+      ref.invalidate(unreadCountProvider);
+    }
   }
 
   Future<void> markRead(String id) async {
@@ -41,16 +44,23 @@ class NotificationsController extends AsyncNotifier<List<AppNotification>> {
       for (final n in current)
         if (n.id == id && !n.isRead) n.copyWith(isRead: true) else n,
     ]);
-    await _repo.markRead(id);
+    final result = await _repo.markRead(id);
+    if (result case Failed()) {
+      state = AsyncData(current); // revert so UI doesn't diverge from server
+      return;
+    }
     ref.invalidate(unreadCountProvider);
   }
 
   Future<void> markAllRead() async {
     final current = state.maybeWhen(data: (v) => v, orElse: () => null);
-    if (current != null) {
-      state = AsyncData([for (final n in current) n.copyWith(isRead: true)]);
+    if (current == null) return;
+    state = AsyncData([for (final n in current) n.copyWith(isRead: true)]);
+    final result = await _repo.markAllRead();
+    if (result case Failed()) {
+      state = AsyncData(current); // revert on failure
+      return;
     }
-    await _repo.markAllRead();
     ref.invalidate(unreadCountProvider);
   }
 }

@@ -174,7 +174,6 @@ class PushService {
   /// native Firebase config exists. Safe to call repeatedly.
   Future<void> _ensureLocalInit() async {
     if (_localReady) return;
-    _localReady = true;
 
     // Timezone DB is required to build TZDateTime for zonedSchedule. This is an
     // Iraq-market app (numbers are +964), so anchor the daily reminder to
@@ -197,6 +196,10 @@ class PushService {
         >();
     await android?.createNotificationChannel(_channel);
     await android?.createNotificationChannel(_routineChannel);
+
+    // Latch only after init actually succeeds — if any step above throws, a
+    // later call retries instead of silently skipping init for the session.
+    _localReady = true;
 
     // Cold start from tapping a local notification (e.g. the routine reminder):
     // the tap callback above only fires while the app is alive, so route the
