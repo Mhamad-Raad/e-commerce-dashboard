@@ -198,7 +198,10 @@ export function Inventory() {
               pageSize={limit}
               total={movements.data.total}
               onPageChange={setPage}
-              onPageSizeChange={setLimit}
+              onPageSizeChange={(n) => {
+                setLimit(n);
+                setPage(1);
+              }}
             />
           )}
         </CardContent>

@@ -27,8 +27,12 @@ import { OrdersTimeseriesChart } from './OrdersTimeseriesChart';
 const PRESETS = [7, 30, 60, 90];
 const DAY_MS = 24 * 60 * 60 * 1000;
 
-const todayISO = () => new Date(Date.now()).toISOString().slice(0, 10);
-const daysAgoISO = (n: number) => new Date(Date.now() - (n - 1) * DAY_MS).toISOString().slice(0, 10);
+// Local calendar date (not UTC): in UTC+3, toISOString() before 03:00 rolls the
+// date back a day, making "today" unselectable and presets end yesterday.
+const localISO = (d: Date) =>
+  `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+const todayISO = () => localISO(new Date(Date.now()));
+const daysAgoISO = (n: number) => localISO(new Date(Date.now() - (n - 1) * DAY_MS));
 
 export function Reports() {
   const { t } = useTranslation();
