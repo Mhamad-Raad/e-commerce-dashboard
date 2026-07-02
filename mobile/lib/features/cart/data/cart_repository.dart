@@ -16,9 +16,9 @@ class CartRepository {
 
   Future<Result<Cart>> getCart() => _guardCart(_api.getCart());
 
-  Future<Result<CartQuote>> getPreview() async {
+  Future<Result<CartQuote>> getPreview({List<String>? itemIds}) async {
     try {
-      return Success(CartQuote.fromJson(await _api.getPreview()));
+      return Success(CartQuote.fromJson(await _api.getPreview(itemIds: itemIds)));
     } catch (e) {
       return Failed(mapError(e));
     }
@@ -43,12 +43,14 @@ class CartRepository {
     required String addressId,
     required String paymentMethod,
     String? notes,
+    List<String>? itemIds,
   }) async {
     try {
       final json = await _api.checkout(
         addressId: addressId,
         paymentMethod: paymentMethod,
         notes: notes,
+        itemIds: itemIds,
       );
       return Success(PlacedOrder.fromJson(json));
     } catch (e) {

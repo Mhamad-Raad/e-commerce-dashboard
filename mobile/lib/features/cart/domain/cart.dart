@@ -1,7 +1,9 @@
 import '../../../core/money/money.dart';
 
 /// A line in the cart. `priceCents` is whole dinars (the snapshot taken when the
-/// item was added), `name`/`imageUrl` come from the resolved product.
+/// item was added), `name`/`imageUrl` come from the resolved product. Store +
+/// lead-days let the cart group items per store and show an arrival estimate
+/// (product override, else store default).
 class CartItem {
   const CartItem({
     required this.id,
@@ -12,6 +14,10 @@ class CartItem {
     this.variantName,
     this.imageUrl,
     this.currency = 'IQD',
+    this.storeId = '',
+    this.storeName = '',
+    this.minLeadDays = 3,
+    this.maxLeadDays = 7,
   });
 
   final String id;
@@ -22,12 +28,21 @@ class CartItem {
   final String? variantName;
   final String? imageUrl;
   final String currency;
+  final String storeId;
+  final String storeName;
+  final int minLeadDays;
+  final int maxLeadDays;
 
   Money get unitPrice => Money(priceCents, currency: currency);
   Money get lineTotal => Money(priceCents * quantity, currency: currency);
 
   factory CartItem.fromJson(Map<String, dynamic> json) {
     final product = json['product'];
+    final store = product is Map ? product['store'] : null;
+    final storeMin =
+        store is Map ? (store['minLeadDays'] as num?)?.toInt() : null;
+    final storeMax =
+        store is Map ? (store['maxLeadDays'] as num?)?.toInt() : null;
     return CartItem(
       id: json['id'] as String,
       productId: json['productId'] as String,
@@ -36,8 +51,55 @@ class CartItem {
       priceCents: (json['priceCents'] as num?)?.toInt() ?? 0,
       variantName: json['variantName'] as String?,
       imageUrl: product is Map ? product['imageUrl'] as String? : null,
+      storeId: store is Map ? (store['id'] as String? ?? '') : '',
+      storeName: store is Map ? (store['name'] as String? ?? '') : '',
+      minLeadDays: (product is Map
+              ? (product['minLeadDays'] as num?)?.toInt()
+              : null) ??
+          storeMin ??
+          3,
+      maxLeadDays: (product is Map
+              ? (product['maxLeadDays'] as num?)?.toInt()
+              : null) ??
+          storeMax ??
+          7,
     );
   }
+}
+
+/// Cart items of one store, in cart order. The arrival window is the widest
+/// span across the group's items (earliest min → latest max).
+class CartStoreGroup {
+  const CartStoreGroup({
+    required this.storeId,
+    required this.storeName,
+    required this.items,
+  });
+
+  final String storeId;
+  final String storeName;
+  final List<CartItem> items;
+
+  int get minLeadDays =>
+      items.fold(items.first.minLeadDays, (m, i) => i.minLeadDays < m ? i.minLeadDays : m);
+  int get maxLeadDays =>
+      items.fold(items.first.maxLeadDays, (m, i) => i.maxLeadDays > m ? i.maxLeadDays : m);
+}
+
+/// Group items per store, preserving first-appearance order.
+List<CartStoreGroup> groupItemsByStore(List<CartItem> items) {
+  final byStore = <String, List<CartItem>>{};
+  for (final item in items) {
+    byStore.putIfAbsent(item.storeId, () => []).add(item);
+  }
+  return [
+    for (final entry in byStore.entries)
+      CartStoreGroup(
+        storeId: entry.key,
+        storeName: entry.value.first.storeName,
+        items: entry.value,
+      ),
+  ];
 }
 
 /// The customer's open cart (`GET /app/cart`). Tax/fees aren't known here — they

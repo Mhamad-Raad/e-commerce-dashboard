@@ -16,8 +16,12 @@ class CartApi {
     return Map<String, dynamic>.from(res.data as Map);
   }
 
-  Future<Map<String, dynamic>> getPreview() async {
-    final res = await _dio.get('/app/cart/preview');
+  // itemIds limits the quote to the locally-selected items (see §selection in
+  // the cart controller); omitted -> the whole cart.
+  Future<Map<String, dynamic>> getPreview({List<String>? itemIds}) async {
+    final res = await _dio.get('/app/cart/preview', queryParameters: {
+      if (itemIds != null && itemIds.isNotEmpty) 'itemIds': itemIds.join(','),
+    });
     return Map<String, dynamic>.from(res.data as Map);
   }
 
@@ -56,11 +60,13 @@ class CartApi {
     required String addressId,
     required String paymentMethod,
     String? notes,
+    List<String>? itemIds,
   }) async {
     final res = await _dio.post('/app/cart/checkout', data: {
       'addressId': addressId,
       'paymentMethod': paymentMethod,
       if (notes != null && notes.isNotEmpty) 'notes': notes,
+      if (itemIds != null && itemIds.isNotEmpty) 'itemIds': itemIds,
     });
     return Map<String, dynamic>.from(res.data as Map);
   }
