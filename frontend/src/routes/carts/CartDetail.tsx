@@ -260,10 +260,20 @@ export function CartDetail() {
                     <Input
                       type="number"
                       min={1}
-                      value={item.quantity}
-                      onChange={(e) => {
+                      // Uncontrolled + commit on blur/Enter: the old per-keystroke
+                      // mutate fired a racing PATCH for every digit (typing "25"
+                      // sent 2 then 25 with no ordering guarantee). key resyncs the
+                      // default when the server value changes.
+                      key={item.quantity}
+                      defaultValue={item.quantity}
+                      onBlur={(e) => {
                         const qty = Number(e.target.value);
-                        if (qty > 0) updateItem.mutate({ itemId: item.id, qty });
+                        if (qty > 0 && qty !== item.quantity) {
+                          updateItem.mutate({ itemId: item.id, qty });
+                        }
+                      }}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') e.currentTarget.blur();
                       }}
                       className="w-20"
                     />
