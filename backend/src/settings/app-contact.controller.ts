@@ -19,6 +19,14 @@ export class AppContactController {
       phone: s.businessPhone ?? null,
       email: s.businessEmail ?? null,
       address: s.businessAddress ?? null,
+      // Social channels; whatsapp is a number (wa.me), the rest profile URLs.
+      whatsapp: s.socialWhatsapp ?? null,
+      instagram: s.socialInstagram ?? null,
+      facebook: s.socialFacebook ?? null,
+      tiktok: s.socialTiktok ?? null,
+      snapchat: s.socialSnapchat ?? null,
+      youtube: s.socialYoutube ?? null,
+      x: s.socialX ?? null,
     };
   }
 }

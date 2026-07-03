@@ -302,6 +302,15 @@ model Setting {
   latestAppVersion String?
   appStoreUrl      String?
   playStoreUrl     String?
+  // Social channels for the app's Contact screen (null = hidden there).
+  // socialWhatsapp is a phone number (wa.me); the rest are full profile URLs.
+  socialInstagram String?
+  socialFacebook  String?
+  socialTiktok    String?
+  socialSnapchat  String?
+  socialYoutube   String?
+  socialX         String?
+  socialWhatsapp  String?
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 }

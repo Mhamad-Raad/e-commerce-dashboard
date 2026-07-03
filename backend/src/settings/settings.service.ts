@@ -39,6 +39,13 @@ export class SettingsService {
         'latestAppVersion',
         'appStoreUrl',
         'playStoreUrl',
+        'socialInstagram',
+        'socialFacebook',
+        'socialTiktok',
+        'socialSnapchat',
+        'socialYoutube',
+        'socialX',
+        'socialWhatsapp',
       ]),
     };
     return this.prisma.setting.upsert({
