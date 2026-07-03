@@ -12,8 +12,10 @@ import '../../auth/presentation/widgets/auth_widgets.dart';
 import '../../cart/presentation/providers/cart_controller.dart';
 import '../../cart/presentation/widgets/cart_button.dart';
 import '../../favorites/presentation/widgets/favorite_button.dart';
+import '../../reviews/presentation/widgets/reviews_section.dart';
 import '../data/product_repository.dart';
 import '../domain/product_detail.dart';
+import 'widgets/added_to_cart_sheet.dart';
 
 /// Storefront product detail: gallery, brand/name, rating, price, description, a
 /// variant selector, quantity, a favorite toggle, and add-to-cart.
@@ -83,17 +85,27 @@ class _ProductBodyState extends ConsumerState<_ProductBody> {
   bool get _inStock => _availableStock > 0;
 
   Future<void> _addToCart() async {
+    final variant = _selectedVariant;
+    final quantity = _qty;
     setState(() => _adding = true);
     final result = await ref.read(cartControllerProvider.notifier).addProduct(
           _detail.id,
-          variantId: _selectedVariant?.id,
-          quantity: _qty,
+          variantId: variant?.id,
+          quantity: quantity,
         );
     if (!mounted) return;
     setState(() => _adding = false);
     switch (result) {
       case Success():
-        showMessage(context, context.l10n.addedToCart);
+        showAddedToCartSheet(
+          context,
+          name: _detail.name,
+          variantName: variant?.name,
+          quantity: quantity,
+          lineTotal: (variant?.salePrice ?? _detail.salePrice) * quantity,
+          imageUrl: variant?.imageUrl ??
+              (_detail.gallery.isEmpty ? null : _detail.gallery.first),
+        );
       case Failed(failure: final f):
         showFailure(context, f);
     }
@@ -193,6 +205,12 @@ class _ProductBodyState extends ConsumerState<_ProductBody> {
                       const SizedBox(height: AppSpacing.sm),
                       Text(_detail.description!, style: text.bodyMedium),
                     ],
+                    const SizedBox(height: AppSpacing.lg),
+                    ReviewsSection(
+                      productId: _detail.id,
+                      fallbackAvg: _detail.ratingAvg,
+                      fallbackCount: _detail.ratingCount,
+                    ),
                   ],
                 ),
               ),

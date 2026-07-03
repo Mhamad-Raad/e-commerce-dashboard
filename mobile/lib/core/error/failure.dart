@@ -43,6 +43,13 @@ class GuestLimitFailure extends Failure {
   const GuestLimitFailure([super.message = 'Guest message limit reached']);
 }
 
+/// 403 on review upsert — the customer has no delivered order containing the
+/// product. The UI shows a friendly "review what you've received" message.
+class ReviewNotAllowedFailure extends Failure {
+  const ReviewNotAllowedFailure(
+      [super.message = 'You can only review products from delivered orders']);
+}
+
 class ValidationFailure extends Failure {
   const ValidationFailure(super.message);
 }
