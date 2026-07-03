@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ConflictException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -29,6 +30,15 @@ const orderInclude = {
 // lives on Order.stockReserved.
 const STOCK_REVERSING_STATUSES: OrderStatus[] = ['CANCELLED', 'REFUNDED'];
 const isReversing = (status: OrderStatus) => STOCK_REVERSING_STATUSES.includes(status);
+
+interface UpdateOrderOptions {
+  // 409 unless the current status is one of these — checked inside the
+  // row-locked transaction, so a concurrent transition can't slip past.
+  allowedFrom?: OrderStatus[];
+  conflictMessage?: string;
+  // Extra keys merged into the STATUS_CHANGED event meta (e.g. { by: 'customer' }).
+  statusMeta?: Record<string, unknown>;
+}
 
 const generateOrderNumber = () => {
   const ts = Date.now().toString(36).toUpperCase();
@@ -133,6 +143,21 @@ export class OrdersService {
           orderBy: { createdAt: 'asc' },
           select: { method: true, status: true, amountCents: true },
         },
+        // Customer-safe timeline only — payment/refund/internal-note events
+        // never leave the dashboard.
+        events: {
+          where: {
+            type: {
+              in: [
+                OrderEventType.CREATED,
+                OrderEventType.STATUS_CHANGED,
+                OrderEventType.TRACKING_UPDATED,
+              ],
+            },
+          },
+          orderBy: { createdAt: 'asc' },
+          select: { type: true, meta: true, createdAt: true },
+        },
       },
     });
     if (!order || order.customerId !== customerId) {
@@ -176,7 +201,37 @@ export class OrdersService {
         status: p.status,
         amountCents: p.amountCents,
       })),
+      events: order.events.map((e) => ({
+        type: e.type,
+        meta: e.meta,
+        createdAt: e.createdAt,
+      })),
     };
+  }
+
+  /**
+   * Customer self-service cancel: only while the order is still PENDING or
+   * PROCESSING. Runs through update() so stock restore, coupon release and the
+   * STATUS_CHANGED event behave exactly like the dashboard path.
+   */
+  async cancelForCustomer(customerId: string, id: string) {
+    const order = await this.prisma.order.findUnique({
+      where: { id },
+      select: { customerId: true },
+    });
+    if (!order || order.customerId !== customerId) {
+      throw new NotFoundException('Order not found');
+    }
+    await this.update(
+      id,
+      { status: OrderStatus.CANCELLED },
+      {
+        allowedFrom: [OrderStatus.PENDING, OrderStatus.PROCESSING],
+        conflictMessage: 'This order can no longer be cancelled',
+        statusMeta: { by: 'customer' },
+      },
+    );
+    return this.getForCustomer(customerId, id);
   }
 
   async exportCsv(query: ListOrdersQueryDto) {
@@ -418,7 +473,7 @@ export class OrdersService {
     return order;
   }
 
-  async update(id: string, dto: UpdateOrderDto) {
+  async update(id: string, dto: UpdateOrderDto, opts: UpdateOrderOptions = {}) {
     const existing = await this.findById(id);
     let statusChanged = false;
 
@@ -433,6 +488,12 @@ export class OrdersService {
       });
       if (!current) throw new NotFoundException(`Order ${id} not found`);
 
+      if (opts.allowedFrom && !opts.allowedFrom.includes(current.status)) {
+        throw new ConflictException(
+          opts.conflictMessage ?? 'Order status no longer allows this change',
+        );
+      }
+
       const entersReversal =
         dto.status !== undefined && isReversing(dto.status) && !isReversing(current.status);
       const leavesReversal =
@@ -445,6 +506,7 @@ export class OrdersService {
         await this.events.record(tx, id, OrderEventType.STATUS_CHANGED, {
           from: current.status,
           to: dto.status,
+          ...opts.statusMeta,
         });
       }
       // Cancelling/refunding returns reserved stock; re-opening re-reserves it

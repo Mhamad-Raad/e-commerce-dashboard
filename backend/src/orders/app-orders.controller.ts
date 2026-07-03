@@ -1,4 +1,12 @@
-import { Controller, Get, Param, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Param,
+  Post,
+  UseGuards,
+} from '@nestjs/common';
 import { Public } from '../auth/decorators/public.decorator';
 import {
   CurrentCustomer,
@@ -27,5 +35,14 @@ export class AppOrdersController {
     @Param('id') id: string,
   ) {
     return this.orders.getForCustomer(customer.id, id);
+  }
+
+  @Post(':id/cancel')
+  @HttpCode(HttpStatus.OK)
+  cancel(
+    @CurrentCustomer() customer: CurrentCustomerPayload,
+    @Param('id') id: string,
+  ) {
+    return this.orders.cancelForCustomer(customer.id, id);
   }
 }
