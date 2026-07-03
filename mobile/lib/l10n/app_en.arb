@@ -361,5 +361,51 @@
       "number": { "type": "String" },
       "status": { "type": "String" }
     }
-  }
+  },
+
+  "reviewsTitle": "Reviews",
+  "seeAllReviews": "See all reviews",
+  "writeReview": "Write a review",
+  "editReview": "Edit your review",
+  "yourReview": "Your review",
+  "reviewPendingApproval": "Pending approval",
+  "reviewRatingLabel": "Your rating",
+  "reviewTitleLabel": "Title (optional)",
+  "reviewCommentLabel": "Comment (optional)",
+  "reviewSubmit": "Submit review",
+  "reviewDelete": "Delete review",
+  "reviewDeleteConfirm": "Delete your review?",
+  "reviewDeleteConfirmBody": "Your review will be removed from this product.",
+  "reviewSubmitted": "Thanks! Your review will appear once it's approved.",
+  "reviewDeleted": "Review deleted.",
+  "reviewNotEligible": "You can review products you've received.",
+  "reviewRatingRequired": "Please choose a rating.",
+  "reviewsLoadError": "Couldn't load reviews.",
+  "noReviewsYet": "No reviews yet",
+  "reviewsEmptyHint": "Be the first to review this product.",
+
+  "orderProgress": "Order progress",
+  "cancelOrder": "Cancel order",
+  "keepOrder": "Keep order",
+  "cancelOrderConfirmTitle": "Cancel this order?",
+  "cancelOrderConfirmBody": "Your order will be cancelled. This can't be undone.",
+  "orderCancelled": "Your order has been cancelled.",
+  "orderCancelTooLate": "This order can no longer be cancelled.",
+  "reorder": "Buy again",
+  "reorderAdded": "{count, plural, =1{1 item added to your cart} other{{count} items added to your cart}}",
+  "@reorderAdded": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "reorderSkippedTitle": "Some items couldn't be added",
+  "reorderUnavailable": "No longer available",
+  "goToCart": "Go to cart",
+  "orderCancelledBanner": "This order was cancelled",
+  "orderRefundedBanner": "This order was refunded",
+
+  "storiesTitle": "Stories",
+  "blogLoadError": "Couldn't load stories.",
+  "blogEmpty": "No stories yet",
+  "blogEmptyHint": "Check back soon for tips and news."
 }

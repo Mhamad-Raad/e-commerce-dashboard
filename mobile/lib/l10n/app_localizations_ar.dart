@@ -898,4 +898,126 @@ class AppLocalizationsAr extends AppLocalizations {
   String notifOrderStatusBody(String number, String status) {
     return 'طلبك $number الآن $status.';
   }
+
+  @override
+  String get reviewsTitle => 'التقييمات';
+
+  @override
+  String get seeAllReviews => 'عرض كل التقييمات';
+
+  @override
+  String get writeReview => 'اكتب تقييمًا';
+
+  @override
+  String get editReview => 'عدّل تقييمك';
+
+  @override
+  String get yourReview => 'تقييمك';
+
+  @override
+  String get reviewPendingApproval => 'بانتظار الموافقة';
+
+  @override
+  String get reviewRatingLabel => 'تقييمك';
+
+  @override
+  String get reviewTitleLabel => 'العنوان (اختياري)';
+
+  @override
+  String get reviewCommentLabel => 'التعليق (اختياري)';
+
+  @override
+  String get reviewSubmit => 'إرسال التقييم';
+
+  @override
+  String get reviewDelete => 'حذف التقييم';
+
+  @override
+  String get reviewDeleteConfirm => 'حذف تقييمك؟';
+
+  @override
+  String get reviewDeleteConfirmBody => 'سيُحذف تقييمك من هذا المنتج.';
+
+  @override
+  String get reviewSubmitted => 'شكرًا لك! سيظهر تقييمك بعد الموافقة عليه.';
+
+  @override
+  String get reviewDeleted => 'تم حذف التقييم.';
+
+  @override
+  String get reviewNotEligible => 'يمكنك تقييم المنتجات التي استلمتها.';
+
+  @override
+  String get reviewRatingRequired => 'الرجاء اختيار تقييم.';
+
+  @override
+  String get reviewsLoadError => 'تعذّر تحميل التقييمات.';
+
+  @override
+  String get noReviewsYet => 'لا توجد تقييمات بعد';
+
+  @override
+  String get reviewsEmptyHint => 'كن أول من يقيّم هذا المنتج.';
+
+  @override
+  String get orderProgress => 'مسار الطلب';
+
+  @override
+  String get cancelOrder => 'إلغاء الطلب';
+
+  @override
+  String get keepOrder => 'الاحتفاظ بالطلب';
+
+  @override
+  String get cancelOrderConfirmTitle => 'إلغاء هذا الطلب؟';
+
+  @override
+  String get cancelOrderConfirmBody => 'سيُلغى طلبك ولا يمكن التراجع عن ذلك.';
+
+  @override
+  String get orderCancelled => 'تم إلغاء طلبك.';
+
+  @override
+  String get orderCancelTooLate => 'لم يعد بالإمكان إلغاء هذا الطلب.';
+
+  @override
+  String get reorder => 'اطلب مجددًا';
+
+  @override
+  String reorderAdded(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'أُضيفت $count منتجات إلى سلتك',
+      one: 'أُضيف منتج واحد إلى سلتك',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get reorderSkippedTitle => 'تعذّرت إضافة بعض المنتجات';
+
+  @override
+  String get reorderUnavailable => 'لم يعد متوفرًا';
+
+  @override
+  String get goToCart => 'الذهاب إلى السلة';
+
+  @override
+  String get orderCancelledBanner => 'أُلغي هذا الطلب';
+
+  @override
+  String get orderRefundedBanner => 'أُعيد مبلغ هذا الطلب';
+
+  @override
+  String get storiesTitle => 'القصص';
+
+  @override
+  String get blogLoadError => 'تعذّر تحميل القصص.';
+
+  @override
+  String get blogEmpty => 'لا توجد قصص بعد';
+
+  @override
+  String get blogEmptyHint => 'عُد قريبًا للاطلاع على النصائح والأخبار.';
 }

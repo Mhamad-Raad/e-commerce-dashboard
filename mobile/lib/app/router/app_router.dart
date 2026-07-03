@@ -16,6 +16,7 @@ import '../../features/addresses/domain/address.dart';
 import '../../features/addresses/presentation/address_form_screen.dart';
 import '../../features/addresses/presentation/addresses_screen.dart';
 import '../../features/blog/presentation/blog_article_screen.dart';
+import '../../features/blog/presentation/blog_list_screen.dart';
 import '../../features/cart/domain/checkout_draft.dart';
 import '../../features/cart/domain/placed_order.dart';
 import '../../features/cart/presentation/cart_screen.dart';
@@ -39,6 +40,7 @@ import '../../features/info/presentation/contact_screen.dart';
 import '../../features/info/presentation/faq_screen.dart';
 import '../../features/info/presentation/legal_screen.dart';
 import '../../features/product/presentation/product_detail_screen.dart';
+import '../../features/reviews/presentation/product_reviews_screen.dart';
 import '../../core/version_gate/update_required_screen.dart';
 import '../../core/version_gate/version_gate_controller.dart';
 import '../shell/main_shell.dart';
@@ -92,11 +94,13 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         return (onSplash || inAuth || onGuestAssistant) ? Routes.home : null;
       }
       // Resolved + logged out: leave the splash, allow the auth screens, the
-      // guest assistant trial, and the informational pages; gate everything
-      // else to login. (Splash is NOT an auth screen — a logged-out user
-      // sitting on it must be sent to login.)
+      // guest assistant trial, the informational pages, and the public blog
+      // (list + articles); gate everything else to login. (Splash is NOT an
+      // auth screen — a logged-out user sitting on it must be sent to login.)
       final onInfo = _infoRoutes.contains(location);
-      return (onSplash || !(inAuth || onGuestAssistant || onInfo))
+      final onBlog = location == Routes.blog ||
+          location.startsWith('${Routes.blog}/');
+      return (onSplash || !(inAuth || onGuestAssistant || onInfo || onBlog))
           ? Routes.login
           : null;
     },
@@ -125,7 +129,9 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           ]),
         ],
       ),
-      // Full-screen article reader, pushed over the tab shell.
+      // Blog: list + full-screen article reader, pushed over the tab shell.
+      // Both public — see the logged-out allowlist in the redirect.
+      GoRoute(path: Routes.blog, builder: (_, _) => const BlogListScreen()),
       GoRoute(
         path: '${Routes.blog}/:id',
         builder: (_, state) =>
@@ -145,11 +151,16 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (_, state) =>
             AddressFormScreen(address: state.extra as Address?),
       ),
-      // Product detail + favorites.
+      // Product detail + reviews + favorites.
       GoRoute(
         path: '/product/:id',
         builder: (_, state) =>
             ProductDetailScreen(id: state.pathParameters['id']!),
+      ),
+      GoRoute(
+        path: '/product/:id/reviews',
+        builder: (_, state) =>
+            ProductReviewsScreen(productId: state.pathParameters['id']!),
       ),
       GoRoute(
         path: Routes.favorites,

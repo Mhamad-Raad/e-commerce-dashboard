@@ -1767,6 +1767,234 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Order {number} is now {status}.'**
   String notifOrderStatusBody(String number, String status);
+
+  /// No description provided for @reviewsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Reviews'**
+  String get reviewsTitle;
+
+  /// No description provided for @seeAllReviews.
+  ///
+  /// In en, this message translates to:
+  /// **'See all reviews'**
+  String get seeAllReviews;
+
+  /// No description provided for @writeReview.
+  ///
+  /// In en, this message translates to:
+  /// **'Write a review'**
+  String get writeReview;
+
+  /// No description provided for @editReview.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit your review'**
+  String get editReview;
+
+  /// No description provided for @yourReview.
+  ///
+  /// In en, this message translates to:
+  /// **'Your review'**
+  String get yourReview;
+
+  /// No description provided for @reviewPendingApproval.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending approval'**
+  String get reviewPendingApproval;
+
+  /// No description provided for @reviewRatingLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Your rating'**
+  String get reviewRatingLabel;
+
+  /// No description provided for @reviewTitleLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Title (optional)'**
+  String get reviewTitleLabel;
+
+  /// No description provided for @reviewCommentLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Comment (optional)'**
+  String get reviewCommentLabel;
+
+  /// No description provided for @reviewSubmit.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit review'**
+  String get reviewSubmit;
+
+  /// No description provided for @reviewDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete review'**
+  String get reviewDelete;
+
+  /// No description provided for @reviewDeleteConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete your review?'**
+  String get reviewDeleteConfirm;
+
+  /// No description provided for @reviewDeleteConfirmBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Your review will be removed from this product.'**
+  String get reviewDeleteConfirmBody;
+
+  /// No description provided for @reviewSubmitted.
+  ///
+  /// In en, this message translates to:
+  /// **'Thanks! Your review will appear once it\'s approved.'**
+  String get reviewSubmitted;
+
+  /// No description provided for @reviewDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Review deleted.'**
+  String get reviewDeleted;
+
+  /// No description provided for @reviewNotEligible.
+  ///
+  /// In en, this message translates to:
+  /// **'You can review products you\'ve received.'**
+  String get reviewNotEligible;
+
+  /// No description provided for @reviewRatingRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Please choose a rating.'**
+  String get reviewRatingRequired;
+
+  /// No description provided for @reviewsLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t load reviews.'**
+  String get reviewsLoadError;
+
+  /// No description provided for @noReviewsYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No reviews yet'**
+  String get noReviewsYet;
+
+  /// No description provided for @reviewsEmptyHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Be the first to review this product.'**
+  String get reviewsEmptyHint;
+
+  /// No description provided for @orderProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'Order progress'**
+  String get orderProgress;
+
+  /// No description provided for @cancelOrder.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel order'**
+  String get cancelOrder;
+
+  /// No description provided for @keepOrder.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep order'**
+  String get keepOrder;
+
+  /// No description provided for @cancelOrderConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel this order?'**
+  String get cancelOrderConfirmTitle;
+
+  /// No description provided for @cancelOrderConfirmBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Your order will be cancelled. This can\'t be undone.'**
+  String get cancelOrderConfirmBody;
+
+  /// No description provided for @orderCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Your order has been cancelled.'**
+  String get orderCancelled;
+
+  /// No description provided for @orderCancelTooLate.
+  ///
+  /// In en, this message translates to:
+  /// **'This order can no longer be cancelled.'**
+  String get orderCancelTooLate;
+
+  /// No description provided for @reorder.
+  ///
+  /// In en, this message translates to:
+  /// **'Buy again'**
+  String get reorder;
+
+  /// No description provided for @reorderAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 item added to your cart} other{{count} items added to your cart}}'**
+  String reorderAdded(int count);
+
+  /// No description provided for @reorderSkippedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Some items couldn\'t be added'**
+  String get reorderSkippedTitle;
+
+  /// No description provided for @reorderUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'No longer available'**
+  String get reorderUnavailable;
+
+  /// No description provided for @goToCart.
+  ///
+  /// In en, this message translates to:
+  /// **'Go to cart'**
+  String get goToCart;
+
+  /// No description provided for @orderCancelledBanner.
+  ///
+  /// In en, this message translates to:
+  /// **'This order was cancelled'**
+  String get orderCancelledBanner;
+
+  /// No description provided for @orderRefundedBanner.
+  ///
+  /// In en, this message translates to:
+  /// **'This order was refunded'**
+  String get orderRefundedBanner;
+
+  /// No description provided for @storiesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Stories'**
+  String get storiesTitle;
+
+  /// No description provided for @blogLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t load stories.'**
+  String get blogLoadError;
+
+  /// No description provided for @blogEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No stories yet'**
+  String get blogEmpty;
+
+  /// No description provided for @blogEmptyHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Check back soon for tips and news.'**
+  String get blogEmptyHint;
 }
 
 class _AppLocalizationsDelegate

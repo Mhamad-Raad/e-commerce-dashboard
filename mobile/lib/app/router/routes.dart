@@ -13,13 +13,14 @@ class Routes {
   static String storeDetail(String id) => '/store/$id';
   // Products filtered to one category (pushed over the shell).
   static String categoryProducts(String id) => '/category/$id';
-  static const blog = '/blog'; // article route is '/blog/:id'
+  static const blog = '/blog'; // article route is '/blog/:id'; both public
   // Addresses (pushed over the tab shell; require auth).
   static const addresses = '/addresses';
   static const addressNew = '/addresses/new';
   static String addressEdit(String id) => '/addresses/$id/edit';
   // Product detail + favorites (pushed over the tab shell; require auth).
   static String productDetail(String id) => '/product/$id';
+  static String productReviews(String id) => '/product/$id/reviews';
   static const favorites = '/favorites';
   // Orders (pushed over the tab shell; require auth).
   static const orders = '/orders';

@@ -903,4 +903,132 @@ class AppLocalizationsCkb extends AppLocalizations {
   String notifOrderStatusBody(String number, String status) {
     return 'داواکاری $number ئێستا $statusـە.';
   }
+
+  @override
+  String get reviewsTitle => 'هەڵسەنگاندنەکان';
+
+  @override
+  String get seeAllReviews => 'هەموو هەڵسەنگاندنەکان ببینە';
+
+  @override
+  String get writeReview => 'هەڵسەنگاندنێک بنووسە';
+
+  @override
+  String get editReview => 'هەڵسەنگاندنەکەت دەستکاری بکە';
+
+  @override
+  String get yourReview => 'هەڵسەنگاندنەکەت';
+
+  @override
+  String get reviewPendingApproval => 'چاوەڕوانی پەسەندکردنە';
+
+  @override
+  String get reviewRatingLabel => 'هەڵسەنگاندنەکەت';
+
+  @override
+  String get reviewTitleLabel => 'ناونیشان (ئیختیاری)';
+
+  @override
+  String get reviewCommentLabel => 'لێدوان (ئیختیاری)';
+
+  @override
+  String get reviewSubmit => 'ناردنی هەڵسەنگاندن';
+
+  @override
+  String get reviewDelete => 'سڕینەوەی هەڵسەنگاندن';
+
+  @override
+  String get reviewDeleteConfirm => 'هەڵسەنگاندنەکەت بسڕێتەوە؟';
+
+  @override
+  String get reviewDeleteConfirmBody =>
+      'هەڵسەنگاندنەکەت لەم بەرهەمە لادەبردرێت.';
+
+  @override
+  String get reviewSubmitted =>
+      'سوپاس! هەڵسەنگاندنەکەت دوای پەسەندکردن دەردەکەوێت.';
+
+  @override
+  String get reviewDeleted => 'هەڵسەنگاندنەکە سڕایەوە.';
+
+  @override
+  String get reviewNotEligible =>
+      'دەتوانیت ئەو بەرهەمانە هەڵبسەنگێنیت کە پێت گەیشتوون.';
+
+  @override
+  String get reviewRatingRequired => 'تکایە هەڵسەنگاندنێک هەڵبژێرە.';
+
+  @override
+  String get reviewsLoadError => 'نەتوانرا هەڵسەنگاندنەکان باربکرێن.';
+
+  @override
+  String get noReviewsYet => 'هێشتا هیچ هەڵسەنگاندنێک نییە';
+
+  @override
+  String get reviewsEmptyHint => 'یەکەم کەس بە لە هەڵسەنگاندنی ئەم بەرهەمە.';
+
+  @override
+  String get orderProgress => 'ڕەوتی داواکاری';
+
+  @override
+  String get cancelOrder => 'هەڵوەشاندنەوەی داواکاری';
+
+  @override
+  String get keepOrder => 'داواکارییەکە بهێڵەرەوە';
+
+  @override
+  String get cancelOrderConfirmTitle => 'ئەم داواکارییە هەڵبوەشێنرێتەوە؟';
+
+  @override
+  String get cancelOrderConfirmBody =>
+      'داواکارییەکەت هەڵدەوەشێنرێتەوە و ناتوانرێت بگەڕێنرێتەوە.';
+
+  @override
+  String get orderCancelled => 'داواکارییەکەت هەڵوەشێنرایەوە.';
+
+  @override
+  String get orderCancelTooLate =>
+      'چیتر ناتوانرێت ئەم داواکارییە هەڵبوەشێنرێتەوە.';
+
+  @override
+  String get reorder => 'دووبارە داوابکەرەوە';
+
+  @override
+  String reorderAdded(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count کاڵا زیادکران بۆ سەبەتەکەت',
+      one: 'کاڵایەک زیادکرا بۆ سەبەتەکەت',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get reorderSkippedTitle => 'نەتوانرا هەندێک کاڵا زیادبکرێن';
+
+  @override
+  String get reorderUnavailable => 'چیتر بەردەست نییە';
+
+  @override
+  String get goToCart => 'بڕۆ بۆ سەبەتە';
+
+  @override
+  String get orderCancelledBanner => 'ئەم داواکارییە هەڵوەشێنرایەوە';
+
+  @override
+  String get orderRefundedBanner => 'پارەی ئەم داواکارییە گەڕێنرایەوە';
+
+  @override
+  String get storiesTitle => 'چیرۆکەکان';
+
+  @override
+  String get blogLoadError => 'نەتوانرا چیرۆکەکان باربکرێن.';
+
+  @override
+  String get blogEmpty => 'هێشتا هیچ چیرۆکێک نییە';
+
+  @override
+  String get blogEmptyHint =>
+      'بەمزووانە سەردانمان بکەرەوە بۆ ئامۆژگاری و هەواڵ.';
 }

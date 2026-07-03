@@ -905,4 +905,129 @@ class AppLocalizationsEn extends AppLocalizations {
   String notifOrderStatusBody(String number, String status) {
     return 'Order $number is now $status.';
   }
+
+  @override
+  String get reviewsTitle => 'Reviews';
+
+  @override
+  String get seeAllReviews => 'See all reviews';
+
+  @override
+  String get writeReview => 'Write a review';
+
+  @override
+  String get editReview => 'Edit your review';
+
+  @override
+  String get yourReview => 'Your review';
+
+  @override
+  String get reviewPendingApproval => 'Pending approval';
+
+  @override
+  String get reviewRatingLabel => 'Your rating';
+
+  @override
+  String get reviewTitleLabel => 'Title (optional)';
+
+  @override
+  String get reviewCommentLabel => 'Comment (optional)';
+
+  @override
+  String get reviewSubmit => 'Submit review';
+
+  @override
+  String get reviewDelete => 'Delete review';
+
+  @override
+  String get reviewDeleteConfirm => 'Delete your review?';
+
+  @override
+  String get reviewDeleteConfirmBody =>
+      'Your review will be removed from this product.';
+
+  @override
+  String get reviewSubmitted =>
+      'Thanks! Your review will appear once it\'s approved.';
+
+  @override
+  String get reviewDeleted => 'Review deleted.';
+
+  @override
+  String get reviewNotEligible => 'You can review products you\'ve received.';
+
+  @override
+  String get reviewRatingRequired => 'Please choose a rating.';
+
+  @override
+  String get reviewsLoadError => 'Couldn\'t load reviews.';
+
+  @override
+  String get noReviewsYet => 'No reviews yet';
+
+  @override
+  String get reviewsEmptyHint => 'Be the first to review this product.';
+
+  @override
+  String get orderProgress => 'Order progress';
+
+  @override
+  String get cancelOrder => 'Cancel order';
+
+  @override
+  String get keepOrder => 'Keep order';
+
+  @override
+  String get cancelOrderConfirmTitle => 'Cancel this order?';
+
+  @override
+  String get cancelOrderConfirmBody =>
+      'Your order will be cancelled. This can\'t be undone.';
+
+  @override
+  String get orderCancelled => 'Your order has been cancelled.';
+
+  @override
+  String get orderCancelTooLate => 'This order can no longer be cancelled.';
+
+  @override
+  String get reorder => 'Buy again';
+
+  @override
+  String reorderAdded(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count items added to your cart',
+      one: '1 item added to your cart',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get reorderSkippedTitle => 'Some items couldn\'t be added';
+
+  @override
+  String get reorderUnavailable => 'No longer available';
+
+  @override
+  String get goToCart => 'Go to cart';
+
+  @override
+  String get orderCancelledBanner => 'This order was cancelled';
+
+  @override
+  String get orderRefundedBanner => 'This order was refunded';
+
+  @override
+  String get storiesTitle => 'Stories';
+
+  @override
+  String get blogLoadError => 'Couldn\'t load stories.';
+
+  @override
+  String get blogEmpty => 'No stories yet';
+
+  @override
+  String get blogEmptyHint => 'Check back soon for tips and news.';
 }
