@@ -1012,6 +1012,36 @@ abstract class AppLocalizations {
   /// **'By using this app you agree to these terms.\n\nOrders: placing an order is an offer to purchase; items are subject to availability and confirmation. Prices are shown in Iraqi dinar and may change until your order is confirmed.\n\nDelivery: estimated arrival times are estimates, not guarantees. Please provide accurate address and contact details — repeated failed deliveries may limit cash-on-delivery availability.\n\nAccounts: you are responsible for keeping your login details safe. We may suspend accounts that abuse the service or attempt fraud.\n\nReturns: contact us within 3 days of delivery for damaged or incorrect items.\n\nThese terms may be updated from time to time; continued use means you accept the latest version.'**
   String get termsBody;
 
+  /// No description provided for @returnPolicyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Returns & exchanges'**
+  String get returnPolicyTitle;
+
+  /// No description provided for @returnPolicyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'We want you to love every order — and when something goes wrong, we make it right.\n\nDamaged or incorrect items: if your order arrives damaged, defective, or different from what you ordered, contact us within 3 days of delivery and we will exchange it or refund you, delivery included.\n\nHow to request a return: reach us through Contact us (call, WhatsApp, or email) with your order number and clear photos of the item and its packaging. Our team will confirm the next steps with you.\n\nCondition: items must be unused and in their original packaging. For hygiene and safety, opened beauty and skincare products can only be returned if they arrived damaged or incorrect.\n\nRefunds: once your return is approved, cash-on-delivery payments are refunded by money transfer, and other payment methods are refunded the way you paid. Refunds are issued within a few days of us receiving the returned item.'**
+  String get returnPolicyBody;
+
+  /// No description provided for @shippingPolicyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Shipping & delivery'**
+  String get shippingPolicyTitle;
+
+  /// No description provided for @shippingPolicyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'We deliver to every governorate in Iraq.\n\nDelivery time: most orders arrive within 3–7 days depending on your governorate. Each store shows an estimated arrival window in your cart before you place your order.\n\nDelivery fees: any delivery fee is shown clearly at checkout, before you confirm — no surprises at the door.\n\nTracking: follow your order\'s status anytime from My Orders. We also send you a notification at every step, and our courier will call you before delivery.\n\nReceiving your order: please make sure your address and phone number are correct and reachable. If we can\'t reach you, we\'ll try again or contact you to reschedule. You can update your addresses anytime from your profile.'**
+  String get shippingPolicyBody;
+
+  /// No description provided for @signupAgreeNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'By creating an account you agree to our {terms} and {privacy}.'**
+  String signupAgreeNotice(String terms, String privacy);
+
   /// No description provided for @selectAddress.
   ///
   /// In en, this message translates to:

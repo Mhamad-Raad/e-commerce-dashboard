@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 import '../../../app/theme/app_spacing.dart';
 import '../../../core/l10n/l10n_ext.dart';
 
-enum LegalDoc { privacy, terms }
+enum LegalDoc { privacy, terms, returns, shipping }
 
-/// Static localized legal text (privacy policy / terms of use).
+/// Static localized policy text (privacy / terms / returns / shipping).
 class LegalScreen extends StatelessWidget {
   const LegalScreen({super.key, required this.doc});
 
@@ -14,8 +14,12 @@ class LegalScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final title = doc == LegalDoc.privacy ? l10n.privacyTitle : l10n.termsTitle;
-    final body = doc == LegalDoc.privacy ? l10n.privacyBody : l10n.termsBody;
+    final (title, body) = switch (doc) {
+      LegalDoc.privacy => (l10n.privacyTitle, l10n.privacyBody),
+      LegalDoc.terms => (l10n.termsTitle, l10n.termsBody),
+      LegalDoc.returns => (l10n.returnPolicyTitle, l10n.returnPolicyBody),
+      LegalDoc.shipping => (l10n.shippingPolicyTitle, l10n.shippingPolicyBody),
+    };
 
     return Scaffold(
       appBar: AppBar(title: Text(title)),

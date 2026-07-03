@@ -1,3 +1,4 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -29,6 +30,10 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
   final _password = TextEditingController();
   String? _gender; // 'FEMALE' | 'MALE' — required, no default.
   bool _loading = false;
+  late final _termsTap = TapGestureRecognizer()
+    ..onTap = () => context.push(Routes.terms);
+  late final _privacyTap = TapGestureRecognizer()
+    ..onTap = () => context.push(Routes.privacy);
 
   @override
   void dispose() {
@@ -36,6 +41,8 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
     _phone.dispose();
     _email.dispose();
     _password.dispose();
+    _termsTap.dispose();
+    _privacyTap.dispose();
     super.dispose();
   }
 
@@ -125,7 +132,45 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
           loading: _loading,
           onPressed: _submit,
         ),
+        const SizedBox(height: AppSpacing.md),
+        _agreementNotice(context),
       ],
+    );
+  }
+
+  /// "By creating an account you agree to our Terms and Privacy" with tappable
+  /// links. Sentinels mark the link slots so each translation keeps its own
+  /// word order (the legal routes are logged-out-reachable — see app_router).
+  Widget _agreementNotice(BuildContext context) {
+    final l10n = context.l10n;
+    final theme = Theme.of(context);
+    final baseStyle = theme.textTheme.bodySmall
+        ?.copyWith(color: theme.colorScheme.onSurfaceVariant);
+    final linkStyle = theme.textTheme.bodySmall?.copyWith(
+      color: theme.colorScheme.primary,
+      fontWeight: FontWeight.w600,
+    );
+
+    final raw = l10n.signupAgreeNotice('[[T]]', '[[P]]');
+    final spans = <InlineSpan>[];
+    var cursor = 0;
+    for (final match in RegExp(r'\[\[(T|P)\]\]').allMatches(raw)) {
+      if (match.start > cursor) {
+        spans.add(TextSpan(text: raw.substring(cursor, match.start)));
+      }
+      final isTerms = match[1] == 'T';
+      spans.add(TextSpan(
+        text: isTerms ? l10n.termsTitle : l10n.privacyTitle,
+        style: linkStyle,
+        recognizer: isTerms ? _termsTap : _privacyTap,
+      ));
+      cursor = match.end;
+    }
+    if (cursor < raw.length) spans.add(TextSpan(text: raw.substring(cursor)));
+
+    return Text.rich(
+      TextSpan(style: baseStyle, children: spans),
+      textAlign: TextAlign.center,
     );
   }
 }

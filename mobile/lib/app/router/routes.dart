@@ -48,6 +48,8 @@ class Routes {
   static const contact = '/contact';
   static const privacy = '/privacy';
   static const terms = '/terms';
+  static const returnPolicy = '/return-policy';
+  static const shippingPolicy = '/shipping-policy';
   static const login = '/auth/login';
   static const signup = '/auth/signup';
   static const otp = '/auth/otp';

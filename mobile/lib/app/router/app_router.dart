@@ -52,6 +52,8 @@ const _infoRoutes = {
   Routes.contact,
   Routes.privacy,
   Routes.terms,
+  Routes.returnPolicy,
+  Routes.shippingPolicy,
 };
 
 /// App router. A single [redirect] enforces auth gating (no guest checkout):
@@ -231,6 +233,14 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: Routes.terms,
         builder: (_, _) => const LegalScreen(doc: LegalDoc.terms),
+      ),
+      GoRoute(
+        path: Routes.returnPolicy,
+        builder: (_, _) => const LegalScreen(doc: LegalDoc.returns),
+      ),
+      GoRoute(
+        path: Routes.shippingPolicy,
+        builder: (_, _) => const LegalScreen(doc: LegalDoc.shipping),
       ),
       GoRoute(path: Routes.login, builder: (_, _) => const LoginScreen()),
       GoRoute(path: Routes.signup, builder: (_, _) => const SignupScreen()),

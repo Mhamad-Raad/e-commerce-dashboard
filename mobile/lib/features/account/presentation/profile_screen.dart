@@ -138,6 +138,16 @@ class ProfileScreen extends ConsumerWidget {
             onTap: () => context.push(Routes.contact),
           ),
           _Tile(
+            icon: Icons.local_shipping_outlined,
+            title: l10n.shippingPolicyTitle,
+            onTap: () => context.push(Routes.shippingPolicy),
+          ),
+          _Tile(
+            icon: Icons.assignment_return_outlined,
+            title: l10n.returnPolicyTitle,
+            onTap: () => context.push(Routes.returnPolicy),
+          ),
+          _Tile(
             icon: Icons.privacy_tip_outlined,
             title: l10n.privacyTitle,
             onTap: () => context.push(Routes.privacy),
