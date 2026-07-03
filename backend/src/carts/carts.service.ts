@@ -396,6 +396,88 @@ export class CartsService {
   }
 
   /**
+   * Merge a past order's items back into the customer's open cart. Unavailable
+   * products/variants are skipped; quantities are clamped to the stock still
+   * free on top of what the cart already holds.
+   */
+  async reorderForCustomer(customerId: string, orderId: string) {
+    const order = await this.prisma.order.findUnique({
+      where: { id: orderId },
+      include: { items: { orderBy: { id: 'asc' } } },
+    });
+    if (!order || order.customerId !== customerId) {
+      throw new NotFoundException('Order not found');
+    }
+
+    const cart = await this.getOrCreateOpenCart(customerId);
+    const skipped: { name: string; reason: 'unavailable' | 'out_of_stock' }[] = [];
+    let added = 0;
+
+    for (const item of order.items) {
+      const product = await this.prisma.product.findUnique({
+        where: { id: item.productId },
+      });
+      if (!product || !product.isActive) {
+        skipped.push({ name: item.name, reason: 'unavailable' });
+        continue;
+      }
+
+      let variant: { id: string; name: string; stock: number; priceCents: number; salePriceCents: number | null } | null = null;
+      if (item.variantId) {
+        const v = await this.prisma.productVariant.findUnique({
+          where: { id: item.variantId },
+        });
+        if (!v || v.productId !== product.id || !v.isActive) {
+          skipped.push({ name: item.name, reason: 'unavailable' });
+          continue;
+        }
+        variant = v;
+      } else if (item.variantName) {
+        // The variant row was deleted (FK SetNull) — that option is gone.
+        skipped.push({ name: item.name, reason: 'unavailable' });
+        continue;
+      }
+
+      const existing = await this.prisma.cartItem.findFirst({
+        where: { cartId: cart.id, productId: product.id, variantId: variant?.id ?? null },
+      });
+      // Clamp to stock minus what the cart already claims for this line.
+      const stock = variant ? variant.stock : product.stock;
+      const quantity = Math.min(item.quantity, stock - (existing?.quantity ?? 0));
+      if (quantity <= 0) {
+        skipped.push({ name: item.name, reason: 'out_of_stock' });
+        continue;
+      }
+
+      if (existing) {
+        await this.prisma.cartItem.update({
+          where: { id: existing.id },
+          data: { quantity: existing.quantity + quantity },
+        });
+      } else {
+        // Snapshot the CURRENT effective price, not the old order's.
+        const priceCents = variant
+          ? effectivePriceCents(variant.priceCents, variant.salePriceCents)
+          : effectivePriceCents(product.priceCents, product.salePriceCents);
+        await this.prisma.cartItem.create({
+          data: {
+            cartId: cart.id,
+            productId: product.id,
+            variantId: variant?.id ?? null,
+            variantName: variant?.name ?? null,
+            quantity,
+            priceCents,
+          },
+        });
+      }
+      added += 1;
+    }
+
+    if (added > 0) await this.recomputeCoupon(cart.id);
+    return { cartId: cart.id, added, skipped };
+  }
+
+  /**
    * Place the customer's order from their open cart. Tax + fees are resolved
    * server-side; the payment is recorded PENDING (settled manually in v1). No
    * staff actor — the customer initiated it.
