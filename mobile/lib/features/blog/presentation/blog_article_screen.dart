@@ -9,6 +9,7 @@ import '../../../core/widgets/app_network_image.dart';
 import '../../../core/widgets/rozhna_app_bar.dart';
 import '../../../core/widgets/skeleton.dart';
 import '../data/blog_repository.dart';
+import 'widgets/blog_markdown.dart';
 
 /// Full story/blog article reader.
 class BlogArticleScreen extends ConsumerWidget {
@@ -63,9 +64,7 @@ class BlogArticleScreen extends ConsumerWidget {
                 children: [
                   Text(article.title, style: text.headlineMedium),
                   const SizedBox(height: AppSpacing.md),
-                  // TODO(blog): render rich HTML/markdown body (flutter_html /
-                  // flutter_markdown) — plain text for the skeleton.
-                  Text(article.body ?? '', style: text.bodyLarge),
+                  BlogMarkdown(data: article.body ?? ''),
                 ],
               ),
             ),

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
+import '../../../../../app/router/routes.dart';
 import '../../../../../app/theme/app_radii.dart';
 import '../../../../../app/theme/app_sizes.dart';
 import '../../../../../app/theme/app_spacing.dart';
@@ -23,7 +25,11 @@ class BlogSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (title != null) SectionHeader(title: title),
+        if (title != null)
+          SectionHeader(
+            title: title,
+            onSeeAll: () => context.push(Routes.blog),
+          ),
         SizedBox(
           height: AppSizes.blogSliderHeight,
           child: ListView.separated(

@@ -15,4 +15,14 @@ class BlogApi {
         ? Map<String, dynamic>.from(res.data as Map)
         : <String, dynamic>{};
   }
+
+  /// Published posts, newest first (`GET /blog?lang=` — no pagination).
+  Future<List<Map<String, dynamic>>> getList(String lang) async {
+    final res = await _dio.get('/blog', queryParameters: {'lang': lang});
+    final raw = res.data is List ? res.data as List : const [];
+    return raw
+        .whereType<Map>()
+        .map((e) => Map<String, dynamic>.from(e))
+        .toList();
+  }
 }

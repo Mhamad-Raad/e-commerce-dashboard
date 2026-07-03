@@ -59,6 +59,7 @@ dependencies:
   # can build TZDateTime for the daily local routine reminder without a lint.
   timezone: ^0.11.0
   firebase_crashlytics: ^5.2.4
+  markdown_widget: ^2.3.2+8
 
 dev_dependencies:
   flutter_test:
