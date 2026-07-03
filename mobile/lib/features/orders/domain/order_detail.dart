@@ -104,6 +104,31 @@ class OrderShipping {
       );
 }
 
+/// One entry in the order's history (`events`, ascending by time).
+class OrderEvent {
+  const OrderEvent({
+    required this.type,
+    required this.createdAt,
+    this.meta = const {},
+  });
+
+  final String type; // CREATED | STATUS_CHANGED | TRACKING_UPDATED
+  final Map<String, dynamic> meta;
+  final DateTime createdAt;
+
+  /// For STATUS_CHANGED events: the status transitioned to.
+  String? get statusTo => meta['to'] as String?;
+
+  factory OrderEvent.fromJson(Map<String, dynamic> json) => OrderEvent(
+        type: (json['type'] as String?) ?? '',
+        meta: json['meta'] is Map
+            ? Map<String, dynamic>.from(json['meta'] as Map)
+            : const {},
+        createdAt: DateTime.tryParse(json['createdAt'] as String? ?? '') ??
+            DateTime.fromMillisecondsSinceEpoch(0),
+      );
+}
+
 /// Full order detail (`GET /app/orders/:id`).
 class OrderDetail {
   const OrderDetail({
@@ -120,6 +145,7 @@ class OrderDetail {
     required this.ship,
     required this.items,
     required this.payments,
+    this.events = const [],
     this.couponCode,
     this.feesLabel,
     this.notes,
@@ -140,6 +166,7 @@ class OrderDetail {
   final OrderShipping ship;
   final List<OrderLineItem> items;
   final List<OrderPayment> payments;
+  final List<OrderEvent> events;
   final String? couponCode;
   final String? feesLabel;
   final String? notes;
@@ -150,6 +177,25 @@ class OrderDetail {
   bool get hasTax => taxCents > 0;
   bool get hasFees => feesCents > 0;
   bool get hasShipping => shippingCents > 0;
+  bool get isCancellable => status == 'PENDING' || status == 'PROCESSING';
+  bool get isTerminated => status == 'CANCELLED' || status == 'REFUNDED';
+
+  /// When the order reached [status]: its STATUS_CHANGED event (last, in case a
+  /// status repeats), with CREATED / placedAt as the PENDING fallback.
+  DateTime? statusReachedAt(String status) {
+    for (final event in events.reversed) {
+      if (event.type == 'STATUS_CHANGED' && event.statusTo == status) {
+        return event.createdAt;
+      }
+    }
+    if (status == 'PENDING') {
+      for (final event in events) {
+        if (event.type == 'CREATED') return event.createdAt;
+      }
+      return placedAt;
+    }
+    return null;
+  }
 
   Money _m(int c) => Money(c, currency: currency);
   Money get subtotal => _m(subtotalCents);
@@ -191,6 +237,7 @@ class OrderDetail {
           (m) => OrderLineItem.fromJson(m, currency: currency)),
       payments: parse(json['payments'],
           (m) => OrderPayment.fromJson(m, currency: currency)),
+      events: parse(json['events'], OrderEvent.fromJson),
     );
   }
 }

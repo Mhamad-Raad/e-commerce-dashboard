@@ -1,18 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
+import '../../../app/router/routes.dart';
 import '../../../app/theme/app_radii.dart';
+import '../../../app/theme/app_sizes.dart';
 import '../../../app/theme/app_spacing.dart';
+import '../../../core/error/failure.dart';
 import '../../../core/l10n/intl_locale.dart';
 import '../../../core/l10n/l10n_ext.dart';
 import '../../../core/money/money.dart';
+import '../../../core/network/api_result.dart';
 import '../../../core/widgets/app_network_image.dart';
+import '../../auth/presentation/widgets/auth_widgets.dart';
 import '../../cart/domain/payment_method.dart';
+import '../../cart/presentation/providers/cart_controller.dart';
 import '../data/orders_repository.dart';
 import '../domain/order_detail.dart';
 import '../domain/order_status.dart';
+import '../domain/reorder_result.dart';
 import 'widgets/order_status_chip.dart';
+import 'widgets/order_timeline.dart';
 
 /// Full detail of one order: status + tracking, items, money breakdown, delivery
 /// address, payment, and any note left at checkout.
@@ -49,10 +58,141 @@ class OrderDetailScreen extends ConsumerWidget {
   }
 }
 
-class _Body extends StatelessWidget {
+class _Body extends ConsumerStatefulWidget {
   const _Body({required this.order});
 
   final OrderDetail order;
+
+  @override
+  ConsumerState<_Body> createState() => _BodyState();
+}
+
+class _BodyState extends ConsumerState<_Body> {
+  bool _cancelling = false;
+  bool _reordering = false;
+
+  OrderDetail get order => widget.order;
+
+  Future<void> _cancelOrder() async {
+    final l10n = context.l10n;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l10n.cancelOrderConfirmTitle),
+        content: Text(l10n.cancelOrderConfirmBody),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(l10n.keepOrder),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            style: TextButton.styleFrom(
+              foregroundColor: Theme.of(ctx).colorScheme.error,
+            ),
+            child: Text(l10n.cancelOrder),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+
+    setState(() => _cancelling = true);
+    final result = await ref.read(ordersRepositoryProvider).cancel(order.id);
+    if (!mounted) return;
+    setState(() => _cancelling = false);
+    switch (result) {
+      case Success():
+        showMessage(context, l10n.orderCancelled);
+      case Failed(failure: ConflictFailure()):
+        // Raced a fulfilment update — refresh to show the real state.
+        showMessage(context, l10n.orderCancelTooLate);
+      case Failed(failure: final f):
+        showFailure(context, f);
+        return; // keep the current view; nothing changed server-side
+    }
+    ref.invalidate(orderDetailProvider(order.id));
+    ref.invalidate(ordersListProvider);
+  }
+
+  Future<void> _reorder() async {
+    final l10n = context.l10n;
+    setState(() => _reordering = true);
+    final result = await ref.read(ordersRepositoryProvider).reorder(order.id);
+    if (!mounted) return;
+    setState(() => _reordering = false);
+    switch (result) {
+      case Success(value: final reorder):
+        // The server mutated the open cart — reload it before showing it.
+        ref.invalidate(cartControllerProvider);
+        if (reorder.skipped.isEmpty) {
+          showMessage(context, l10n.reorderAdded(reorder.added));
+          context.push(Routes.cart);
+        } else {
+          await _showSkipped(reorder);
+        }
+      case Failed(failure: final f):
+        showFailure(context, f);
+    }
+  }
+
+  Future<void> _showSkipped(ReorderResult reorder) async {
+    final l10n = context.l10n;
+    final scheme = Theme.of(context).colorScheme;
+    await showDialog<void>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l10n.reorderSkippedTitle),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (reorder.added > 0) ...[
+              Text(l10n.reorderAdded(reorder.added)),
+              const SizedBox(height: AppSpacing.sm),
+            ],
+            for (final item in reorder.skipped)
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Icon(Icons.remove_shopping_cart_outlined,
+                        size: 18, color: scheme.onSurfaceVariant),
+                    const SizedBox(width: AppSpacing.sm),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(item.name,
+                              maxLines: 2, overflow: TextOverflow.ellipsis),
+                          Text(
+                            item.outOfStock
+                                ? l10n.outOfStock
+                                : l10n.reorderUnavailable,
+                            style: Theme.of(ctx)
+                                .textTheme
+                                .bodySmall
+                                ?.copyWith(color: scheme.onSurfaceVariant),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+          ],
+        ),
+        actions: [
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text(l10n.goToCart),
+          ),
+        ],
+      ),
+    );
+    if (mounted) context.push(Routes.cart);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -99,6 +239,12 @@ class _Body extends StatelessWidget {
             ],
           ),
         ],
+        const SizedBox(height: AppSpacing.md),
+
+        _Section(
+          title: l10n.orderProgress,
+          child: OrderTimeline(order: order),
+        ),
         const SizedBox(height: AppSpacing.md),
 
         _Section(
@@ -180,6 +326,36 @@ class _Body extends StatelessWidget {
         if (order.notes != null && order.notes!.isNotEmpty) ...[
           const SizedBox(height: AppSpacing.md),
           _Section(title: l10n.notes, child: Text(order.notes!)),
+        ],
+        const SizedBox(height: AppSpacing.lg),
+
+        FilledButton.tonalIcon(
+          onPressed: _reordering ? null : _reorder,
+          icon: _reordering
+              ? const SizedBox(
+                  width: AppSizes.buttonSpinner,
+                  height: AppSizes.buttonSpinner,
+                  child: CircularProgressIndicator(
+                      strokeWidth: AppSizes.buttonSpinnerStroke),
+                )
+              : const Icon(Icons.shopping_cart_checkout_outlined),
+          label: Text(l10n.reorder),
+        ),
+        if (order.isCancellable) ...[
+          const SizedBox(height: AppSpacing.sm),
+          OutlinedButton.icon(
+            onPressed: _cancelling ? null : _cancelOrder,
+            icon: _cancelling
+                ? const SizedBox(
+                    width: AppSizes.buttonSpinner,
+                    height: AppSizes.buttonSpinner,
+                    child: CircularProgressIndicator(
+                        strokeWidth: AppSizes.buttonSpinnerStroke),
+                  )
+                : const Icon(Icons.cancel_outlined),
+            label: Text(l10n.cancelOrder),
+            style: OutlinedButton.styleFrom(foregroundColor: scheme.error),
+          ),
         ],
       ],
     );
