@@ -1,8 +1,9 @@
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
+import type { TFunction } from 'i18next';
 import { Bot, Lock } from 'lucide-react';
 import { toast } from 'sonner';
 import { z } from 'zod';
@@ -27,41 +28,44 @@ import {
 } from '@/components/ui/select';
 import { extractErrorMessage } from '@/lib/format';
 
-// Optional non-negative integer entered as text; '' means "no limit".
-const intOrBlank = z
-  .string()
-  .refine((v) => v === '' || (Number.isInteger(Number(v)) && Number(v) >= 0), {
-    message: 'Enter a whole number ≥ 0, or leave blank for no limit',
-  });
-// Optional non-negative money (dollars) entered as text; '' means "no cap".
-const moneyOrBlank = z
-  .string()
-  .refine((v) => v === '' || (!Number.isNaN(Number(v)) && Number(v) >= 0), {
-    message: 'Enter an amount ≥ 0, or leave blank for no cap',
-  });
-
-const schema = z.object({
-  enabled: z.boolean(),
-  model: z.string().min(1),
-  maxMsgsPerMinute: intOrBlank,
-  maxMsgsPerHour: intOrBlank,
-  maxMsgsPerDay: intOrBlank,
-  maxMsgsPerWeek: intOrBlank,
-  maxMsgsPerMonth: intOrBlank,
-  maxTokensPerDay: intOrBlank,
-  maxTokensPerWeek: intOrBlank,
-  maxTokensPerMonth: intOrBlank,
-  budgetWeekly: moneyOrBlank,
-  budgetMonthly: moneyOrBlank,
-  budgetTotal: moneyOrBlank,
-  warnThresholdPct: z
+// Factory so validation messages resolve in the active locale.
+const makeSchema = (t: TFunction) => {
+  // Optional non-negative integer entered as text; '' means "no limit".
+  const intOrBlank = z
     .string()
-    .refine((v) => Number.isInteger(Number(v)) && Number(v) >= 1 && Number(v) <= 100, {
-      message: '1–100',
-    }),
-});
+    .refine((v) => v === '' || (Number.isInteger(Number(v)) && Number(v) >= 0), {
+      message: t('validation.int_or_blank'),
+    });
+  // Optional non-negative money (dollars) entered as text; '' means "no cap".
+  const moneyOrBlank = z
+    .string()
+    .refine((v) => v === '' || (!Number.isNaN(Number(v)) && Number(v) >= 0), {
+      message: t('validation.money_or_blank'),
+    });
 
-type FormValues = z.infer<typeof schema>;
+  return z.object({
+    enabled: z.boolean(),
+    model: z.string().min(1),
+    maxMsgsPerMinute: intOrBlank,
+    maxMsgsPerHour: intOrBlank,
+    maxMsgsPerDay: intOrBlank,
+    maxMsgsPerWeek: intOrBlank,
+    maxMsgsPerMonth: intOrBlank,
+    maxTokensPerDay: intOrBlank,
+    maxTokensPerWeek: intOrBlank,
+    maxTokensPerMonth: intOrBlank,
+    budgetWeekly: moneyOrBlank,
+    budgetMonthly: moneyOrBlank,
+    budgetTotal: moneyOrBlank,
+    warnThresholdPct: z
+      .string()
+      .refine((v) => Number.isInteger(Number(v)) && Number(v) >= 1 && Number(v) <= 100, {
+        message: t('validation.percent_1_100'),
+      }),
+  });
+};
+
+type FormValues = z.infer<ReturnType<typeof makeSchema>>;
 
 const numStr = (n: number | null) => (n == null ? '' : String(n));
 const centsToStr = (c: number | null) => (c == null ? '' : String(c / 100));
@@ -76,6 +80,9 @@ export function AssistantSettings() {
     queryKey: ['assistant-config'],
     queryFn: () => assistantApi.getConfig(),
   });
+
+  // Rebuilt on language change so messages re-resolve in the new locale.
+  const schema = useMemo(() => makeSchema(t), [t]);
 
   const {
     register,

@@ -66,7 +66,7 @@ export function OrdersList() {
       className: 'w-10',
       header: (
         <span onClick={(e) => e.stopPropagation()}>
-          <Checkbox checked={allSelected} onCheckedChange={toggleAll} aria-label="Select all" />
+          <Checkbox checked={allSelected} onCheckedChange={toggleAll} aria-label={t('common.select_all')} />
         </span>
       ),
       cell: (o) => (

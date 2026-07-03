@@ -1,4 +1,5 @@
 import { type ReactNode } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { GripVertical } from 'lucide-react';
@@ -15,6 +16,7 @@ export function SortableRow({
   id: string;
   children: (handle: ReactNode) => ReactNode;
 }) {
+  const { t } = useTranslation();
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
     useSortable({ id });
 
@@ -27,7 +29,7 @@ export function SortableRow({
   const handle = (
     <button
       type="button"
-      aria-label="Drag"
+      aria-label={t('common.drag')}
       className={cn(
         'cursor-grab touch-none rounded p-1 text-muted-foreground hover:bg-muted',
         isDragging && 'cursor-grabbing',

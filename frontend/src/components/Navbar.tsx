@@ -24,6 +24,7 @@ function usePageTitle() {
 }
 
 export function Navbar({ collapsed, onToggleCollapsed, onOpenMobileMenu }: NavbarProps) {
+  const { t } = useTranslation();
   const title = usePageTitle();
 
   return (
@@ -33,7 +34,7 @@ export function Navbar({ collapsed, onToggleCollapsed, onOpenMobileMenu }: Navba
         size="icon"
         className="md:hidden"
         onClick={onOpenMobileMenu}
-        aria-label="Open menu"
+        aria-label={t('common.open_menu')}
       >
         <Menu className="h-5 w-5" />
       </Button>
@@ -42,7 +43,7 @@ export function Navbar({ collapsed, onToggleCollapsed, onOpenMobileMenu }: Navba
         size="icon"
         className="hidden md:inline-flex"
         onClick={onToggleCollapsed}
-        aria-label="Toggle sidebar"
+        aria-label={t('common.toggle_sidebar')}
       >
         {collapsed ? <PanelLeftOpen className="h-5 w-5" /> : <PanelLeftClose className="h-5 w-5" />}
       </Button>

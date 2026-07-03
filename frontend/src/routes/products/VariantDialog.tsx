@@ -1,7 +1,8 @@
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useTranslation } from 'react-i18next';
+import type { TFunction } from 'i18next';
 import { z } from 'zod';
 import type { ProductVariant, VariantWritePayload } from '@/features/products/types';
 import { FormField } from '@/components/FormField';
@@ -18,23 +19,27 @@ import {
 } from '@/components/ui/dialog';
 import { fromMinor, toMinor } from '@/lib/format';
 
-const schema = z.object({
-  name: z.string().min(1).max(120),
-  sku: z.string().min(2).max(40).regex(/^[A-Z0-9_-]+$/i),
-  price: z.string().min(1).refine((v) => !Number.isNaN(Number(v)) && Number(v) >= 0),
-  salePrice: z
-    .string()
-    .optional()
-    .or(z.literal(''))
-    .refine((v) => !v || (!Number.isNaN(Number(v)) && Number(v) >= 0), { message: 'Invalid sale price' }),
-  stock: z.string().refine((v) => Number.isInteger(Number(v)) && Number(v) >= 0),
-  lowStockThreshold: z.string().refine((v) => Number.isInteger(Number(v)) && Number(v) >= 0),
-  imageUrl: z.string().url().optional().or(z.literal('')),
-  sortOrder: z.string().refine((v) => Number.isInteger(Number(v)) && Number(v) >= 0),
-  isActive: z.boolean(),
-});
+// Factory so validation messages resolve in the active locale.
+const makeSchema = (t: TFunction) =>
+  z.object({
+    name: z.string().min(1).max(120),
+    sku: z.string().min(2).max(40).regex(/^[A-Z0-9_-]+$/i),
+    price: z.string().min(1).refine((v) => !Number.isNaN(Number(v)) && Number(v) >= 0),
+    salePrice: z
+      .string()
+      .optional()
+      .or(z.literal(''))
+      .refine((v) => !v || (!Number.isNaN(Number(v)) && Number(v) >= 0), {
+        message: t('validation.invalid_sale_price'),
+      }),
+    stock: z.string().refine((v) => Number.isInteger(Number(v)) && Number(v) >= 0),
+    lowStockThreshold: z.string().refine((v) => Number.isInteger(Number(v)) && Number(v) >= 0),
+    imageUrl: z.string().url().optional().or(z.literal('')),
+    sortOrder: z.string().refine((v) => Number.isInteger(Number(v)) && Number(v) >= 0),
+    isActive: z.boolean(),
+  });
 
-type FormValues = z.infer<typeof schema>;
+type FormValues = z.infer<ReturnType<typeof makeSchema>>;
 
 interface VariantDialogProps {
   open: boolean;
@@ -55,6 +60,9 @@ export function VariantDialog({
 }: VariantDialogProps) {
   const { t } = useTranslation();
   const isEdit = !!variant;
+
+  // Rebuilt on language change so messages re-resolve in the new locale.
+  const schema = useMemo(() => makeSchema(t), [t]);
 
   const {
     register,

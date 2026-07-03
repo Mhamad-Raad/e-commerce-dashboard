@@ -1,9 +1,10 @@
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
+import type { TFunction } from 'i18next';
 import { ArrowLeft, Package } from 'lucide-react';
 import { toast } from 'sonner';
 import { z } from 'zod';
@@ -26,78 +27,80 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { AttributeFields } from '@/components/AttributeFields';
 import { extractErrorMessage, fromMinor, toMinor } from '@/lib/format';
 
-const schema = z.object({
-  name: z.string().min(1).max(200),
-  nameAr: z.string().max(200).optional().or(z.literal('')),
-  nameCkb: z.string().max(200).optional().or(z.literal('')),
-  sku: z.string().min(2).max(40).regex(/^[A-Z0-9_-]+$/i),
-  price: z.string().min(1).refine((v) => !Number.isNaN(Number(v)) && Number(v) >= 0),
-  salePrice: z
-    .string()
-    .optional()
-    .or(z.literal(''))
-    .refine((v) => !v || (!Number.isNaN(Number(v)) && Number(v) >= 0), {
-      message: 'Invalid sale price',
-    }),
-  currency: z.string().length(3),
-  stock: z.string().min(1).refine((v) => Number.isInteger(Number(v)) && Number(v) >= 0),
-  lowStockThreshold: z
-    .string()
-    .optional()
-    .or(z.literal(''))
-    .refine((v) => !v || (Number.isInteger(Number(v)) && Number(v) >= 0), {
-      message: 'Invalid threshold',
-    }),
-  ratingAvg: z
-    .string()
-    .optional()
-    .or(z.literal(''))
-    .refine((v) => !v || (!Number.isNaN(Number(v)) && Number(v) >= 0 && Number(v) <= 5), {
-      message: 'Rating must be 0–5',
-    }),
-  ratingCount: z
-    .string()
-    .optional()
-    .or(z.literal(''))
-    .refine((v) => !v || (Number.isInteger(Number(v)) && Number(v) >= 0), {
-      message: 'Invalid count',
-    }),
-  minLeadDays: z
-    .string()
-    .optional()
-    .or(z.literal(''))
-    .refine((v) => !v || (Number.isInteger(Number(v)) && Number(v) >= 0 && Number(v) <= 365), {
-      message: 'Enter 0–365 days',
-    }),
-  maxLeadDays: z
-    .string()
-    .optional()
-    .or(z.literal(''))
-    .refine((v) => !v || (Number.isInteger(Number(v)) && Number(v) >= 0 && Number(v) <= 365), {
-      message: 'Enter 0–365 days',
-    }),
-  storeId: z.string().min(1),
-  categoryId: z.string().optional().or(z.literal('')),
-  imageUrl: z.string().min(1, { message: 'Cover image is required' }).url(),
-  images: z.array(z.string().url()),
-  // Dynamic, category-driven values keyed by attribute key.
-  attributes: z.record(z.any()),
-  description: z.string().max(5000).optional().or(z.literal('')),
-  descriptionAr: z.string().max(5000).optional().or(z.literal('')),
-  descriptionCkb: z.string().max(5000).optional().or(z.literal('')),
-  isActive: z.boolean(),
-})
-  // Delivery override is all-or-nothing: both blank (inherit) or both set.
-  .refine((v) => (v.minLeadDays === '') === (v.maxLeadDays === ''), {
-    message: 'Set both, or leave both blank to use the store default',
-    path: ['maxLeadDays'],
+// Factory so validation messages resolve in the active locale.
+const makeSchema = (t: TFunction) =>
+  z.object({
+    name: z.string().min(1).max(200),
+    nameAr: z.string().max(200).optional().or(z.literal('')),
+    nameCkb: z.string().max(200).optional().or(z.literal('')),
+    sku: z.string().min(2).max(40).regex(/^[A-Z0-9_-]+$/i),
+    price: z.string().min(1).refine((v) => !Number.isNaN(Number(v)) && Number(v) >= 0),
+    salePrice: z
+      .string()
+      .optional()
+      .or(z.literal(''))
+      .refine((v) => !v || (!Number.isNaN(Number(v)) && Number(v) >= 0), {
+        message: t('validation.invalid_sale_price'),
+      }),
+    currency: z.string().length(3),
+    stock: z.string().min(1).refine((v) => Number.isInteger(Number(v)) && Number(v) >= 0),
+    lowStockThreshold: z
+      .string()
+      .optional()
+      .or(z.literal(''))
+      .refine((v) => !v || (Number.isInteger(Number(v)) && Number(v) >= 0), {
+        message: t('validation.invalid_threshold'),
+      }),
+    ratingAvg: z
+      .string()
+      .optional()
+      .or(z.literal(''))
+      .refine((v) => !v || (!Number.isNaN(Number(v)) && Number(v) >= 0 && Number(v) <= 5), {
+        message: t('validation.rating_range'),
+      }),
+    ratingCount: z
+      .string()
+      .optional()
+      .or(z.literal(''))
+      .refine((v) => !v || (Number.isInteger(Number(v)) && Number(v) >= 0), {
+        message: t('validation.invalid_count'),
+      }),
+    minLeadDays: z
+      .string()
+      .optional()
+      .or(z.literal(''))
+      .refine((v) => !v || (Number.isInteger(Number(v)) && Number(v) >= 0 && Number(v) <= 365), {
+        message: t('validation.lead_days_range'),
+      }),
+    maxLeadDays: z
+      .string()
+      .optional()
+      .or(z.literal(''))
+      .refine((v) => !v || (Number.isInteger(Number(v)) && Number(v) >= 0 && Number(v) <= 365), {
+        message: t('validation.lead_days_range'),
+      }),
+    storeId: z.string().min(1),
+    categoryId: z.string().optional().or(z.literal('')),
+    imageUrl: z.string().min(1, { message: t('validation.cover_image_required') }).url(),
+    images: z.array(z.string().url()),
+    // Dynamic, category-driven values keyed by attribute key.
+    attributes: z.record(z.any()),
+    description: z.string().max(5000).optional().or(z.literal('')),
+    descriptionAr: z.string().max(5000).optional().or(z.literal('')),
+    descriptionCkb: z.string().max(5000).optional().or(z.literal('')),
+    isActive: z.boolean(),
   })
-  .refine((v) => !v.minLeadDays || !v.maxLeadDays || Number(v.minLeadDays) <= Number(v.maxLeadDays), {
-    message: 'Min must be ≤ max',
-    path: ['maxLeadDays'],
-  });
+    // Delivery override is all-or-nothing: both blank (inherit) or both set.
+    .refine((v) => (v.minLeadDays === '') === (v.maxLeadDays === ''), {
+      message: t('validation.lead_days_pair'),
+      path: ['maxLeadDays'],
+    })
+    .refine((v) => !v.minLeadDays || !v.maxLeadDays || Number(v.minLeadDays) <= Number(v.maxLeadDays), {
+      message: t('validation.min_lte_max'),
+      path: ['maxLeadDays'],
+    });
 
-type FormValues = z.infer<typeof schema>;
+type FormValues = z.infer<ReturnType<typeof makeSchema>>;
 
 const defaultValues: FormValues = {
   name: '',
@@ -143,6 +146,9 @@ export function ProductForm() {
     queryFn: () => settingsApi.get(),
     enabled: !isEdit,
   });
+
+  // Rebuilt on language change so messages re-resolve in the new locale.
+  const schema = useMemo(() => makeSchema(t), [t]);
 
   const {
     register,

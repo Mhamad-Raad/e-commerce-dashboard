@@ -113,7 +113,11 @@
     "no": "No",
     "none": "—",
     "retry": "Try again",
-    "export_csv": "Export CSV"
+    "export_csv": "Export CSV",
+    "open_menu": "Open menu",
+    "toggle_sidebar": "Toggle sidebar",
+    "drag": "Drag",
+    "select_all": "Select all"
   },
   "upload": {
     "choose": "Choose image",
@@ -373,7 +377,16 @@
     "delete_title": "Delete customer",
     "delete_message": "Delete \"{{name}}\"? This can't be undone.",
     "saved_toast": "Customer saved",
-    "deleted_toast": "Customer deleted"
+    "deleted_toast": "Customer deleted",
+    "account_access": "Account access",
+    "reset_password": "Reset password",
+    "reset_password_desc": "Set a new password for this customer. They will be signed out of all their devices.",
+    "new_password": "New password",
+    "confirm_password": "Confirm password",
+    "password_reset_toast": "Password reset — the customer was signed out of all devices",
+    "revoke_sessions": "Sign out all devices",
+    "revoke_sessions_message": "Sign \"{{name}}\" out of every device? They will need to log in again.",
+    "sessions_revoked_toast": "Customer signed out of all devices"
   },
   "orders": {
     "title": "Orders",
@@ -833,6 +846,27 @@
     "mark_all_read": "Mark all read",
     "order_created": "New order {{number}} from {{customer}} · {{amount}}",
     "refund_requested": "Refund {{number}} requested on order {{order}} · {{amount}}"
+  },
+  "validation": {
+    "required": "Required",
+    "invalid_sale_price": "Invalid sale price",
+    "invalid_threshold": "Invalid threshold",
+    "invalid_count": "Invalid count",
+    "invalid_fee": "Invalid fee",
+    "rating_range": "Rating must be 0–5",
+    "lead_days_range": "Enter 0–365 days",
+    "lead_days_pair": "Set both, or leave both blank to use the store default",
+    "min_lte_max": "Min must be ≤ max",
+    "cover_image_required": "Cover image is required",
+    "add_option": "Add at least one option",
+    "label_needs_alnum": "Label must include letters or numbers",
+    "duplicate_attribute": "Duplicate attribute",
+    "int_or_blank": "Enter a whole number ≥ 0, or leave blank for no limit",
+    "money_or_blank": "Enter an amount ≥ 0, or leave blank for no cap",
+    "percent_1_100": "1–100",
+    "percent_0_100": "0–100",
+    "password_min_8": "Password must be at least 8 characters.",
+    "passwords_no_match": "Passwords do not match."
   },
   "toast": {
     "error": "Something went wrong"

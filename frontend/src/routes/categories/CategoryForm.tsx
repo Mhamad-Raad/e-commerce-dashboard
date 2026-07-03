@@ -1,9 +1,10 @@
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
+import type { TFunction } from 'i18next';
 import { ArrowLeft, Tags, Plus, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { z } from 'zod';
@@ -34,55 +35,58 @@ const needsOptions = (t: AttributeType) => t === 'select' || t === 'multiselect'
 const toKey = (label: string) =>
   label.trim().toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '');
 
-const attrRow = z
-  .object({
-    key: z.string(),
-    label: z.string().min(1, 'Required'),
-    type: z.enum(['text', 'textarea', 'number', 'select', 'multiselect']),
-    optionsText: z.string(),
-  })
-  .refine((r) => !needsOptions(r.type) || r.optionsText.trim().length > 0, {
-    message: 'Add at least one option',
-    path: ['optionsText'],
-  });
-
-const schema = z
-  .object({
-    name: z.string().min(1).max(60),
-    nameAr: z.string().max(60).optional().or(z.literal('')),
-    nameCkb: z.string().max(60).optional().or(z.literal('')),
-    imageUrl: z.string().url().optional().or(z.literal('')),
-    description: z.string().max(1000).optional().or(z.literal('')),
-    descriptionAr: z.string().max(1000).optional().or(z.literal('')),
-    descriptionCkb: z.string().max(1000).optional().or(z.literal('')),
-    isActive: z.boolean(),
-    attributeSchema: z.array(attrRow),
-  })
-  // Derived attribute keys must be present and unique (they key product values).
-  .superRefine((vals, ctx) => {
-    const seen = new Set<string>();
-    vals.attributeSchema.forEach((row, i) => {
-      const key = row.key.trim() || toKey(row.label);
-      if (!key) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: 'Label must include letters or numbers',
-          path: ['attributeSchema', i, 'label'],
-        });
-        return;
-      }
-      if (seen.has(key)) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: 'Duplicate attribute',
-          path: ['attributeSchema', i, 'label'],
-        });
-      }
-      seen.add(key);
+// Factory so validation messages resolve in the active locale.
+const makeSchema = (t: TFunction) => {
+  const attrRow = z
+    .object({
+      key: z.string(),
+      label: z.string().min(1, t('validation.required')),
+      type: z.enum(['text', 'textarea', 'number', 'select', 'multiselect']),
+      optionsText: z.string(),
+    })
+    .refine((r) => !needsOptions(r.type) || r.optionsText.trim().length > 0, {
+      message: t('validation.add_option'),
+      path: ['optionsText'],
     });
-  });
 
-type FormValues = z.infer<typeof schema>;
+  return z
+    .object({
+      name: z.string().min(1).max(60),
+      nameAr: z.string().max(60).optional().or(z.literal('')),
+      nameCkb: z.string().max(60).optional().or(z.literal('')),
+      imageUrl: z.string().url().optional().or(z.literal('')),
+      description: z.string().max(1000).optional().or(z.literal('')),
+      descriptionAr: z.string().max(1000).optional().or(z.literal('')),
+      descriptionCkb: z.string().max(1000).optional().or(z.literal('')),
+      isActive: z.boolean(),
+      attributeSchema: z.array(attrRow),
+    })
+    // Derived attribute keys must be present and unique (they key product values).
+    .superRefine((vals, ctx) => {
+      const seen = new Set<string>();
+      vals.attributeSchema.forEach((row, i) => {
+        const key = row.key.trim() || toKey(row.label);
+        if (!key) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: t('validation.label_needs_alnum'),
+            path: ['attributeSchema', i, 'label'],
+          });
+          return;
+        }
+        if (seen.has(key)) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: t('validation.duplicate_attribute'),
+            path: ['attributeSchema', i, 'label'],
+          });
+        }
+        seen.add(key);
+      });
+    });
+};
+
+type FormValues = z.infer<ReturnType<typeof makeSchema>>;
 
 const defaultValues: FormValues = {
   name: '',
@@ -108,6 +112,9 @@ export function CategoryForm() {
     queryFn: () => categoriesApi.get(id!),
     enabled: isEdit,
   });
+
+  // Rebuilt on language change so messages re-resolve in the new locale.
+  const schema = useMemo(() => makeSchema(t), [t]);
 
   const {
     register,

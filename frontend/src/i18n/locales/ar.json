@@ -113,7 +113,11 @@
     "no": "لا",
     "none": "—",
     "retry": "إعادة المحاولة",
-    "export_csv": "تصدير CSV"
+    "export_csv": "تصدير CSV",
+    "open_menu": "فتح القائمة",
+    "toggle_sidebar": "إظهار/إخفاء الشريط الجانبي",
+    "drag": "سحب",
+    "select_all": "تحديد الكل"
   },
   "upload": {
     "choose": "اختر صورة",
@@ -373,7 +377,16 @@
     "delete_title": "حذف العميل",
     "delete_message": "حذف \"{{name}}\"؟ لا يمكن التراجع عن ذلك.",
     "saved_toast": "تم حفظ العميل",
-    "deleted_toast": "تم حذف العميل"
+    "deleted_toast": "تم حذف العميل",
+    "account_access": "الوصول إلى الحساب",
+    "reset_password": "إعادة تعيين كلمة المرور",
+    "reset_password_desc": "عيّن كلمة مرور جديدة لهذا العميل. سيتم تسجيل خروجه من جميع أجهزته.",
+    "new_password": "كلمة المرور الجديدة",
+    "confirm_password": "تأكيد كلمة المرور",
+    "password_reset_toast": "تمت إعادة تعيين كلمة المرور — تم تسجيل خروج العميل من جميع الأجهزة",
+    "revoke_sessions": "تسجيل الخروج من كل الأجهزة",
+    "revoke_sessions_message": "تسجيل خروج \"{{name}}\" من جميع الأجهزة؟ سيحتاج إلى تسجيل الدخول مجدداً.",
+    "sessions_revoked_toast": "تم تسجيل خروج العميل من جميع الأجهزة"
   },
   "orders": {
     "title": "الطلبات",
@@ -833,6 +846,27 @@
     "mark_all_read": "تعليم الكل كمقروء",
     "order_created": "طلب جديد {{number}} من {{customer}} · {{amount}}",
     "refund_requested": "طلب استرجاع {{number}} على الطلب {{order}} · {{amount}}"
+  },
+  "validation": {
+    "required": "مطلوب",
+    "invalid_sale_price": "سعر تخفيض غير صالح",
+    "invalid_threshold": "حد تنبيه غير صالح",
+    "invalid_count": "عدد غير صالح",
+    "invalid_fee": "رسوم غير صالحة",
+    "rating_range": "يجب أن يكون التقييم بين 0 و5",
+    "lead_days_range": "أدخل من 0 إلى 365 يوماً",
+    "lead_days_pair": "املأ الحقلين معاً، أو اتركهما فارغين لاعتماد افتراضي المتجر",
+    "min_lte_max": "يجب ألا يتجاوز الحد الأدنى الحد الأقصى",
+    "cover_image_required": "صورة الغلاف مطلوبة",
+    "add_option": "أضف خياراً واحداً على الأقل",
+    "label_needs_alnum": "يجب أن تحتوي التسمية على حروف أو أرقام",
+    "duplicate_attribute": "خاصية مكررة",
+    "int_or_blank": "أدخل رقماً صحيحاً ≥ 0، أو اتركه فارغاً لعدم وضع حد",
+    "money_or_blank": "أدخل مبلغاً ≥ 0، أو اتركه فارغاً لعدم وضع حد",
+    "percent_1_100": "من 1 إلى 100",
+    "percent_0_100": "من 0 إلى 100",
+    "password_min_8": "يجب أن تتكوّن كلمة المرور من 8 أحرف على الأقل.",
+    "passwords_no_match": "كلمتا المرور غير متطابقتين."
   },
   "toast": {
     "error": "حدث خطأ ما"

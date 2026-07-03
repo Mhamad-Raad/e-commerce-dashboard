@@ -1,9 +1,10 @@
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
+import type { TFunction } from 'i18next';
 import { ArrowLeft, Store as StoreIcon } from 'lucide-react';
 import { toast } from 'sonner';
 import { z } from 'zod';
@@ -22,40 +23,42 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { extractErrorMessage } from '@/lib/format';
 
-const schema = z.object({
-  name: z.string().min(1).max(120),
-  nameAr: z.string().max(120).optional().or(z.literal('')),
-  nameCkb: z.string().max(120).optional().or(z.literal('')),
-  description: z.string().max(2000).optional().or(z.literal('')),
-  descriptionAr: z.string().max(2000).optional().or(z.literal('')),
-  descriptionCkb: z.string().max(2000).optional().or(z.literal('')),
-  logoUrl: z.string().url().optional().or(z.literal('')),
-  bannerUrl: z.string().url().optional().or(z.literal('')),
-  email: z.string().email().optional().or(z.literal('')),
-  phone: z.string().max(40).optional().or(z.literal('')),
-  address: z.string().max(300).optional().or(z.literal('')),
-  city: z.string().max(120).optional().or(z.literal('')),
-  country: z.string().max(120).optional().or(z.literal('')),
-  feeGroupId: z.string().optional().or(z.literal('')),
-  minLeadDays: z
-    .string()
-    .min(1)
-    .refine((v) => Number.isInteger(Number(v)) && Number(v) >= 0 && Number(v) <= 365, {
-      message: 'Enter 0–365 days',
-    }),
-  maxLeadDays: z
-    .string()
-    .min(1)
-    .refine((v) => Number.isInteger(Number(v)) && Number(v) >= 0 && Number(v) <= 365, {
-      message: 'Enter 0–365 days',
-    }),
-  isActive: z.boolean(),
-}).refine((v) => Number(v.minLeadDays) <= Number(v.maxLeadDays), {
-  message: 'Min must be ≤ max',
-  path: ['maxLeadDays'],
-});
+// Factory so validation messages resolve in the active locale.
+const makeSchema = (t: TFunction) =>
+  z.object({
+    name: z.string().min(1).max(120),
+    nameAr: z.string().max(120).optional().or(z.literal('')),
+    nameCkb: z.string().max(120).optional().or(z.literal('')),
+    description: z.string().max(2000).optional().or(z.literal('')),
+    descriptionAr: z.string().max(2000).optional().or(z.literal('')),
+    descriptionCkb: z.string().max(2000).optional().or(z.literal('')),
+    logoUrl: z.string().url().optional().or(z.literal('')),
+    bannerUrl: z.string().url().optional().or(z.literal('')),
+    email: z.string().email().optional().or(z.literal('')),
+    phone: z.string().max(40).optional().or(z.literal('')),
+    address: z.string().max(300).optional().or(z.literal('')),
+    city: z.string().max(120).optional().or(z.literal('')),
+    country: z.string().max(120).optional().or(z.literal('')),
+    feeGroupId: z.string().optional().or(z.literal('')),
+    minLeadDays: z
+      .string()
+      .min(1)
+      .refine((v) => Number.isInteger(Number(v)) && Number(v) >= 0 && Number(v) <= 365, {
+        message: t('validation.lead_days_range'),
+      }),
+    maxLeadDays: z
+      .string()
+      .min(1)
+      .refine((v) => Number.isInteger(Number(v)) && Number(v) >= 0 && Number(v) <= 365, {
+        message: t('validation.lead_days_range'),
+      }),
+    isActive: z.boolean(),
+  }).refine((v) => Number(v.minLeadDays) <= Number(v.maxLeadDays), {
+    message: t('validation.min_lte_max'),
+    path: ['maxLeadDays'],
+  });
 
-type FormValues = z.infer<typeof schema>;
+type FormValues = z.infer<ReturnType<typeof makeSchema>>;
 
 const defaultValues: FormValues = {
   name: '',
@@ -89,6 +92,9 @@ export function StoreForm() {
     queryFn: () => storesApi.get(id!),
     enabled: isEdit,
   });
+
+  // Rebuilt on language change so messages re-resolve in the new locale.
+  const schema = useMemo(() => makeSchema(t), [t]);
 
   const {
     register,

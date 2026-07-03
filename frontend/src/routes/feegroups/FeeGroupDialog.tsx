@@ -1,7 +1,8 @@
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useTranslation } from 'react-i18next';
+import type { TFunction } from 'i18next';
 import { z } from 'zod';
 import type { FeeGroup, FeeGroupWritePayload } from '@/features/feegroups/types';
 import { FormField } from '@/components/FormField';
@@ -19,19 +20,25 @@ import { fromMinor, toMinor } from '@/lib/format';
 
 const CURRENCY = 'IQD';
 
-const schema = z.object({
-  name: z.string().min(1).max(60),
-  label: z.string().min(1).max(40),
-  fee: z.string().refine((v) => !Number.isNaN(Number(v)) && Number(v) >= 0, { message: 'Invalid fee' }),
-  taxRatePct: z
-    .string()
-    .refine((v) => Number.isInteger(Number(v)) && Number(v) >= 0 && Number(v) <= 100, {
-      message: '0–100',
-    }),
-  isActive: z.boolean(),
-});
+// Factory so validation messages resolve in the active locale.
+const makeSchema = (t: TFunction) =>
+  z.object({
+    name: z.string().min(1).max(60),
+    label: z.string().min(1).max(40),
+    fee: z
+      .string()
+      .refine((v) => !Number.isNaN(Number(v)) && Number(v) >= 0, {
+        message: t('validation.invalid_fee'),
+      }),
+    taxRatePct: z
+      .string()
+      .refine((v) => Number.isInteger(Number(v)) && Number(v) >= 0 && Number(v) <= 100, {
+        message: t('validation.percent_0_100'),
+      }),
+    isActive: z.boolean(),
+  });
 
-type FormValues = z.infer<typeof schema>;
+type FormValues = z.infer<ReturnType<typeof makeSchema>>;
 
 interface Props {
   open: boolean;
@@ -44,6 +51,9 @@ interface Props {
 export function FeeGroupDialog({ open, feeGroup, saving, onOpenChange, onSubmit }: Props) {
   const { t } = useTranslation();
   const isEdit = !!feeGroup;
+
+  // Rebuilt on language change so messages re-resolve in the new locale.
+  const schema = useMemo(() => makeSchema(t), [t]);
 
   const {
     register,

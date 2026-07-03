@@ -1,5 +1,6 @@
 import { lazy, Suspense } from 'react';
 import { Route, Routes } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { ProtectedRoute } from './routes/ProtectedRoute';
 import { DashboardLayout } from './components/DashboardLayout';
 
@@ -106,9 +107,10 @@ const Receipts = lazy(() =>
 );
 
 function PageLoader() {
+  const { t } = useTranslation();
   return (
     <div className="flex h-full items-center justify-center py-12 text-sm text-muted-foreground">
-      Loading…
+      {t('common.loading')}
     </div>
   );
 }
