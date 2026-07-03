@@ -1,5 +1,6 @@
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
+import * as bcrypt from 'bcryptjs';
 import { CSV_MAX_ROWS, toCsv } from '../common/csv';
 import { buildPaginated, paginate } from '../common/pagination';
 import { PrismaService } from '../prisma/prisma.service';
@@ -137,6 +138,33 @@ export class CustomersService {
       await this.uploads.deleteByUrl(existing.avatarUrl);
     }
     return updated;
+  }
+
+  /** Admin password reset: set a new hash and force re-login on every device. */
+  async resetPassword(id: string, password: string) {
+    await this.ensureExists(id);
+    // Same cost as the customer-auth register/reset paths.
+    const passwordHash = await bcrypt.hash(password, 12);
+    await this.prisma.customer.update({ where: { id }, data: { passwordHash } });
+    await this.prisma.customerSession.deleteMany({ where: { customerId: id } });
+    return { success: true };
+  }
+
+  /** Kill every refresh session (e.g. suspected account compromise). */
+  async revokeSessions(id: string) {
+    await this.ensureExists(id);
+    const { count } = await this.prisma.customerSession.deleteMany({
+      where: { customerId: id },
+    });
+    return { success: true, revoked: count };
+  }
+
+  private async ensureExists(id: string) {
+    const customer = await this.prisma.customer.findUnique({
+      where: { id },
+      select: { id: true },
+    });
+    if (!customer) throw new NotFoundException(`Customer ${id} not found`);
   }
 
   async remove(id: string) {

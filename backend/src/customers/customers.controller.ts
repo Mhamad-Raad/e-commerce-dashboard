@@ -14,6 +14,7 @@ import {
 import { CustomersService } from './customers.service';
 import { CreateCustomerDto } from './dto/create-customer.dto';
 import { ListCustomersQueryDto } from './dto/list-customers.query.dto';
+import { ResetCustomerPasswordDto } from './dto/reset-customer-password.dto';
 import { UpdateCustomerDto } from './dto/update-customer.dto';
 
 @Controller('customers')
@@ -45,6 +46,18 @@ export class CustomersController {
   @Patch(':id')
   update(@Param('id') id: string, @Body() dto: UpdateCustomerDto) {
     return this.customers.update(id, dto);
+  }
+
+  @Post(':id/reset-password')
+  @HttpCode(HttpStatus.OK)
+  resetPassword(@Param('id') id: string, @Body() dto: ResetCustomerPasswordDto) {
+    return this.customers.resetPassword(id, dto.password);
+  }
+
+  @Post(':id/revoke-sessions')
+  @HttpCode(HttpStatus.OK)
+  revokeSessions(@Param('id') id: string) {
+    return this.customers.revokeSessions(id);
   }
 
   @Delete(':id')
