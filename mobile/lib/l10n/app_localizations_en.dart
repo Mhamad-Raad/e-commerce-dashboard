@@ -486,6 +486,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get contactLoadError => 'Couldn\'t load contact details.';
 
   @override
+  String get contactFollowUs => 'Follow us';
+
+  @override
   String get privacyTitle => 'Privacy policy';
 
   @override

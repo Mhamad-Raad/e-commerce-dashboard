@@ -483,6 +483,9 @@ class AppLocalizationsCkb extends AppLocalizations {
   String get contactLoadError => 'نەتوانرا زانیاری پەیوەندی باربکرێت.';
 
   @override
+  String get contactFollowUs => 'فۆڵۆومان بکە';
+
+  @override
   String get privacyTitle => 'سیاسەتی تایبەتمەندی';
 
   @override

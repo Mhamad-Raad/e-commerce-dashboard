@@ -185,6 +185,7 @@
   "contactEmail": "Email",
   "contactAddress": "Address",
   "contactLoadError": "Couldn't load contact details.",
+  "contactFollowUs": "Follow us",
   "privacyTitle": "Privacy policy",
   "privacyBody": "We collect only what we need to serve you: your name, phone number, delivery addresses, and order history. Your phone number is used to secure your account and coordinate deliveries.\n\nWe never sell your personal information to third parties. Order details are shared only with the people who deliver your packages.\n\nYour data is stored securely, and payments are settled on delivery or through the payment method you choose — we do not store card numbers.\n\nYou can update your information anytime from your profile, and you can request account deletion from the Edit Profile screen or by contacting support.",
   "termsTitle": "Terms of use",

@@ -480,6 +480,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get contactLoadError => 'تعذّر تحميل بيانات التواصل.';
 
   @override
+  String get contactFollowUs => 'تابعنا';
+
+  @override
   String get privacyTitle => 'سياسة الخصوصية';
 
   @override

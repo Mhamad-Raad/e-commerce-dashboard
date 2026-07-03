@@ -49,6 +49,8 @@ dependencies:
   google_fonts: ^8.1.0
   image_picker: ^1.1.2
   url_launcher: ^6.3.1
+  # Brand icons (Instagram/TikTok/…) for the Contact screen's social row.
+  font_awesome_flutter: ^10.10.0
   package_info_plus: ^8.3.0
   firebase_core: ^4.11.0
   firebase_messaging: ^16.4.1

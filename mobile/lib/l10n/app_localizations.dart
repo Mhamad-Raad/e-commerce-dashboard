@@ -988,6 +988,12 @@ abstract class AppLocalizations {
   /// **'Couldn\'t load contact details.'**
   String get contactLoadError;
 
+  /// No description provided for @contactFollowUs.
+  ///
+  /// In en, this message translates to:
+  /// **'Follow us'**
+  String get contactFollowUs;
+
   /// No description provided for @privacyTitle.
   ///
   /// In en, this message translates to:
