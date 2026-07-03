@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { ArrowLeft, Pencil, Trash2, Users } from 'lucide-react';
+import { ArrowLeft, KeyRound, LogOut, Pencil, Trash2, Users } from 'lucide-react';
 import { toast } from 'sonner';
 import { customersApi } from '@/features/customers/api';
 import { PageHeader } from '@/components/PageHeader';
@@ -19,6 +19,7 @@ import { ProductImage } from '@/features/products/ProductImage';
 import { formatDate, formatMoney, extractErrorMessage, initials } from '@/lib/format';
 import { CustomerAddresses } from './CustomerAddresses';
 import { CustomerConversations } from './CustomerConversations';
+import { ResetPasswordDialog } from './ResetPasswordDialog';
 
 export function CustomerDetail() {
   const { id } = useParams<{ id: string }>();
@@ -26,6 +27,8 @@ export function CustomerDetail() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const [resetOpen, setResetOpen] = useState(false);
+  const [revokeOpen, setRevokeOpen] = useState(false);
 
   const { data: customer, isLoading, isError, error } = useQuery({
     queryKey: ['customer', id],
@@ -39,6 +42,24 @@ export function CustomerDetail() {
       queryClient.invalidateQueries({ queryKey: ['customers'] });
       toast.success(t('customers.deleted_toast'));
       navigate('/customers');
+    },
+    onError: (err) => toast.error(extractErrorMessage(err)),
+  });
+
+  const resetPasswordMutation = useMutation({
+    mutationFn: (password: string) => customersApi.resetPassword(id!, password),
+    onSuccess: () => {
+      setResetOpen(false);
+      toast.success(t('customers.password_reset_toast'));
+    },
+    onError: (err) => toast.error(extractErrorMessage(err)),
+  });
+
+  const revokeSessionsMutation = useMutation({
+    mutationFn: () => customersApi.revokeSessions(id!),
+    onSuccess: () => {
+      setRevokeOpen(false);
+      toast.success(t('customers.sessions_revoked_toast'));
     },
     onError: (err) => toast.error(extractErrorMessage(err)),
   });
@@ -241,6 +262,39 @@ export function CustomerDetail() {
       </div>
 
       <CustomerConversations customerId={customer.id} />
+
+      <Card>
+        <CardHeader>
+          <CardTitle>{t('customers.account_access')}</CardTitle>
+        </CardHeader>
+        <CardContent className="flex flex-wrap gap-2 pt-0">
+          <Button variant="outline" onClick={() => setResetOpen(true)}>
+            <KeyRound className="h-4 w-4" />
+            {t('customers.reset_password')}
+          </Button>
+          <Button variant="outline" onClick={() => setRevokeOpen(true)}>
+            <LogOut className="h-4 w-4" />
+            {t('customers.revoke_sessions')}
+          </Button>
+        </CardContent>
+      </Card>
+
+      <ResetPasswordDialog
+        open={resetOpen}
+        saving={resetPasswordMutation.isPending}
+        onOpenChange={setResetOpen}
+        onSubmit={(password) => resetPasswordMutation.mutate(password)}
+      />
+
+      <ConfirmDialog
+        open={revokeOpen}
+        title={t('customers.revoke_sessions')}
+        message={t('customers.revoke_sessions_message', { name: customer.name })}
+        confirmLabel={t('customers.revoke_sessions')}
+        busy={revokeSessionsMutation.isPending}
+        onCancel={() => setRevokeOpen(false)}
+        onConfirm={() => revokeSessionsMutation.mutate()}
+      />
 
       <ConfirmDialog
         open={confirmOpen}

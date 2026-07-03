@@ -33,4 +33,11 @@ export const customersApi = {
   remove: async (id: string): Promise<void> => {
     await api.delete(`/customers/${id}`);
   },
+  // Also revokes every session on the backend.
+  resetPassword: async (id: string, password: string): Promise<void> => {
+    await api.post(`/customers/${id}/reset-password`, { password });
+  },
+  revokeSessions: async (id: string): Promise<void> => {
+    await api.post(`/customers/${id}/revoke-sessions`);
+  },
 };
