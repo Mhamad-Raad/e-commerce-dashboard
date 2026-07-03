@@ -755,6 +755,11 @@
     "play_store_url": "رابط متجر Play",
     "app_store_url": "رابط App Store",
     "version_format_error": "استخدم الصيغة 1.2.3",
+    "social_section": "روابط التواصل الاجتماعي",
+    "social_section_hint": "تظهر في شاشة تواصل معنا في التطبيق. اترك الحقل فارغًا لإخفاء تلك القناة.",
+    "social_whatsapp": "رقم واتساب",
+    "social_whatsapp_hint": "أرقام مع رمز الدولة، مثل 9647701234567. يحل محل هاتف النشاط لزر واتساب.",
+    "social_url_error": "يجب أن يكون رابطًا كاملًا يبدأ بـ https://",
     "saved_toast": "تم حفظ الإعدادات"
   },
   "reports": {

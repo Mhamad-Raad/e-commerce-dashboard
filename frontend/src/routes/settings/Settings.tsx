@@ -17,6 +17,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { extractErrorMessage } from '@/lib/format';
 
 const versionPattern = /^(\d+\.\d+\.\d+)?$/;
+const urlPattern = /^(https?:\/\/\S{1,290})?$/;
 
 const schema = z.object({
   businessName: z.string().max(120).optional().or(z.literal('')),
@@ -28,6 +29,13 @@ const schema = z.object({
   latestAppVersion: z.string().regex(versionPattern),
   appStoreUrl: z.string().max(300),
   playStoreUrl: z.string().max(300),
+  socialInstagram: z.string().regex(urlPattern),
+  socialFacebook: z.string().regex(urlPattern),
+  socialTiktok: z.string().regex(urlPattern),
+  socialSnapchat: z.string().regex(urlPattern),
+  socialYoutube: z.string().regex(urlPattern),
+  socialX: z.string().regex(urlPattern),
+  socialWhatsapp: z.string().max(40),
 });
 
 type FormValues = z.infer<typeof schema>;
@@ -58,6 +66,13 @@ export function Settings() {
       latestAppVersion: '',
       appStoreUrl: '',
       playStoreUrl: '',
+      socialInstagram: '',
+      socialFacebook: '',
+      socialTiktok: '',
+      socialSnapchat: '',
+      socialYoutube: '',
+      socialX: '',
+      socialWhatsapp: '',
     },
   });
 
@@ -74,6 +89,13 @@ export function Settings() {
         latestAppVersion: s.latestAppVersion ?? '',
         appStoreUrl: s.appStoreUrl ?? '',
         playStoreUrl: s.playStoreUrl ?? '',
+        socialInstagram: s.socialInstagram ?? '',
+        socialFacebook: s.socialFacebook ?? '',
+        socialTiktok: s.socialTiktok ?? '',
+        socialSnapchat: s.socialSnapchat ?? '',
+        socialYoutube: s.socialYoutube ?? '',
+        socialX: s.socialX ?? '',
+        socialWhatsapp: s.socialWhatsapp ?? '',
       });
     }
   }, [settingsQuery.data, reset]);
@@ -91,6 +113,13 @@ export function Settings() {
         latestAppVersion: values.latestAppVersion.trim(),
         appStoreUrl: values.appStoreUrl.trim(),
         playStoreUrl: values.playStoreUrl.trim(),
+        socialInstagram: values.socialInstagram.trim(),
+        socialFacebook: values.socialFacebook.trim(),
+        socialTiktok: values.socialTiktok.trim(),
+        socialSnapchat: values.socialSnapchat.trim(),
+        socialYoutube: values.socialYoutube.trim(),
+        socialX: values.socialX.trim(),
+        socialWhatsapp: values.socialWhatsapp.trim(),
       };
       return settingsApi.update(payload);
     },
@@ -158,6 +187,36 @@ export function Settings() {
                 </FormField>
                 <FormField label={t('settings.app_store_url')} error={errors.appStoreUrl?.message}>
                   <Input dir="ltr" autoComplete="off" {...register('appStoreUrl')} />
+                </FormField>
+              </div>
+
+              <h3 className="border-t pt-5 text-sm font-semibold">{t('settings.social_section')}</h3>
+              <p className="text-sm text-muted-foreground">{t('settings.social_section_hint')}</p>
+              <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+                {(
+                  [
+                    ['socialInstagram', 'Instagram', 'https://instagram.com/yourpage'],
+                    ['socialFacebook', 'Facebook', 'https://facebook.com/yourpage'],
+                    ['socialTiktok', 'TikTok', 'https://tiktok.com/@yourpage'],
+                    ['socialSnapchat', 'Snapchat', 'https://snapchat.com/add/yourpage'],
+                    ['socialYoutube', 'YouTube', 'https://youtube.com/@yourchannel'],
+                    ['socialX', 'X (Twitter)', 'https://x.com/yourpage'],
+                  ] as const
+                ).map(([name, label, placeholder]) => (
+                  <FormField
+                    key={name}
+                    label={label}
+                    error={errors[name] ? t('settings.social_url_error') : undefined}
+                  >
+                    <Input dir="ltr" placeholder={placeholder} autoComplete="off" {...register(name)} />
+                  </FormField>
+                ))}
+                <FormField
+                  label={t('settings.social_whatsapp')}
+                  error={errors.socialWhatsapp?.message}
+                  hint={t('settings.social_whatsapp_hint')}
+                >
+                  <Input dir="ltr" placeholder="9647701234567" autoComplete="off" {...register('socialWhatsapp')} />
                 </FormField>
               </div>
 

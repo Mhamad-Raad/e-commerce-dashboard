@@ -755,6 +755,11 @@
     "play_store_url": "Play Store URL",
     "app_store_url": "App Store URL",
     "version_format_error": "Use the form 1.2.3",
+    "social_section": "Social links",
+    "social_section_hint": "Shown on the app's Contact us screen. Leave a field empty to hide that channel.",
+    "social_whatsapp": "WhatsApp number",
+    "social_whatsapp_hint": "Digits with country code, e.g. 9647701234567. Overrides the business phone for the WhatsApp button.",
+    "social_url_error": "Must be a full link starting with https://",
     "saved_toast": "Settings saved"
   },
   "reports": {

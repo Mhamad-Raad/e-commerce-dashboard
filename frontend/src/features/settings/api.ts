@@ -11,6 +11,13 @@ export interface Settings {
   latestAppVersion: string | null;
   appStoreUrl: string | null;
   playStoreUrl: string | null;
+  socialInstagram: string | null;
+  socialFacebook: string | null;
+  socialTiktok: string | null;
+  socialSnapchat: string | null;
+  socialYoutube: string | null;
+  socialX: string | null;
+  socialWhatsapp: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -21,11 +28,18 @@ export interface SettingsWritePayload {
   businessPhone?: string;
   businessAddress?: string;
   defaultCurrency?: string;
-  // Version-gate fields: send '' to clear (the API stores it as null = off).
+  // Version-gate + social fields: send '' to clear (the API stores null = off/hidden).
   minAppVersion?: string;
   latestAppVersion?: string;
   appStoreUrl?: string;
   playStoreUrl?: string;
+  socialInstagram?: string;
+  socialFacebook?: string;
+  socialTiktok?: string;
+  socialSnapchat?: string;
+  socialYoutube?: string;
+  socialX?: string;
+  socialWhatsapp?: string;
 }
 
 export const settingsApi = {
