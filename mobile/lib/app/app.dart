@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../core/crash/crash_reporter.dart';
+import '../features/auth/presentation/providers/auth_controller.dart';
 import '../l10n/app_localizations.dart';
 import 'locale/ckb_localizations.dart';
 import 'locale/locale_controller.dart';
@@ -14,6 +16,9 @@ class App extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // Tag crash reports with the signed-in customer (cleared on logout).
+    ref.listen(authControllerProvider,
+        (_, next) => CrashReporter.setUser(next.customer?.id));
     final router = ref.watch(appRouterProvider);
     final themeMode = ref.watch(themeControllerProvider);
     final locale = ref.watch(localeControllerProvider);

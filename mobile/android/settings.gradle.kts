@@ -23,6 +23,8 @@ plugins {
     id("org.jetbrains.kotlin.android") version "2.2.20" apply false
     // Firebase Cloud Messaging: consumes android/app/google-services.json.
     id("com.google.gms.google-services") version "4.4.2" apply false
+    // Crashlytics: uploads mapping files so release stack traces deobfuscate.
+    id("com.google.firebase.crashlytics") version "3.0.5" apply false
 }
 
 include(":app")

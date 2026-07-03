@@ -8,6 +8,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'app/app.dart';
 import 'app/env/env.dart';
+import 'core/crash/crash_reporter.dart';
 import 'core/push/push_messaging.dart';
 import 'core/storage/prefs.dart';
 import 'core/version_gate/version_gate_controller.dart';
@@ -19,10 +20,11 @@ Future<void> bootstrap(AppConfig config) async {
     () async {
       WidgetsFlutterBinding.ensureInitialized();
 
-      // TODO: forward to crash reporting (Sentry/Crashlytics) when added.
+      // Crashlytics no-ops until Firebase initialises below (checked per call),
+      // so wiring the handler first loses nothing.
       FlutterError.onError = (details) {
         FlutterError.presentError(details);
-        debugPrint('FlutterError: ${details.exceptionAsString()}');
+        CrashReporter.recordFlutterError(details);
       };
 
       // Load locale date symbols so DateFormat works for ar (ckb maps to ar).
@@ -31,6 +33,7 @@ Future<void> bootstrap(AppConfig config) async {
       // Initialise Firebase for push. No-op (push stays dormant) until the
       // native Firebase config is added — see PushService / FcmService.
       await initFirebaseMessaging();
+      await CrashReporter.init();
 
       final sharedPrefs = await SharedPreferences.getInstance();
       final packageInfo = await PackageInfo.fromPlatform();
@@ -46,6 +49,9 @@ Future<void> bootstrap(AppConfig config) async {
         ),
       );
     },
-    (error, stack) => debugPrint('Uncaught zone error: $error\n$stack'),
+    (error, stack) {
+      debugPrint('Uncaught zone error: $error\n$stack');
+      CrashReporter.recordError(error, stack);
+    },
   );
 }
