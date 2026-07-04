@@ -7,6 +7,8 @@ import '../../../app/theme/app_radii.dart';
 import '../../../app/theme/app_spacing.dart';
 import '../../../core/l10n/l10n_ext.dart';
 import '../../../core/widgets/app_network_image.dart';
+import '../../../core/widgets/skeleton.dart';
+import '../../../core/widgets/status_views.dart';
 import '../data/catalog_repository.dart';
 import '../domain/catalog_store.dart';
 
@@ -22,28 +24,62 @@ class StoresScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(title: Text(l10n.stores)),
       body: storesAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (_, _) => Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(l10n.storesLoadError),
-              const SizedBox(height: AppSpacing.md),
-              FilledButton(
-                onPressed: () => ref.invalidate(catalogStoresProvider),
-                child: Text(l10n.retry),
-              ),
-            ],
-          ),
+        loading: () => const _StoresSkeleton(),
+        error: (_, _) => ErrorRetry(
+          message: l10n.storesLoadError,
+          onRetry: () => ref.invalidate(catalogStoresProvider),
         ),
         data: (stores) => stores.isEmpty
-            ? Center(child: Text(l10n.comingSoon))
-            : ListView.separated(
-                padding: const EdgeInsets.all(AppSpacing.margin),
-                itemCount: stores.length,
-                separatorBuilder: (_, _) => const SizedBox(height: AppSpacing.sm),
-                itemBuilder: (_, i) => _StoreTile(store: stores[i]),
+            ? RefreshableFill(
+                onRefresh: () => ref.refresh(catalogStoresProvider.future),
+                child: EmptyState(
+                  icon: Icons.storefront_outlined,
+                  title: l10n.comingSoon,
+                ),
+              )
+            : RefreshIndicator(
+                onRefresh: () => ref.refresh(catalogStoresProvider.future),
+                child: ListView.separated(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  padding: const EdgeInsets.all(AppSpacing.margin),
+                  itemCount: stores.length,
+                  separatorBuilder: (_, _) =>
+                      const SizedBox(height: AppSpacing.sm),
+                  itemBuilder: (_, i) => _StoreTile(store: stores[i]),
+                ),
               ),
+      ),
+    );
+  }
+}
+
+class _StoresSkeleton extends StatelessWidget {
+  const _StoresSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    return Shimmer(
+      child: ListView.separated(
+        physics: const NeverScrollableScrollPhysics(),
+        padding: const EdgeInsets.all(AppSpacing.margin),
+        itemCount: 6,
+        separatorBuilder: (_, _) => const SizedBox(height: AppSpacing.sm),
+        itemBuilder: (_, _) => const Row(
+          children: [
+            SkeletonBox(width: 56, height: 56),
+            SizedBox(width: AppSpacing.md),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SkeletonBox(width: 140, height: 16),
+                  SizedBox(height: AppSpacing.xs),
+                  SkeletonBox(width: 80, height: 12),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -6,10 +6,12 @@ import '../../../app/router/routes.dart';
 import '../../../app/theme/app_radii.dart';
 import '../../../app/theme/app_spacing.dart';
 import '../../../core/l10n/l10n_ext.dart';
+import '../../../core/widgets/status_views.dart';
 import '../../cart/presentation/widgets/cart_button.dart';
 import 'providers/product_browse_controller.dart';
 import 'widgets/filter_sheet.dart';
 import 'widgets/product_grid.dart';
+import 'widgets/product_grid_skeleton.dart';
 
 /// Products tab — searchable, filterable, paginated catalog grid, plus a way
 /// into the Stores showcase.
@@ -93,29 +95,26 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
     final l10n = context.l10n;
     switch (state.status) {
       case BrowseStatus.loading:
-        return const Center(child: CircularProgressIndicator());
+        return const ProductGridSkeleton();
       case BrowseStatus.error:
-        return Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(state.failure?.message ?? l10n.homeLoadError),
-              const SizedBox(height: AppSpacing.md),
-              FilledButton(
-                onPressed: _controller.refresh,
-                child: Text(l10n.retry),
-              ),
-            ],
-          ),
+        return ErrorRetry(
+          message: l10n.homeLoadError,
+          onRetry: _controller.refresh,
         );
       case BrowseStatus.data:
         if (state.items.isEmpty) {
-          return Center(child: Text(l10n.noResults));
+          return RefreshableFill(
+            onRefresh: _controller.refresh,
+            child: EmptyState(icon: Icons.search_off, title: l10n.noResults),
+          );
         }
-        return ProductGrid(
-          products: state.items,
-          loadingMore: state.loadingMore,
-          onLoadMore: _controller.loadMore,
+        return RefreshIndicator(
+          onRefresh: _controller.refresh,
+          child: ProductGrid(
+            products: state.items,
+            loadingMore: state.loadingMore,
+            onLoadMore: _controller.loadMore,
+          ),
         );
     }
   }

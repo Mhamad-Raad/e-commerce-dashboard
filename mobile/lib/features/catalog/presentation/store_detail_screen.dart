@@ -5,9 +5,11 @@ import '../../../app/theme/app_radii.dart';
 import '../../../app/theme/app_spacing.dart';
 import '../../../core/l10n/l10n_ext.dart';
 import '../../../core/widgets/app_network_image.dart';
+import '../../../core/widgets/status_views.dart';
 import '../data/catalog_repository.dart';
 import '../domain/store_detail.dart';
 import 'widgets/product_grid.dart';
+import 'widgets/product_grid_skeleton.dart';
 
 /// A store/brand page: header (logo, name, description, product count) and its
 /// products in a grid.
@@ -26,27 +28,29 @@ class StoreDetailScreen extends ConsumerWidget {
         title: Text(detailAsync.asData?.value.name ?? l10n.stores),
       ),
       body: detailAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (_, _) => Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(l10n.storesLoadError),
-              const SizedBox(height: AppSpacing.md),
-              FilledButton(
-                onPressed: () => ref.invalidate(storeDetailProvider(id)),
-                child: Text(l10n.retry),
-              ),
-            ],
-          ),
+        loading: () => const ProductGridSkeleton(),
+        error: (_, _) => ErrorRetry(
+          message: l10n.storesLoadError,
+          onRetry: () => ref.invalidate(storeDetailProvider(id)),
         ),
         data: (store) => Column(
           children: [
             _Header(store: store),
             if (store.products.isEmpty)
-              Expanded(child: Center(child: Text(l10n.noResults)))
+              Expanded(
+                child: RefreshableFill(
+                  onRefresh: () => ref.refresh(storeDetailProvider(id).future),
+                  child: EmptyState(
+                      icon: Icons.search_off, title: l10n.noResults),
+                ),
+              )
             else
-              Expanded(child: ProductGrid(products: store.products)),
+              Expanded(
+                child: RefreshIndicator(
+                  onRefresh: () => ref.refresh(storeDetailProvider(id).future),
+                  child: ProductGrid(products: store.products),
+                ),
+              ),
           ],
         ),
       ),
