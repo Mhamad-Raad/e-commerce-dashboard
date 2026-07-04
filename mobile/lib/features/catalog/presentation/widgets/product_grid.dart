@@ -56,6 +56,9 @@ class _ProductGridState extends State<ProductGrid> {
           child: LayoutBuilder(
             builder: (context, constraints) => GridView.builder(
               controller: _controller,
+              // Always scrollable so a wrapping RefreshIndicator works even
+              // when the products don't fill the viewport.
+              physics: const AlwaysScrollableScrollPhysics(),
               padding: widget.padding,
               gridDelegate: productGridDelegate(
                 constraints.maxWidth - widget.padding.horizontal,
