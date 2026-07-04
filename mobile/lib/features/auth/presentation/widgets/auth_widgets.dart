@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../../app/theme/app_sizes.dart';
 import '../../../../app/theme/app_spacing.dart';
 import '../../../../core/error/failure.dart';
+import '../../../../core/l10n/l10n_ext.dart';
 
 /// Rounded text field. Styling (fill, berry focus ring, radius) comes from the
 /// app's inputDecorationTheme — we intentionally don't override `border` here.
@@ -43,11 +44,13 @@ class PasswordField extends StatefulWidget {
     required this.controller,
     required this.label,
     this.textInputAction,
+    this.focusNode,
   });
 
   final TextEditingController controller;
   final String label;
   final TextInputAction? textInputAction;
+  final FocusNode? focusNode;
 
   @override
   State<PasswordField> createState() => _PasswordFieldState();
@@ -60,13 +63,16 @@ class _PasswordFieldState extends State<PasswordField> {
   Widget build(BuildContext context) {
     return TextField(
       controller: widget.controller,
+      focusNode: widget.focusNode,
       obscureText: _obscure,
       textInputAction: widget.textInputAction,
       decoration: InputDecoration(
         labelText: widget.label,
         suffixIcon: IconButton(
           icon: Icon(_obscure ? Icons.visibility_off : Icons.visibility),
-          tooltip: _obscure ? 'Show password' : 'Hide password',
+          tooltip: _obscure
+              ? context.l10n.showPassword
+              : context.l10n.hidePassword,
           onPressed: () => setState(() => _obscure = !_obscure),
         ),
       ),

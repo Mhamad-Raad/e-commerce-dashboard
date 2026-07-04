@@ -274,6 +274,18 @@ abstract class AppLocalizations {
   /// **'Enter the code we sent you.'**
   String get enterTheCode;
 
+  /// No description provided for @showPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Show password'**
+  String get showPassword;
+
+  /// No description provided for @hidePassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide password'**
+  String get hidePassword;
+
   /// No description provided for @resetPassword.
   ///
   /// In en, this message translates to:

@@ -9,6 +9,7 @@ import '../../../../core/network/api_result.dart';
 import '../../../../core/widgets/rozhna_app_bar.dart';
 import '../providers/auth_controller.dart';
 import '../widgets/auth_widgets.dart';
+import '../widgets/otp_code_input.dart';
 
 /// Step 2 of reset: enter the code + a new password. On success all sessions are
 /// revoked server-side, so we send the user back to login.
@@ -27,6 +28,7 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
       TextEditingController(text: widget.phone);
   final _code = TextEditingController();
   final _password = TextEditingController();
+  final _passwordFocus = FocusNode();
   bool _loading = false;
 
   @override
@@ -34,12 +36,13 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
     _phone.dispose();
     _code.dispose();
     _password.dispose();
+    _passwordFocus.dispose();
     super.dispose();
   }
 
   Future<void> _submit() async {
     if (_phone.text.trim().isEmpty ||
-        _code.text.trim().isEmpty ||
+        _code.text.trim().length < 6 ||
         _password.text.isEmpty) {
       showMessage(context, context.l10n.fillCodeAndPassword);
       return;
@@ -81,16 +84,20 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
           textInputAction: TextInputAction.next,
         ),
         const SizedBox(height: AppSpacing.md),
-        AuthField(
+        Text(l10n.resetCode, style: text.labelLarge),
+        const SizedBox(height: AppSpacing.sm),
+        OtpCodeInput(
           controller: _code,
-          label: l10n.resetCode,
-          keyboardType: TextInputType.number,
-          textInputAction: TextInputAction.next,
-          autofillHints: const [AutofillHints.oneTimeCode],
+          autofocus: false,
+          closeKeyboardWhenCompleted: false,
+          // The code is mid-form: completing it moves to the password instead
+          // of submitting (the password is usually still empty here).
+          onCompleted: (_) => _passwordFocus.requestFocus(),
         ),
         const SizedBox(height: AppSpacing.md),
         PasswordField(
           controller: _password,
+          focusNode: _passwordFocus,
           label: l10n.newPasswordMin8,
           textInputAction: TextInputAction.done,
         ),

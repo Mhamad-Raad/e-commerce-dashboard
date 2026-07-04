@@ -102,6 +102,12 @@ class AppLocalizationsCkb extends AppLocalizations {
   String get enterTheCode => 'ئەو کۆدە بنووسە کە بۆمان ناردیت.';
 
   @override
+  String get showPassword => 'پیشاندانی وشەی نهێنی';
+
+  @override
+  String get hidePassword => 'شاردنەوەی وشەی نهێنی';
+
+  @override
   String get resetPassword => 'ڕێکخستنەوەی وشەی نهێنی';
 
   @override

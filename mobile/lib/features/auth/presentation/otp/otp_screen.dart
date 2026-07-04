@@ -9,6 +9,7 @@ import '../../../../core/network/api_result.dart';
 import '../../../../core/widgets/rozhna_app_bar.dart';
 import '../providers/auth_controller.dart';
 import '../widgets/auth_widgets.dart';
+import '../widgets/otp_code_input.dart';
 
 /// WhatsApp OTP verification for sign-up. On success the account is verified and
 /// auto-logged-in (the router then redirects home).
@@ -28,6 +29,7 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
 
   final _code = TextEditingController();
   bool _loading = false;
+  bool _codeError = false;
   Timer? _timer;
   int _cooldown = 0;
 
@@ -56,7 +58,8 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
   }
 
   Future<void> _verify() async {
-    if (_code.text.trim().isEmpty) {
+    if (_loading) return;
+    if (_code.text.trim().length < 6) {
       showMessage(context, context.l10n.enterTheCode);
       return;
     }
@@ -68,6 +71,7 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
     setState(() => _loading = false);
     // Success → auto-login → router redirects home. Handle failures only.
     if (result case Failed(failure: final failure)) {
+      setState(() => _codeError = true);
       showFailure(context, failure);
     }
   }
@@ -98,12 +102,13 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
         const SizedBox(height: AppSpacing.sm),
         Text(l10n.otpSentTo(widget.phone), style: text.bodyLarge),
         const SizedBox(height: AppSpacing.xl),
-        AuthField(
+        OtpCodeInput(
           controller: _code,
-          label: l10n.verificationCode,
-          keyboardType: TextInputType.number,
-          textInputAction: TextInputAction.done,
-          autofillHints: const [AutofillHints.oneTimeCode],
+          forceError: _codeError,
+          onChanged: (_) {
+            if (_codeError) setState(() => _codeError = false);
+          },
+          onCompleted: (_) => _verify(),
         ),
         const SizedBox(height: AppSpacing.lg),
         PrimaryButton(label: l10n.verify, loading: _loading, onPressed: _verify),

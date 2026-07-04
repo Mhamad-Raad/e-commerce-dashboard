@@ -37,6 +37,8 @@
   "resendCode": "Didn't get it? Resend code",
   "newCodeSent": "A new code is on its way.",
   "enterTheCode": "Enter the code we sent you.",
+  "showPassword": "Show password",
+  "hidePassword": "Hide password",
 
   "resetPassword": "Reset password",
   "forgotSubtitle": "Enter your phone number and we'll send a reset code on WhatsApp.",
