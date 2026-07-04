@@ -8,6 +8,7 @@ import '../../../app/theme/app_radii.dart';
 import '../../../app/theme/app_spacing.dart';
 import '../../../core/l10n/intl_locale.dart';
 import '../../../core/l10n/l10n_ext.dart';
+import '../../../core/widgets/status_views.dart';
 import '../data/orders_repository.dart';
 import '../domain/order_summary.dart';
 import 'widgets/order_status_chip.dart';
@@ -26,18 +27,9 @@ class OrdersScreen extends ConsumerWidget {
       appBar: AppBar(title: Text(l10n.myOrders)),
       body: ordersAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (_, _) => Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(l10n.ordersLoadError),
-              const SizedBox(height: AppSpacing.md),
-              FilledButton(
-                onPressed: () => ref.invalidate(ordersListProvider),
-                child: Text(l10n.retry),
-              ),
-            ],
-          ),
+        error: (_, _) => ErrorRetry(
+          message: l10n.ordersLoadError,
+          onRetry: () => ref.invalidate(ordersListProvider),
         ),
         data: (orders) => orders.isEmpty
             ? _Empty()

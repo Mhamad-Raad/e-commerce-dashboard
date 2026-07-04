@@ -8,6 +8,8 @@ import '../../../app/theme/app_typography.dart';
 import '../../../core/l10n/l10n_ext.dart';
 import '../../../core/network/api_result.dart';
 import '../../../core/widgets/app_network_image.dart';
+import '../../../core/widgets/skeleton.dart';
+import '../../../core/widgets/status_views.dart';
 import '../../auth/presentation/widgets/auth_widgets.dart';
 import '../../cart/presentation/providers/cart_controller.dart';
 import '../../cart/presentation/widgets/cart_button.dart';
@@ -37,19 +39,10 @@ class ProductDetailScreen extends ConsumerWidget {
         ],
       ),
       body: detailAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (_, _) => Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(l10n.productLoadError),
-              const SizedBox(height: AppSpacing.md),
-              FilledButton(
-                onPressed: () => ref.invalidate(productDetailProvider(id)),
-                child: Text(l10n.retry),
-              ),
-            ],
-          ),
+        loading: () => const _DetailSkeleton(),
+        error: (_, _) => ErrorRetry(
+          message: l10n.productLoadError,
+          onRetry: () => ref.invalidate(productDetailProvider(id)),
         ),
         data: (detail) => _ProductBody(detail: detail),
       ),
@@ -399,6 +392,44 @@ class _BottomBar extends StatelessWidget {
                     )
                   : const Icon(Icons.add_shopping_cart_outlined),
               label: Text(l10n.addToCart),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Shimmer placeholder mirroring the detail layout (gallery → brand → name →
+/// price → description) so the screen doesn't "jump" when content arrives.
+class _DetailSkeleton extends StatelessWidget {
+  const _DetailSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    return Shimmer(
+      child: ListView(
+        physics: const NeverScrollableScrollPhysics(),
+        padding: EdgeInsets.zero,
+        children: [
+          const SkeletonBox(height: 320, radius: BorderRadius.zero),
+          Padding(
+            padding: const EdgeInsets.all(AppSpacing.margin),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: const [
+                SkeletonBox(width: 80, height: 14),
+                SizedBox(height: AppSpacing.sm),
+                SkeletonBox(width: 220, height: 24),
+                SizedBox(height: AppSpacing.md),
+                SkeletonBox(width: 120, height: 20),
+                SizedBox(height: AppSpacing.lg),
+                SkeletonBox(height: 14),
+                SizedBox(height: AppSpacing.sm),
+                SkeletonBox(height: 14),
+                SizedBox(height: AppSpacing.sm),
+                SkeletonBox(width: 180, height: 14),
+              ],
             ),
           ),
         ],

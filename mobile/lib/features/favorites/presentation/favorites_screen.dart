@@ -5,7 +5,9 @@ import 'package:go_router/go_router.dart';
 import '../../../app/router/routes.dart';
 import '../../../app/theme/app_spacing.dart';
 import '../../../core/l10n/l10n_ext.dart';
+import '../../../core/widgets/status_views.dart';
 import '../../catalog/presentation/home/widgets/product_card.dart';
+import '../../catalog/presentation/widgets/product_grid_skeleton.dart';
 import 'providers/favorites_providers.dart';
 
 /// The customer's favorite products, in a grid. Pushed over the tab shell from
@@ -21,33 +23,31 @@ class FavoritesScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(title: Text(l10n.myFavorites)),
       body: favoritesAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (_, _) => Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(l10n.favoritesLoadError),
-              const SizedBox(height: AppSpacing.md),
-              FilledButton(
-                onPressed: () => ref.invalidate(favoritesListProvider),
-                child: Text(l10n.retry),
-              ),
-            ],
-          ),
+        loading: () => const ProductGridSkeleton(),
+        error: (_, _) => ErrorRetry(
+          message: l10n.favoritesLoadError,
+          onRetry: () => ref.invalidate(favoritesListProvider),
         ),
         data: (products) => products.isEmpty
-            ? _Empty()
-            : LayoutBuilder(
-                builder: (context, constraints) => GridView.builder(
-                  padding: const EdgeInsets.all(AppSpacing.margin),
-                  gridDelegate: productGridDelegate(
-                    constraints.maxWidth - AppSpacing.margin * 2,
-                  ),
-                  itemCount: products.length,
-                  itemBuilder: (_, i) => ProductCard(
-                    product: products[i],
-                    onTap: () =>
-                        context.push(Routes.productDetail(products[i].id)),
+            ? RefreshableFill(
+                onRefresh: () => ref.refresh(favoritesListProvider.future),
+                child: _Empty(),
+              )
+            : RefreshIndicator(
+                onRefresh: () => ref.refresh(favoritesListProvider.future),
+                child: LayoutBuilder(
+                  builder: (context, constraints) => GridView.builder(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    padding: const EdgeInsets.all(AppSpacing.margin),
+                    gridDelegate: productGridDelegate(
+                      constraints.maxWidth - AppSpacing.margin * 2,
+                    ),
+                    itemCount: products.length,
+                    itemBuilder: (_, i) => ProductCard(
+                      product: products[i],
+                      onTap: () =>
+                          context.push(Routes.productDetail(products[i].id)),
+                    ),
                   ),
                 ),
               ),

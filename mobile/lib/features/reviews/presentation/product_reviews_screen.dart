@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../app/theme/app_spacing.dart';
 import '../../../core/l10n/l10n_ext.dart';
 import '../../../core/widgets/skeleton.dart';
+import '../../../core/widgets/status_views.dart';
 import 'providers/reviews_providers.dart';
 import 'widgets/rating_stars.dart';
 import 'widgets/review_card.dart';
@@ -53,18 +54,9 @@ class _ProductReviewsScreenState extends ConsumerState<ProductReviewsScreen> {
       appBar: AppBar(title: Text(l10n.reviewsTitle)),
       body: switch (state.status) {
         ReviewsStatus.loading => const _ReviewsSkeleton(),
-        ReviewsStatus.error => Center(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(l10n.reviewsLoadError),
-                const SizedBox(height: AppSpacing.md),
-                FilledButton(
-                  onPressed: controller.refresh,
-                  child: Text(l10n.retry),
-                ),
-              ],
-            ),
+        ReviewsStatus.error => ErrorRetry(
+            message: l10n.reviewsLoadError,
+            onRetry: controller.refresh,
           ),
         ReviewsStatus.data => RefreshIndicator(
             onRefresh: controller.refresh,
@@ -79,17 +71,10 @@ class _ProductReviewsScreenState extends ConsumerState<ProductReviewsScreen> {
                 ),
                 const SizedBox(height: AppSpacing.md),
                 if (state.items.isEmpty)
-                  Padding(
-                    padding: const EdgeInsets.all(AppSpacing.xl),
-                    child: Column(
-                      children: [
-                        Text(l10n.noReviewsYet,
-                            style: Theme.of(context).textTheme.titleMedium),
-                        const SizedBox(height: AppSpacing.sm),
-                        Text(l10n.reviewsEmptyHint,
-                            textAlign: TextAlign.center),
-                      ],
-                    ),
+                  EmptyState(
+                    icon: Icons.rate_review_outlined,
+                    title: l10n.noReviewsYet,
+                    hint: l10n.reviewsEmptyHint,
                   )
                 else
                   for (final review in state.items) ...[

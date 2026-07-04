@@ -8,6 +8,7 @@ import '../../../app/theme/app_radii.dart';
 import '../../../app/theme/app_spacing.dart';
 import '../../../core/l10n/intl_locale.dart';
 import '../../../core/l10n/l10n_ext.dart';
+import '../../../core/widgets/status_views.dart';
 import '../domain/app_notification.dart';
 import 'notification_presentation.dart';
 import 'notification_target_nav.dart';
@@ -42,20 +43,10 @@ class NotificationsScreen extends ConsumerWidget {
       ),
       body: async.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (_, _) => Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(l10n.notificationsLoadError),
-              const SizedBox(height: AppSpacing.md),
-              FilledButton(
-                onPressed: () => ref
-                    .read(notificationsControllerProvider.notifier)
-                    .refresh(),
-                child: Text(l10n.retry),
-              ),
-            ],
-          ),
+        error: (_, _) => ErrorRetry(
+          message: l10n.notificationsLoadError,
+          onRetry: () =>
+              ref.read(notificationsControllerProvider.notifier).refresh(),
         ),
         data: (items) => items.isEmpty
             ? const _Empty()
